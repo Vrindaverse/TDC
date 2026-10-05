@@ -1,0 +1,52 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+
+import { Footer } from "@/components/footer";
+import { Navbar } from "@/components/navbar";
+import { site } from "@/lib/navigation";
+
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: `${site.fullName} — ${site.tagline}`,
+    template: `%s — ${site.name}`,
+  },
+  description:
+    "Technocrats Developer Community (TDC) is a student-led developer community focused on programming, development, AI/ML, cybersecurity, open source and hands-on technology learning.",
+  keywords: [
+    "Technocrats",
+    "Developer Community",
+    "TDC",
+    "Student Community",
+    "Web Development",
+    "AI/ML",
+    "Cybersecurity",
+    "Open Source",
+  ],
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}

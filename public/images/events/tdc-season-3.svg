@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900" role="img" aria-label="TDC Season 3">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#1a1a1a"/>
+      <stop offset="1" stop-color="#0b0b0b"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(255,255,255,0.09)"/>
+    </pattern>
+  </defs>
+
+  <rect width="600" height="900" fill="url(#g)"/>
+  <rect width="600" height="900" fill="url(#dots)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#f5f5f5">
+    <text x="40" y="66" font-size="16" font-weight="700" letter-spacing="3">TDC</text>
+    <text x="560" y="66" font-size="12" letter-spacing="2" text-anchor="end" fill="#a3a3a3">REGISTRATION OPEN</text>
+    <line x1="40" y1="88" x2="560" y2="88" stroke="#a3a3a3" stroke-opacity="0.4" stroke-dasharray="5 5"/>
+
+    <text x="566" y="236" font-size="230" font-weight="700" text-anchor="end" fill="#f5f5f5" fill-opacity="0.07">01</text>
+
+    <text x="40" y="270" font-size="46" font-weight="700" letter-spacing="-1">TDC Season 3</text>
+
+    <line x1="40" y1="768" x2="560" y2="768" stroke="#a3a3a3" stroke-opacity="0.4" stroke-dasharray="5 5"/>
+    <text x="40" y="804" font-size="22" font-weight="700" letter-spacing="1">17 OCT 2026</text>
+    <text x="40" y="834" font-size="13" letter-spacing="1.5" fill="#a3a3a3">10:00 - 18:00</text>
+    <text x="40" y="858" font-size="13" letter-spacing="1.5" fill="#a3a3a3">MAIN AUDITORIUM</text>
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+.dot-grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  /* Fade the field out toward the edges so it reads as depth behind the copy
+     rather than a flat texture. Canvas repaints continuously, so there is no
+     paint cost to masking it. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 72% 68% at 50% 45%,
+    #000 32%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(ellipse 72% 68% at 50% 45%, #000 32%, transparent 100%);
+}
+
+.dot-grid__wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.dot-grid__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Purely decorative: the pointer effects listen on window, so the canvas must
+     not swallow hover or clicks meant for the hero's links and buttons. */
+  pointer-events: none;
+}

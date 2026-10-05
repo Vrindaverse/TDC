@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="860" viewBox="0 0 600 860" role="img" aria-label="DSA Clinic: Arrays &amp; Hashing">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#f1f1f1"/>
+      <stop offset="1" stop-color="#d2d2d2"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(0,0,0,0.08)"/>
+    </pattern>
+  </defs>
+
+  <rect width="600" height="860" fill="url(#g)"/>
+  <rect width="600" height="860" fill="url(#dots)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#111111">
+    <text x="40" y="66" font-size="16" font-weight="700" letter-spacing="3">TDC</text>
+    <text x="560" y="66" font-size="12" letter-spacing="2" text-anchor="end" fill="#5a5a5a">ARCHIVED</text>
+    <line x1="40" y1="88" x2="560" y2="88" stroke="#5a5a5a" stroke-opacity="0.4" stroke-dasharray="5 5"/>
+
+    <text x="566" y="224" font-size="230" font-weight="700" text-anchor="end" fill="#111111" fill-opacity="0.07">07</text>
+
+    <text x="40" y="258" font-size="46" font-weight="700" letter-spacing="-1">DSA Clinic:</text>
+    <text x="40" y="312" font-size="46" font-weight="700" letter-spacing="-1">Arrays &amp;</text>
+    <text x="40" y="366" font-size="46" font-weight="700" letter-spacing="-1">Hashing</text>
+
+    <line x1="40" y1="728" x2="560" y2="728" stroke="#5a5a5a" stroke-opacity="0.4" stroke-dasharray="5 5"/>
+    <text x="40" y="764" font-size="22" font-weight="700" letter-spacing="1">11 JAN 2026</text>
+    <text x="40" y="794" font-size="13" letter-spacing="1.5" fill="#5a5a5a">16:00 - 18:30</text>
+    <text x="40" y="818" font-size="13" letter-spacing="1.5" fill="#5a5a5a">SEMINAR ROOM 4</text>
+  </g>
+</svg>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Abstract network diagram on a light grid">
+  <rect width="1600" height="1000" fill="#f3f4f6" />
+
+  <g stroke="#e4e6ea" stroke-width="1">
+    <path d="M0 100H1600M0 200H1600M0 300H1600M0 400H1600M0 500H1600M0 600H1600M0 700H1600M0 800H1600M0 900H1600" />
+    <path d="M100 0V1000M200 0V1000M300 0V1000M400 0V1000M500 0V1000M600 0V1000M700 0V1000M800 0V1000M900 0V1000M1000 0V1000M1100 0V1000M1200 0V1000M1300 0V1000M1400 0V1000M1500 0V1000" />
+  </g>
+
+  <g fill="none" stroke="#2f4f9f" stroke-width="2" opacity="0.28">
+    <circle cx="1180" cy="430" r="200" />
+    <circle cx="1180" cy="430" r="310" />
+    <circle cx="1180" cy="430" r="420" stroke-opacity="0.6" />
+  </g>
+
+  <g stroke="#2f4f9f" stroke-width="2" opacity="0.45">
+    <path d="M1180 230V630M980 430H1380" fill="none" />
+  </g>
+
+  <g stroke="#1f2937" stroke-width="2" opacity="0.3" fill="none">
+    <path d="M300 250h150v150H300z" />
+    <path d="M520 250h150v150H520z" />
+    <path d="M410 400v150" />
+  </g>
+
+  <g fill="#f3f4f6" stroke="#1f2937" stroke-width="3" opacity="0.75">
+    <circle cx="300" cy="250" r="14" />
+    <circle cx="670" cy="250" r="14" />
+    <circle cx="410" cy="550" r="14" />
+  </g>
+
+  <g stroke="#1f2937" stroke-width="2" opacity="0.5">
+    <path d="M780 620h220M780 680h150M780 740h190" fill="none" />
+  </g>
+
+  <g fill="#2f4f9f">
+    <circle cx="1180" cy="430" r="26" />
+    <circle cx="1180" cy="120" r="14" />
+    <circle cx="1490" cy="430" r="14" />
+    <circle cx="1180" cy="740" r="14" />
+    <circle cx="870" cy="430" r="14" />
+  </g>
+
+  <g stroke="#2f4f9f" stroke-width="2" opacity="0.55" fill="none">
+    <path d="M1180 430L1180 120M1180 430L1490 430M1180 430L1180 740M1180 430L870 430" />
+    <path d="M900 780L1180 430L1420 800" stroke-opacity="0.35" />
+  </g>
+
+  <g fill="#1f2937" opacity="0.12" font-family="monospace" font-size="28">
+    <text x="96" y="880">{ }</text>
+    <text x="200" y="880">&lt;/&gt;</text>
+    <text x="330" y="880">[ ]</text>
+  </g>
+</svg>
