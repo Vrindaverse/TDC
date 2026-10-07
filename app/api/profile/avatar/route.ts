@@ -67,12 +67,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const key = await putAvatarObject(
-    session.user.id,
-    ext,
-    new Uint8Array(await file.arrayBuffer()),
-    file.type
-  );
+  let key: string;
+  try {
+    key = await putAvatarObject(
+      session.user.id,
+      ext,
+      new Uint8Array(await file.arrayBuffer()),
+      file.type
+    );
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("magic bytes")) {
+      return NextResponse.json(
+        { error: "The file content does not match its type. Please upload a valid image." },
+        { status: 400 }
+      );
+    }
+    throw err;
+  }
 
   const previousKey = profile.avatarKey;
   await db

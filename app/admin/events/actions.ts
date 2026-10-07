@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { eventSchema } from "@/lib/validation/events";
 import { fieldErrorsFromZod, type FieldErrors } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
 
 export type EventFormState = {
   error?: string;
@@ -30,10 +31,16 @@ function parseForm(formData: FormData) {
   });
 }
 
-export async function createEventAction(
+async function createEventActionInternal(
   _prev: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const { profile } = await requireAdmin();
 
   const parsed = parseForm(formData);
@@ -67,10 +74,18 @@ export async function createEventAction(
   redirect("/admin/events");
 }
 
-export async function updateEventAction(
+export { createEventActionInternal as createEventAction };
+
+async function updateEventActionInternal(
   _prev: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -90,7 +105,15 @@ export async function updateEventAction(
       notFound();
     }
 
-    await db.update(events).set(parsed.data).where(eq(events.id, id));
+    const result = await db
+      .update(events)
+      .set(parsed.data)
+      .where(eq(events.id, id))
+      .returning({ id: events.id });
+    
+    if (result.length === 0) {
+      notFound();
+    }
 
     const previousPoster = existing[0].poster;
     if (
@@ -131,7 +154,15 @@ export async function updateEventAction(
   redirect("/admin/events");
 }
 
-export async function deleteEventAction(formData: FormData) {
+export { updateEventActionInternal as updateEventAction };
+
+async function deleteEventActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/events?error=csrf");
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -181,7 +212,15 @@ export async function deleteEventAction(formData: FormData) {
   redirect("/admin/events");
 }
 
-export async function setEventRegistrationStatusAction(formData: FormData) {
+export { deleteEventActionInternal as deleteEventAction };
+
+async function setEventRegistrationStatusActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/events?error=csrf");
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -202,11 +241,17 @@ export async function setEventRegistrationStatusAction(formData: FormData) {
     if (!existing) {
       outcome = "not_found";
     } else if (existing.status !== registrationStatus) {
-      await db
+      const result = await db
         .update(events)
         .set({ registrationStatus: registrationStatus as "open" | "closing" | "closed" })
-        .where(eq(events.id, id));
-      detail = `${existing.title}: ${existing.status} → ${registrationStatus}`;
+        .where(eq(events.id, id))
+        .returning({ id: events.id });
+      
+      if (result.length === 0) {
+        outcome = "not_found";
+      } else {
+        detail = `${existing.title}: ${existing.status} → ${registrationStatus}`;
+      }
     }
   } catch (err) {
     console.error("[admin/events] status toggle failed:", err);
@@ -231,6 +276,8 @@ export async function setEventRegistrationStatusAction(formData: FormData) {
   revalidatePath("/events");
   redirect("/admin/events");
 }
+
+export { setEventRegistrationStatusActionInternal as setEventRegistrationStatusAction };
 
 function isNextError(error: unknown, digest: string): boolean {
   return (

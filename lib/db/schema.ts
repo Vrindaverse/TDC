@@ -51,6 +51,7 @@ export const profiles = pgTable(
       "profiles_role_check",
       sql`${table.role} in ('USER', 'ADMIN')`
     ),
+    collegeIdIdx: index("profiles_college_id_idx").on(table.collegeId),
   })
 );
 
@@ -76,6 +77,8 @@ export const events = pgTable(
   },
   (table) => ({
     startsAtIdx: index("events_starts_at_idx").on(table.startsAt),
+    domainIdx: index("events_domain_idx").on(table.domain),
+    registrationStatusIdx: index("events_registration_status_idx").on(table.registrationStatus),
     statusCheck: check(
       "events_registration_status_check",
       sql`${table.registrationStatus} in ('open', 'closing', 'closed')`
@@ -108,6 +111,7 @@ export const registrations = pgTable(
       table.eventId
     ),
     eventIdIdx: index("registrations_event_id_idx").on(table.eventId),
+    profileIdIdx: index("registrations_profile_id_idx").on(table.profileId),
   })
 );
 
@@ -148,6 +152,7 @@ export const contactMessages = pgTable(
   },
   (table) => ({
     statusIdx: index("contact_messages_status_idx").on(table.status),
+    profileIdIdx: index("contact_messages_profile_id_idx").on(table.profileId),
     statusCheck: check(
       "contact_messages_status_check",
       sql`${table.status} in ('new', 'read')`
@@ -210,6 +215,18 @@ export const auditLog = pgTable(
   })
 );
 
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text("key").primaryKey(),
+    count: integer("count").notNull().default(1),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => ({
+    expiresAtIdx: index("rate_limits_expires_at_idx").on(table.expiresAt),
+  })
+);
+
 export type College = typeof colleges.$inferSelect;
 export type Profile = typeof profiles.$inferSelect;
 export type EventRecord = typeof events.$inferSelect;
@@ -218,3 +235,4 @@ export type PendingRegistration = typeof pendingRegistrations.$inferSelect;
 export type ContactMessage = typeof contactMessages.$inferSelect;
 export type Announcement = typeof announcements.$inferSelect;
 export type AuditLogEntry = typeof auditLog.$inferSelect;
+export type RateLimit = typeof rateLimits.$inferSelect;

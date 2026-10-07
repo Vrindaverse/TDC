@@ -15,13 +15,27 @@ import {
   resetPasswordSchema,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type ResetPasswordState = {
   error?: string;
   fieldErrors?: FieldErrors;
 } | null;
 
-export async function resendResetCodeAction(formData: FormData) {
+async function resendResetCodeActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/forgot-password");
+  }
+
+  const rateLimit = await checkRateLimit("auth:resend");
+  if (!rateLimit.success) {
+    redirect("/reset-password?error=resend");
+    return;
+  }
+
   const email = String(formData.get("email") ?? "")
     .trim()
     .toLowerCase();
@@ -54,10 +68,23 @@ export async function resendResetCodeAction(formData: FormData) {
   redirect("/reset-password?resent=1");
 }
 
-export async function resetPasswordAction(
+export { resendResetCodeActionInternal as resendResetCodeAction };
+
+async function resetPasswordActionInternal(
   _prev: ResetPasswordState,
   formData: FormData
 ): Promise<ResetPasswordState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
+  const rateLimit = await checkRateLimit("auth:reset-password");
+  if (!rateLimit.success) {
+    return { error: rateLimit.error ?? "Too many reset attempts. Please try again later." };
+  }
+
   const email = await getResetEmail();
   if (!email) {
     redirect("/forgot-password");
@@ -96,3 +123,5 @@ export async function resetPasswordAction(
   await clearResetEmailCookie();
   redirect("/login?reset=1");
 }
+
+export { resetPasswordActionInternal as resetPasswordAction };

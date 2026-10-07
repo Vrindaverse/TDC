@@ -69,6 +69,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
       noValidate
       className="flex flex-col gap-5"
     >
+      <input type="hidden" name="_csrf" />
       <input type="hidden" name="email" value={email} />
 
       {state?.error ? (
@@ -183,6 +184,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
           className="w-full"
           disabled={pending}
         >
+          <input type="hidden" name="_csrf" />
           <RotateCcw aria-hidden="true" className="size-4" />
           Resend code
         </Button>

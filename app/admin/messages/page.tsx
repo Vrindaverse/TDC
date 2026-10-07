@@ -23,6 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   MESSAGE_CATEGORIES,
   adminMessagesRows,
@@ -131,17 +132,38 @@ export default async function AdminMessagesPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-5 shadow-sm">
+        <div className="flex flex-col gap-1.5">
+          <p className="tdc-mono-label text-[11px] text-primary">
+            consoles / messages
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight">Messages</h1>
+          <p className="text-sm text-muted-foreground">
+            {total} message{total === 1 ? "" : "s"}
+            {hasFilters ? " match your filters." : " from registered members."}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-primary admin-badge-live" aria-hidden="true" />
+            {Number(unreadCount?.count ?? 0)} unread
+          </span>
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Link href={exportHref}>Download CSV</Link>
+          </Button>
+        </div>
+      </header>
+
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0 border-b pb-4">
           <div>
-            <CardTitle>Messages</CardTitle>
+            <CardTitle className="text-base">Inbox</CardTitle>
             <CardDescription>
-              {total} message{total === 1 ? "" : "s"}
-              {hasFilters ? " match your filters." : " from registered members."}
+              Showing page {currentPage} of {totalPages}.
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
               <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
               {Number(unreadCount?.count ?? 0)} unread
             </span>
@@ -150,7 +172,7 @@ export default async function AdminMessagesPage({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 p-4">
           <form
             method="get"
             className="flex flex-wrap items-center gap-3"
@@ -230,27 +252,29 @@ export default async function AdminMessagesPage({
             </div>
           ) : (
             <>
-              <ul className="flex flex-col gap-4">
+              <ul className="flex flex-col gap-3">
                 {rows.map((row) => (
                   <li
                     key={row.id}
-                    className={
+                    className={cn(
+                      "group flex flex-col gap-3 rounded-xl border p-4 transition-all",
                       row.status === "new"
-                        ? "flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4"
-                        : "flex flex-col gap-3 rounded-lg border bg-card p-4"
-                    }
+                        ? "border-primary/30 bg-gradient-to-r from-primary/5 to-card shadow-sm"
+                        : "border-border/60 bg-card/60 hover:border-primary/30 hover:shadow-sm"
+                    )}
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="text-sm font-semibold">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                           {row.subject}
                           {row.status === "new" ? (
-                            <span className="ml-2 inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground uppercase">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground uppercase">
+                              <span className="size-1.5 rounded-full bg-primary-foreground admin-badge-live" />
                               New
                             </span>
                           ) : null}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {categoryLabels[row.category] ?? row.category}
                         </span>
                         <span className="text-xs text-muted-foreground">
@@ -272,7 +296,11 @@ export default async function AdminMessagesPage({
                             value={row.status === "new" ? "read" : "unread"}
                           />
                           <input type="hidden" name="back" value={backPath} />
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                          >
                             {row.status === "new" ? (
                               "Mark as read"
                             ) : (

@@ -20,6 +20,7 @@ export function DeleteUserButton({
   return (
     <form action={deleteUserAction}>
       <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="_csrf" />
       <Button
         type="submit"
         variant={confirming ? "destructive" : "outline"}

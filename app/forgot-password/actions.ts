@@ -10,16 +10,29 @@ import {
   forgotPasswordSchema,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type RequestResetState = {
   error?: string;
   fieldErrors?: FieldErrors;
 } | null;
 
-export async function requestResetCodeAction(
+async function requestResetCodeActionInternal(
   _prev: RequestResetState,
   formData: FormData
 ): Promise<RequestResetState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
+  const rateLimit = await checkRateLimit("auth:forgot-password");
+  if (!rateLimit.success) {
+    return { error: rateLimit.error ?? "Too many requests. Please try again later." };
+  }
+
   const parsed = forgotPasswordSchema.safeParse({
     email: formData.get("email"),
   });
@@ -51,3 +64,5 @@ export async function requestResetCodeAction(
 
   redirect("/reset-password");
 }
+
+export { requestResetCodeActionInternal as requestResetCodeAction };

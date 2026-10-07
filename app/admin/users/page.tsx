@@ -127,31 +127,33 @@ export default async function AdminUsersPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-4 shadow-sm">
         <div>
-          <h1 className="tdc-mono-label text-[11px] text-primary">
+          <p className="tdc-mono-label text-[11px] text-primary">
             consoles / members
-          </h1>
-          <p className="text-xl font-semibold tracking-tight">
+          </p>
+          <p className="text-xl font-bold tracking-tight">
             {total} member{total === 1 ? "" : "s"}
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/api/admin/export/users">Download CSV</Link>
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
+          <Link href="/api/admin/export/users">
+            Download CSV
+          </Link>
         </Button>
       </header>
 
-      <Card>
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0 border-b pb-4">
           <div>
-            <CardTitle>Members</CardTitle>
+            <CardTitle className="text-base">Members</CardTitle>
             <CardDescription>
               Showing page {currentPage} of {totalPages}.
             </CardDescription>
           </div>
           <FilterForm q={query} role={roleFilter ?? null} />
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4 p-0">
           {deleted ? (
             <div role="status" className={successBanner}>
               <CheckCircle2
@@ -215,7 +217,7 @@ export default async function AdminUsersPage({
           ) : null}
 
           {rows.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
+            <p className="py-8 text-sm text-muted-foreground">
               {query || roleFilter ? "No members match your filters." : "No members yet."}
             </p>
           ) : (
@@ -223,49 +225,50 @@ export default async function AdminUsersPage({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">Name</th>
-                      <th className="py-2 pr-4 font-medium">Email</th>
-                      <th className="py-2 pr-4 font-medium">College</th>
-                      <th className="py-2 pr-4 font-medium">Enrollment</th>
-                      <th className="py-2 pr-4 font-medium">Role</th>
-                      <th className="py-2 pr-4 font-medium">Joined</th>
-                      <th className="py-2 text-right font-medium">Actions</th>
+                    <tr className="border-b border-border/60 bg-muted/30 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <th className="px-4 py-3 font-medium">Name</th>
+                      <th className="px-4 py-3 font-medium">Email</th>
+                      <th className="px-4 py-3 font-medium">College</th>
+                      <th className="px-4 py-3 font-medium">Enrollment</th>
+                      <th className="px-4 py-3 font-medium">Role</th>
+                      <th className="px-4 py-3 font-medium">Joined</th>
+                      <th className="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((user) => (
-                      <tr key={user.id} className="border-b last:border-0">
-                        <td className="py-2 pr-4 font-medium">{user.name}</td>
-                        <td className="py-2 pr-4">
+                      <tr key={user.id} className="admin-table-row border-b border-border/60 last:border-0">
+                        <td className="px-4 py-3 font-medium">{user.name}</td>
+                        <td className="px-4 py-3">
                           <span className="inline-flex items-center gap-2">
                             {user.email}
                             {user.emailVerified ? null : (
-                              <Badge variant="outline">unverified</Badge>
+                              <Badge variant="outline" className="text-[10px]">unverified</Badge>
                             )}
                           </span>
                         </td>
-                        <td className="py-2 pr-4 text-muted-foreground">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {user.college ?? "—"}
                         </td>
-                        <td className="py-2 pr-4 font-mono text-xs">
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                           {user.enrollmentNumber}
                         </td>
-                        <td className="py-2 pr-4">
+                        <td className="px-4 py-3">
                           <Badge
                             variant={user.role === "ADMIN" ? "default" : "secondary"}
+                            className="text-[10px] font-semibold"
                           >
                             {user.role}
                           </Badge>
                         </td>
-                        <td className="py-2 pr-4 text-muted-foreground">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {formatDate(user.createdAt)}
                         </td>
-                        <td className="py-2">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Link href={`/admin/users/${user.id}`}>
-                              <Button variant="outline" size="sm" aria-label="View member">
-                                <Eye aria-hidden="true" className="size-3.5" />
+                              <Button variant="ghost" size="sm" aria-label="View member" className="h-8 w-8 p-0">
+                                <Eye aria-hidden="true" className="size-4" />
                               </Button>
                             </Link>
                             {user.userId === session?.user?.id ? null : (
@@ -283,20 +286,20 @@ export default async function AdminUsersPage({
                                 <input type="hidden" name="back" value="/admin/users" />
                                 <Button
                                   type="submit"
-                                  variant="outline"
+                                  variant="ghost"
                                   size="sm"
                                   aria-label={
                                     user.role === "ADMIN"
                                       ? "Remove admin"
                                       : "Make admin"
                                   }
+                                  className="h-8 w-8 p-0"
                                 >
                                   {user.role === "ADMIN" ? (
-                                    <ShieldOff aria-hidden="true" className="size-3.5" />
+                                    <ShieldOff aria-hidden="true" className="size-4" />
                                   ) : (
-                                    <ShieldCheck aria-hidden="true" className="size-3.5" />
+                                    <ShieldCheck aria-hidden="true" className="size-4" />
                                   )}
-                                  {user.role === "ADMIN" ? "Remove" : "Admin"}
                                 </Button>
                               </form>
                             )}
@@ -313,7 +316,7 @@ export default async function AdminUsersPage({
               </div>
 
               {totalPages > 1 ? (
-                <div className="mt-4 flex items-center justify-between gap-3 pt-4">
+                <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-3">
                   <p className="text-sm text-muted-foreground">
                     {currentPage * PAGE_SIZE - PAGE_SIZE + 1}–
                     {Math.min(currentPage * PAGE_SIZE, total)} of {total}

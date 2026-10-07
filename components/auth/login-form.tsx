@@ -114,6 +114,7 @@ export function LoginForm() {
         noValidate
         className="flex flex-col gap-5"
       >
+        <input type="hidden" name="_csrf" />
         <div className="flex flex-col gap-2">
           <Label htmlFor="login-email">Email</Label>
           <Input

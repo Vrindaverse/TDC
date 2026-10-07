@@ -108,6 +108,7 @@ export function ChangePasswordForm() {
       noValidate
       className="flex flex-col gap-4"
     >
+      <input type="hidden" name="_csrf" />
       {state?.error ? (
         <div
           role="alert"

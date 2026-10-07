@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, X } from "lucide-react";
 
 import { ADMIN_NAV_ITEMS, VISIT_SITE_HREF } from "@/components/admin/admin-nav-items";
 import {
@@ -10,6 +10,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +27,8 @@ export function AdminMobileSidebar({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-72 p-0 sm:max-w-sm">
-        <SheetHeader className="border-b px-4 py-4">
+      <SheetContent side="left" className="flex w-72 flex-col p-0 sm:max-w-sm">
+        <SheetHeader className="flex flex-row items-center justify-between border-b px-4 py-4">
           <SheetTitle asChild>
             <span className="flex items-center gap-2.5">
               <span
@@ -44,9 +45,16 @@ export function AdminMobileSidebar({
               </span>
             </span>
           </SheetTitle>
+          <SheetClose className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground">
+            <X aria-hidden="true" className="size-5" />
+            <span className="sr-only">Close</span>
+          </SheetClose>
         </SheetHeader>
 
         <div className="flex flex-col gap-1 overflow-y-auto p-3">
+          <span className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Navigation
+          </span>
           {ADMIN_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active =
@@ -61,10 +69,10 @@ export function AdminMobileSidebar({
                 onClick={() => onOpenChange(false)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "group relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                   active
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                 )}
               >
                 <Icon
@@ -80,26 +88,32 @@ export function AdminMobileSidebar({
                 {item.label === "Messages" && unreadMessages > 0 ? (
                   <span
                     className={cn(
-                      "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums",
+                      "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums shadow-sm",
                       active
-                        ? "bg-primary-foreground/20 text-primary-foreground"
+                        ? "bg-primary-foreground/25 text-primary-foreground"
                         : "bg-primary text-primary-foreground"
                     )}
                   >
                     {unreadMessages}
                   </span>
                 ) : null}
+                {active ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary-foreground/30"
+                  />
+                ) : null}
               </Link>
             );
           })}
 
-          <div className="my-1 h-px bg-border" />
+          <div className="my-2 h-px bg-border/60" />
 
           <Link
             href={VISIT_SITE_HREF}
             target="_blank"
             onClick={() => onOpenChange(false)}
-            className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
           >
             <ArrowUpRight aria-hidden="true" className="size-4 shrink-0" />
             <span className="flex-1">Visit site</span>

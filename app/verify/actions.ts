@@ -14,10 +14,9 @@ import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { pendingRegistrations, profiles } from "@/lib/db/schema";
 import { findUserIdByEmail, isEmailVerified } from "@/lib/db/users";
-import {
-  otpSchema,
-  type FieldErrors,
-} from "@/lib/validation/auth";
+import { otpSchema, type FieldErrors } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type VerifyFormState = {
   error?: string;
@@ -36,10 +35,21 @@ async function resolveTargetEmail(): Promise<string | null> {
   return session?.user?.email ?? null;
 }
 
-export async function verifyEmailAction(
+async function verifyEmailActionInternal(
   _prev: VerifyFormState,
   formData: FormData
 ): Promise<VerifyFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
+  const rateLimit = await checkRateLimit("auth:verify");
+  if (!rateLimit.success) {
+    return { error: rateLimit.error ?? "Too many verification attempts. Please try again later." };
+  }
+
   const email = await resolveTargetEmail();
   if (!email) {
     return {
@@ -63,7 +73,7 @@ export async function verifyEmailAction(
       email,
       otp: parsed.data.otp,
     });
-    const verified = !result.error || (await isEmailVerified(email));
+    const verified = !result.error && (await isEmailVerified(email));
     if (!verified) {
       console.error(
         "[verify] emailOtp.verifyEmail failed:",
@@ -108,30 +118,33 @@ export async function verifyEmailAction(
         };
       }
 
-      await db
-        .insert(profiles)
-        .values({
-          userId,
-          name: pending.name,
-          mobile: pending.mobile,
-          collegeId: pending.collegeId,
-          enrollmentNumber: pending.enrollmentNumber,
-          role: "USER",
-        })
-        .onConflictDoUpdate({
-          target: profiles.userId,
-          set: {
+      await db.transaction(async (tx) => {
+        await tx
+          .insert(profiles)
+          .values({
+            userId,
             name: pending.name,
             mobile: pending.mobile,
             collegeId: pending.collegeId,
             enrollmentNumber: pending.enrollmentNumber,
-            updatedAt: new Date(),
-          },
-        });
+            role: "USER",
+          })
+          .onConflictDoUpdate({
+            target: profiles.userId,
+            set: {
+              name: pending.name,
+              mobile: pending.mobile,
+              collegeId: pending.collegeId,
+              enrollmentNumber: pending.enrollmentNumber,
+              updatedAt: new Date(),
+            },
+          });
 
-      await db
-        .delete(pendingRegistrations)
-        .where(eq(pendingRegistrations.email, pending.email));
+        await tx
+          .delete(pendingRegistrations)
+          .where(eq(pendingRegistrations.email, pending.email));
+      });
+
       await clearPendingEmailCookie();
       target = "/profile";
     }
@@ -145,7 +158,14 @@ export async function verifyEmailAction(
   redirect(target);
 }
 
-export async function resendOtpAction(): Promise<ResendFormState> {
+export { verifyEmailActionInternal as verifyEmailAction };
+
+async function resendOtpActionInternal(): Promise<ResendFormState> {
+  const rateLimit = await checkRateLimit("auth:resend");
+  if (!rateLimit.success) {
+    return { error: rateLimit.error ?? "Too many resend attempts. Please try again later." };
+  }
+
   const email = await resolveTargetEmail();
   if (!email) {
     return {
@@ -171,3 +191,5 @@ export async function resendOtpAction(): Promise<ResendFormState> {
     return { error: "We couldn't resend the code. Please try again." };
   }
 }
+
+export { resendOtpActionInternal as resendOtpAction };

@@ -16,16 +16,23 @@ import {
   fieldErrorsFromZod,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
 
 export type CompleteProfileFormState = {
   error?: string;
   fieldErrors?: FieldErrors;
 } | null;
 
-export async function completeProfileAction(
+async function completeProfileActionInternal(
   _prev: CompleteProfileFormState,
   formData: FormData
 ): Promise<CompleteProfileFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const session = await getSession();
   if (!session?.user) {
     redirect("/login");
@@ -82,22 +89,25 @@ export async function completeProfileAction(
       };
     }
 
-    await db.insert(profiles).values({
-      userId: session.user.id,
-      name: session.user.name || "TDC Member",
-      mobile: input.mobile,
-      collegeId: input.collegeId,
-      enrollmentNumber: input.enrollmentNumber,
-      role: "USER",
+    await db.transaction(async (tx) => {
+      await tx.insert(profiles).values({
+        userId: session.user.id,
+        name: session.user.name ?? "TDC Member",
+        mobile: input.mobile,
+        collegeId: input.collegeId,
+        enrollmentNumber: input.enrollmentNumber,
+        role: "USER",
+      });
+
+      const pending = await getPendingRegistration(session.user.email);
+      if (pending) {
+        await tx
+          .delete(pendingRegistrations)
+          .where(eq(pendingRegistrations.email, pending.email));
+      }
     });
 
-    const pending = await getPendingRegistration(session.user.email);
-    if (pending) {
-      await db
-        .delete(pendingRegistrations)
-        .where(eq(pendingRegistrations.email, pending.email));
-      await clearPendingEmailCookie();
-    }
+    await clearPendingEmailCookie();
   } catch (err) {
     if (isNextRedirect(err)) throw err;
     console.error("[complete-profile] unexpected error:", err);
@@ -109,6 +119,8 @@ export async function completeProfileAction(
 
   redirect("/post-auth");
 }
+
+export { completeProfileActionInternal as completeProfileAction };
 
 function isNextRedirect(error: unknown): boolean {
   return (

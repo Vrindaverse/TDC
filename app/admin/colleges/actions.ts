@@ -10,6 +10,7 @@ import { db, sql } from "@/lib/db";
 import { colleges } from "@/lib/db/schema";
 import { collegeSchema } from "@/lib/validation/colleges";
 import { fieldErrorsFromZod, type FieldErrors } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -35,10 +36,16 @@ function isUniqueViolation(err: unknown): boolean {
   );
 }
 
-export async function createCollegeAction(
+async function createCollegeActionInternal(
   _prev: CollegeFormState,
   formData: FormData
 ): Promise<CollegeFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const { profile } = await requireAdmin();
 
   const parsed = parseForm(formData);
@@ -77,10 +84,18 @@ export async function createCollegeAction(
   redirect("/admin/colleges?created=1");
 }
 
-export async function updateCollegeAction(
+export { createCollegeActionInternal as createCollegeAction };
+
+async function updateCollegeActionInternal(
   _prev: CollegeFormState,
   formData: FormData
 ): Promise<CollegeFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -103,7 +118,15 @@ export async function updateCollegeAction(
       return { error: "That college no longer exists." };
     }
 
-    await db.update(colleges).set(parsed.data).where(eq(colleges.id, id));
+    const result = await db
+      .update(colleges)
+      .set(parsed.data)
+      .where(eq(colleges.id, id))
+      .returning({ id: colleges.id });
+
+    if (result.length === 0) {
+      return { error: "That college no longer exists." };
+    }
 
     const changes: string[] = [];
     if (existing[0].name !== parsed.data.name) {
@@ -138,7 +161,15 @@ export async function updateCollegeAction(
   redirect("/admin/colleges?updated=1");
 }
 
-export async function toggleCollegeAction(formData: FormData) {
+export { updateCollegeActionInternal as updateCollegeAction };
+
+async function toggleCollegeActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/colleges?error=csrf");
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -157,19 +188,24 @@ export async function toggleCollegeAction(formData: FormData) {
     if (!existing) {
       outcome = "not_found";
     } else if (existing.isActive !== value) {
-      await db
+      const result = await db
         .update(colleges)
         .set({ isActive: value })
-        .where(eq(colleges.id, id));
+        .where(eq(colleges.id, id))
+        .returning({ id: colleges.id });
 
-      await recordAudit({
-        actorId: profile.id,
-        actorName: profile.name,
-        action: "college.toggle",
-        targetType: "college",
-        targetId: id,
-        detail: `${existing.name} set to ${value ? "active" : "inactive"}`,
-      });
+      if (result.length === 0) {
+        outcome = "not_found";
+      } else {
+        await recordAudit({
+          actorId: profile.id,
+          actorName: profile.name,
+          action: "college.toggle",
+          targetType: "college",
+          targetId: id,
+          detail: `${existing.name} set to ${value ? "active" : "inactive"}`,
+        });
+      }
     }
   } catch (err) {
     console.error("[admin/colleges] toggle failed:", err);
@@ -184,7 +220,15 @@ export async function toggleCollegeAction(formData: FormData) {
   redirect("/admin/colleges?toggled=1");
 }
 
-export async function deleteCollegeAction(formData: FormData) {
+export { toggleCollegeActionInternal as toggleCollegeAction };
+
+async function deleteCollegeActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/colleges?error=csrf");
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -236,3 +280,5 @@ export async function deleteCollegeAction(formData: FormData) {
   revalidatePath("/admin/users");
   redirect("/admin/colleges?deleted=1");
 }
+
+export { deleteCollegeActionInternal as deleteCollegeAction };

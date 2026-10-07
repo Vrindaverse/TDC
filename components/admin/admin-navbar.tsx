@@ -45,7 +45,7 @@ export function AdminNavbar({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-md">
       <AdminMobileSidebar
         open={mobileOpen}
         onOpenChange={setMobileOpen}
@@ -63,7 +63,7 @@ export function AdminNavbar({
           </button>
           <span
             aria-hidden="true"
-            className="flex size-7 items-center justify-center rounded-[6px] bg-primary text-[0.7rem] font-bold tracking-tight text-primary-foreground"
+            className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-[0.7rem] font-bold tracking-tight text-primary-foreground shadow-sm"
           >
             TD
           </span>
@@ -79,7 +79,7 @@ export function AdminNavbar({
           <Link
             href={VISIT_SITE_HREF}
             target="_blank"
-            className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground sm:inline-flex"
           >
             <ExternalLink aria-hidden="true" className="size-3.5" />
             Visit site
@@ -106,7 +106,7 @@ export function AdminNavbar({
                   ) : avatarInitials(userName, userEmail) ? (
                     <span
                       aria-hidden="true"
-                      className="flex size-full items-center justify-center bg-primary text-xs font-semibold text-primary-foreground"
+                      className="flex size-full items-center justify-center bg-gradient-to-br from-primary to-primary/80 text-xs font-semibold text-primary-foreground"
                     >
                       {avatarInitials(userName, userEmail)}
                     </span>

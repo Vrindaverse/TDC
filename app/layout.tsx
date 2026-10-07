@@ -8,8 +8,11 @@ import {
   ChromeSkeleton,
 } from "@/components/app-shell";
 import { site } from "@/lib/navigation";
+import { validateEnv } from "@/lib/env";
 
 import "./globals.css";
+
+validateEnv();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

@@ -95,31 +95,31 @@ export default async function AdminActivityPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-card px-5 py-4">
-        <div className="flex flex-col gap-1">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-5 shadow-sm">
+        <div className="flex flex-col gap-1.5">
           <p className="tdc-mono-label text-[11px] text-primary">
             consoles / activity
           </p>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             Admin activity
           </h1>
           <p className="text-sm text-muted-foreground">
             Every change made from this console, newest first.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
           <Link href="/api/admin/export/activity">Download CSV</Link>
         </Button>
       </header>
 
-      <Card>
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0 border-b pb-4">
           <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
               <History aria-hidden="true" className="size-5" />
             </span>
             <div>
-              <CardTitle className="text-sm font-semibold">
+              <CardTitle className="text-base font-semibold">
                 {total} entr{total === 1 ? "y" : "ies"}
               </CardTitle>
               <CardDescription className="text-xs">
@@ -151,9 +151,9 @@ export default async function AdminActivityPage({
             ) : null}
           </form>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="p-0">
           {rows.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
+            <p className="py-8 text-sm text-muted-foreground">
               {actionFilter
                 ? "No entries match this filter."
                 : "No admin actions recorded yet."}
@@ -163,32 +163,32 @@ export default async function AdminActivityPage({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">When</th>
-                      <th className="py-2 pr-4 font-medium">Admin</th>
-                      <th className="py-2 pr-4 font-medium">Action</th>
-                      <th className="py-2 pr-4 font-medium">Target</th>
-                      <th className="py-2 font-medium">Detail</th>
+                    <tr className="border-b border-border/60 bg-muted/30 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <th className="px-4 py-3 font-medium">When</th>
+                      <th className="px-4 py-3 font-medium">Admin</th>
+                      <th className="px-4 py-3 font-medium">Action</th>
+                      <th className="px-4 py-3 font-medium">Target</th>
+                      <th className="px-4 py-3 font-medium">Detail</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <tr key={row.id} className="border-b last:border-0">
-                        <td className="py-2 pr-4 whitespace-nowrap text-muted-foreground">
+                      <tr key={row.id} className="admin-table-row border-b border-border/60 last:border-0">
+                        <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
                           {formatDateTime(row.createdAt)}
                         </td>
-                        <td className="py-2 pr-4 font-medium">
+                        <td className="px-4 py-3 font-medium">
                           {row.actorName}
                         </td>
-                        <td className="py-2 pr-4">
-                          <Badge variant="secondary" className="text-xs">
+                        <td className="px-4 py-3">
+                          <Badge variant="secondary" className="text-[10px] font-semibold">
                             {actionLabels[row.action] ?? row.action}
                           </Badge>
                         </td>
-                        <td className="py-2 pr-4 text-muted-foreground">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {targetLabels[row.targetType] ?? row.targetType}
                         </td>
-                        <td className="py-2 text-muted-foreground">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {row.detail ?? "—"}
                         </td>
                       </tr>
@@ -198,7 +198,7 @@ export default async function AdminActivityPage({
               </div>
 
               {totalPages > 1 ? (
-                <div className="flex items-center justify-between gap-3 pt-2">
+                <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-3">
                   <p className="text-sm text-muted-foreground">
                     {currentPage * PAGE_SIZE - PAGE_SIZE + 1}–
                     {Math.min(currentPage * PAGE_SIZE, total)} of {total}

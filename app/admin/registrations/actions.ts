@@ -8,6 +8,7 @@ import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { registrations } from "@/lib/db/schema";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -16,7 +17,18 @@ function withParam(path: string, key: string, value: string) {
   return `${path}${path.includes("?") ? "&" : "?"}${key}=${value}`;
 }
 
-export async function deleteRegistrationAction(formData: FormData) {
+async function deleteRegistrationActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    const back = String(formData.get("back") ?? "");
+    const safeBack =
+      back.startsWith("/admin/registrations") && !back.includes("://")
+        ? back
+        : "/admin/registrations";
+    redirect(withParam(safeBack, "error", "csrf"));
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -45,8 +57,16 @@ export async function deleteRegistrationAction(formData: FormData) {
     if (!existing) {
       outcome = "not_found";
     } else {
-      await db.delete(registrations).where(eq(registrations.id, id));
-      detail = existing.email ?? existing.name ?? id;
+      const result = await db
+        .delete(registrations)
+        .where(eq(registrations.id, id))
+        .returning({ id: registrations.id });
+
+      if (result.length === 0) {
+        outcome = "not_found";
+      } else {
+        detail = existing.email ?? existing.name ?? id;
+      }
     }
   } catch (err) {
     console.error("[admin/registrations] delete failed:", err);
@@ -73,3 +93,5 @@ export async function deleteRegistrationAction(formData: FormData) {
   revalidatePath("/admin/events");
   redirect(withParam(safeBack, "deleted", "1"));
 }
+
+export { deleteRegistrationActionInternal as deleteRegistrationAction };

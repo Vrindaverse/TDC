@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { db } from "@/lib/db";
 import { announcements } from "@/lib/db/schema";
 
@@ -71,12 +72,12 @@ export default async function AdminAnnouncementsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-card px-5 py-4">
-        <div className="flex flex-col gap-1">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-5 shadow-sm">
+        <div className="flex flex-col gap-1.5">
           <p className="tdc-mono-label text-[11px] text-primary">
             consoles / announcements
           </p>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             Announcements
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -84,15 +85,15 @@ export default async function AdminAnnouncementsPage({
           </p>
         </div>
         {editing ? (
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
             <Link href="/admin/announcements">Cancel editing</Link>
           </Button>
         ) : null}
       </header>
 
-      <Card>
-        <CardHeader className="flex-row items-center gap-3 space-y-0">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row items-center gap-3 space-y-0 border-b pb-4">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
             <Megaphone aria-hidden="true" className="size-5" />
           </span>
           <div>
@@ -106,7 +107,7 @@ export default async function AdminAnnouncementsPage({
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <AnnouncementForm
             announcement={
               editing
@@ -117,16 +118,16 @@ export default async function AdminAnnouncementsPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex-row items-center gap-3 space-y-0">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row items-center gap-3 space-y-0 border-b pb-4">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
             <Megaphone aria-hidden="true" className="size-5" />
           </span>
-          <CardTitle className="text-sm font-semibold">
+          <CardTitle className="text-base font-semibold">
             All announcements
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
+        <CardContent className="flex flex-col gap-3 p-4">
           {updated ? (
             <div role="status" className={successBanner}>
               <CheckCircle2
@@ -156,7 +157,7 @@ export default async function AdminAnnouncementsPage({
           ) : null}
 
           {rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="py-8 text-sm text-muted-foreground">
               No announcements yet. Publish the first one above.
             </p>
           ) : (
@@ -164,28 +165,29 @@ export default async function AdminAnnouncementsPage({
               {rows.map((announcement) => (
                 <li
                   key={announcement.id}
-                  className={
+                  className={cn(
+                    "group flex flex-col gap-3 rounded-xl border p-4 transition-all",
                     editing?.id === announcement.id
-                      ? "flex flex-col gap-3 rounded-md border border-primary/40 bg-primary/5 p-3"
-                      : "flex flex-col gap-3 rounded-md border p-3"
-                  }
+                      ? "border-primary/40 bg-gradient-to-r from-primary/5 to-card shadow-sm"
+                      : "border-border/60 bg-card/60 hover:border-primary/30 hover:shadow-sm"
+                  )}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                         {announcement.title}
                         {announcement.pinned ? (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-[10px] font-medium">
                             <Pin aria-hidden="true" className="mr-1 size-3" />
                             Pinned
                           </Badge>
                         ) : null}
                         {announcement.isActive ? (
-                          <Badge variant="default" className="text-xs">
+                          <Badge variant="default" className={cn("text-[10px] font-semibold", "admin-badge-live")}>
                             Live
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-[10px]">
                             Hidden
                           </Badge>
                         )}
@@ -198,7 +200,7 @@ export default async function AdminAnnouncementsPage({
                           : ""}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <form action={toggleAnnouncementAction}>
                         <input type="hidden" name="id" value={announcement.id} />
                         <input
@@ -215,6 +217,7 @@ export default async function AdminAnnouncementsPage({
                           type="submit"
                           variant="outline"
                           size="sm"
+                          className="h-8 gap-1.5 text-xs"
                           aria-label={
                             announcement.isActive ? "Hide" : "Publish"
                           }
@@ -234,6 +237,7 @@ export default async function AdminAnnouncementsPage({
                           type="submit"
                           variant="outline"
                           size="sm"
+                          className="h-8 w-8 p-0"
                           aria-label={
                             announcement.pinned
                               ? "Unpin announcement"
@@ -245,10 +249,9 @@ export default async function AdminAnnouncementsPage({
                           ) : (
                             <Pin aria-hidden="true" className="size-4" />
                           )}
-                          {announcement.pinned ? "Unpin" : "Pin"}
                         </Button>
                       </form>
-                      <Button asChild variant="outline" size="sm">
+                      <Button asChild variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
                         <Link
                           href={`/admin/announcements?edit=${announcement.id}`}
                           aria-label={`Edit ${announcement.title}`}
@@ -263,12 +266,12 @@ export default async function AdminAnnouncementsPage({
                         label="Delete"
                         confirmLabel="Confirm delete"
                         variant="ghost"
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         ariaLabel="Delete announcement"
                       />
                     </div>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                     {announcement.body}
                   </p>
                 </li>

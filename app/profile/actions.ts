@@ -10,6 +10,7 @@ import {
   fieldErrorsFromZod,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
 
 export type ChangePasswordState = {
   success?: boolean;
@@ -17,10 +18,16 @@ export type ChangePasswordState = {
   fieldErrors?: FieldErrors;
 } | null;
 
-export async function changePasswordAction(
+async function changePasswordActionInternal(
   _prev: ChangePasswordState,
   formData: FormData
 ): Promise<ChangePasswordState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   await requireProfile();
 
   const parsed = changePasswordSchema.safeParse({
@@ -55,3 +62,5 @@ export async function changePasswordAction(
   revalidatePath("/profile");
   return { success: true };
 }
+
+export { changePasswordActionInternal as changePasswordAction };

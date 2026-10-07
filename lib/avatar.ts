@@ -15,6 +15,33 @@ export const AVATAR_BUCKET = process.env.AWS_S3_BUCKET ?? "avatars";
 
 const AVATAR_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
+const MAGIC_BYTES: Record<AvatarExtension, number[][]> = {
+  png: [[0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]],
+  jpg: [[0xff, 0xd8, 0xff]],
+  webp: [[0x52, 0x49, 0x46, 0x46]],
+  gif: [[0x47, 0x49, 0x46, 0x38, 0x37, 0x61], [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]],
+  avif: [[0x00, 0x00, 0x00, 0x1c, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66]],
+};
+
+function validateMagicBytes(body: Uint8Array, ext: AvatarExtension): boolean {
+  const signatures = MAGIC_BYTES[ext];
+  if (!signatures) return false;
+
+  for (const sig of signatures) {
+    if (body.length >= sig.length) {
+      let match = true;
+      for (let i = 0; i < sig.length; i++) {
+        if (body[i] !== sig[i]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return true;
+    }
+  }
+  return false;
+}
+
 let s3Client: S3Client | null = null;
 
 function getS3Client() {
@@ -45,6 +72,9 @@ export async function putAvatarObject(
   body: Uint8Array,
   contentType: string
 ): Promise<string> {
+  if (!validateMagicBytes(body, ext)) {
+    throw new Error("Invalid file content: magic bytes do not match declared type");
+  }
   const key = avatarKeyForUser(userId, ext);
   await getS3Client().send(
     new PutObjectCommand({
@@ -98,6 +128,9 @@ export async function putPosterObject(
   body: Uint8Array,
   contentType: string
 ): Promise<string> {
+  if (!validateMagicBytes(body, ext)) {
+    throw new Error("Invalid file content: magic bytes do not match declared type");
+  }
   const key = posterKey(ext);
   await getS3Client().send(
     new PutObjectCommand({

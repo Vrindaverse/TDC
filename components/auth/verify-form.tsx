@@ -73,6 +73,7 @@ export function VerifyForm({ email }: { email: string }) {
         noValidate
         className="flex flex-col gap-5"
       >
+        <input type="hidden" name="_csrf" />
         <div className="flex flex-col gap-2">
           <Label htmlFor="verify-otp">Verification code</Label>
           <Input
@@ -127,6 +128,7 @@ export function VerifyForm({ email }: { email: string }) {
           minute — check your spam folder too.
         </p>
         <form action={resendFormAction}>
+          <input type="hidden" name="_csrf" />
           <button
             type="submit"
             disabled={pending || resendPending}

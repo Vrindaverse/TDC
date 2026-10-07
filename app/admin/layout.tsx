@@ -30,9 +30,9 @@ export default async function AdminLayout({
   const unreadMessages = await getUnreadMessageCount();
 
   return (
-    <div className="flex min-h-full flex-col bg-muted/30">
+    <div className="flex min-h-full flex-col bg-gradient-to-br from-muted/30 to-muted/10">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 md:py-10 lg:flex-row lg:gap-8 lg:px-8">
-        <div className="hidden w-60 shrink-0 lg:block">
+        <div className="hidden w-64 shrink-0 lg:block">
           <AdminSidebar unreadMessages={unreadMessages} />
         </div>
         <main className="min-w-0 flex-1">{children}</main>

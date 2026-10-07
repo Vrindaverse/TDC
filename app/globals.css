@@ -323,3 +323,70 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* Admin console specific styles */
+.admin-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.985 0 0) 0%, oklch(0.967 0 0) 100%);
+}
+
+.dark .admin-gradient-bg {
+  background: linear-gradient(135deg, oklch(0.16 0 0) 0%, oklch(0.21 0 0) 100%);
+}
+
+.admin-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.dark .admin-card-hover:hover {
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+}
+
+.admin-table-row {
+  transition: background-color 0.15s ease;
+}
+
+.admin-table-row:hover {
+  background-color: oklch(0.967 0 0 / 0.5);
+}
+
+.dark .admin-table-row:hover {
+  background-color: oklch(0.27 0 0 / 0.5);
+}
+
+.admin-stat-icon {
+  transition: all 0.2s ease;
+}
+
+.admin-stat-icon:hover {
+  transform: scale(1.05);
+}
+
+.admin-section-divider {
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  height: 1px;
+}
+
+.admin-badge-live::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: oklch(0.65 0.18 145);
+  margin-right: 6px;
+  animation: admin-pulse 2s ease-in-out infinite;
+}
+
+@keyframes admin-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

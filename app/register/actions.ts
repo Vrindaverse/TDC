@@ -9,6 +9,8 @@ import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { colleges, pendingRegistrations, profiles } from "@/lib/db/schema";
 import { fieldErrorsFromZod, registerSchema } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type RegisterFormState = {
   error?: string;
@@ -17,10 +19,21 @@ export type RegisterFormState = {
 
 const PENDING_TTL_MS = 60 * 60 * 24 * 1000;
 
-export async function registerAction(
+async function registerActionInternal(
   _prev: RegisterFormState,
   formData: FormData
 ): Promise<RegisterFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
+  const rateLimit = await checkRateLimit("auth:register");
+  if (!rateLimit.success) {
+    return { error: rateLimit.error ?? "Too many registration attempts. Please try again later." };
+  }
+
   const parsed = registerSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -131,3 +144,5 @@ export async function registerAction(
 
   redirect("/verify");
 }
+
+export { registerActionInternal as registerAction };

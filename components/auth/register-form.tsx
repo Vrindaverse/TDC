@@ -121,6 +121,7 @@ export function RegisterForm({
       noValidate
       className="flex flex-col gap-5"
     >
+      <input type="hidden" name="_csrf" />
       {state?.error ? (
         <div
           role="alert"

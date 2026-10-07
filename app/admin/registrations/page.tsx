@@ -102,12 +102,12 @@ export default async function AdminRegistrationsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-card px-5 py-4">
-        <div className="flex flex-col gap-1">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-5 shadow-sm">
+        <div className="flex flex-col gap-1.5">
           <p className="tdc-mono-label text-[11px] text-primary">
             consoles / registrations
           </p>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             {total} registration{total === 1 ? "" : "s"}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -116,15 +116,15 @@ export default async function AdminRegistrationsPage({
               : "Across all events."}
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
           <Link href={exportHref}>Download CSV</Link>
         </Button>
       </header>
 
-      <Card>
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0 border-b pb-4">
           <div>
-            <CardTitle>Registrations</CardTitle>
+            <CardTitle className="text-base">Registrations</CardTitle>
             <CardDescription>
               Showing page {currentPage} of {totalPages}.
             </CardDescription>
@@ -161,7 +161,7 @@ export default async function AdminRegistrationsPage({
             ) : null}
           </form>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 p-0">
           {deleted ? (
             <div role="status" className={successBanner}>
               <CheckCircle2
@@ -191,7 +191,7 @@ export default async function AdminRegistrationsPage({
           ) : null}
 
           {rows.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
+            <p className="py-8 text-sm text-muted-foreground">
               {query || eventId
                 ? "No registrations match your filters."
                 : "No registrations yet."}
@@ -201,27 +201,27 @@ export default async function AdminRegistrationsPage({
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[980px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                      <th className="py-2 pr-4 font-medium">Registrant</th>
-                      <th className="py-2 pr-4 font-medium">Email</th>
-                      <th className="py-2 pr-4 font-medium">Mobile</th>
-                      <th className="py-2 pr-4 font-medium">Enrollment</th>
-                      <th className="py-2 pr-4 font-medium">Sem</th>
-                      <th className="py-2 pr-4 font-medium">Event</th>
-                      <th className="py-2 pr-4 font-medium">Event date</th>
-                      <th className="py-2 pr-4 font-medium">Registered</th>
-                      <th className="py-2 text-right font-medium">Actions</th>
+                    <tr className="border-b border-border/60 bg-muted/30 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <th className="px-4 py-3 font-medium">Registrant</th>
+                      <th className="px-4 py-3 font-medium">Email</th>
+                      <th className="px-4 py-3 font-medium">Mobile</th>
+                      <th className="px-4 py-3 font-medium">Enrollment</th>
+                      <th className="px-4 py-3 font-medium">Sem</th>
+                      <th className="px-4 py-3 font-medium">Event</th>
+                      <th className="px-4 py-3 font-medium">Event date</th>
+                      <th className="px-4 py-3 font-medium">Registered</th>
+                      <th className="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((row) => (
-                      <tr key={row.id} className="border-b last:border-0">
-                        <td className="py-2 pr-4 font-medium">
+                      <tr key={row.id} className="admin-table-row border-b border-border/60 last:border-0">
+                        <td className="px-4 py-3 font-medium">
                           <span className="inline-flex flex-col gap-0.5">
                             <span className="inline-flex items-center gap-2">
                               {row.name}
                               {row.isMember ? null : (
-                                <Badge variant="outline">Guest</Badge>
+                                <Badge variant="outline" className="text-[10px]">Guest</Badge>
                               )}
                             </span>
                             {row.college ? (
@@ -231,28 +231,28 @@ export default async function AdminRegistrationsPage({
                             ) : null}
                           </span>
                         </td>
-                        <td className="py-2 pr-4 text-muted-foreground">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {row.email}
                         </td>
-                        <td className="py-2 pr-4 font-mono text-xs text-muted-foreground">
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                           {row.mobile ?? "—"}
                         </td>
-                        <td className="py-2 pr-4 font-mono text-xs text-muted-foreground">
+                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                           {row.enrollmentNumber ?? "—"}
                         </td>
-                        <td className="py-2 pr-4 text-muted-foreground">
+                        <td className="px-4 py-3 text-muted-foreground">
                           {row.semester ? `Sem ${row.semester}` : "—"}
                         </td>
-                        <td className="py-2 pr-4">{row.title}</td>
-                        <td className="py-2 pr-4 text-muted-foreground">
+                        <td className="px-4 py-3">{row.title}</td>
+                        <td className="px-4 py-3 text-muted-foreground">
                           {formatDate(row.startsAt)}
                         </td>
-                        <td className="py-2 pr-4">
-                          <Badge variant="outline">
+                        <td className="px-4 py-3">
+                          <Badge variant="outline" className="text-[10px]">
                             {formatDate(row.createdAt)}
                           </Badge>
                         </td>
-                        <td className="py-2">
+                        <td className="px-4 py-3">
                           <div className="flex items-center justify-end">
                             <ConfirmSubmitButton
                               action={deleteRegistrationAction}
@@ -260,7 +260,7 @@ export default async function AdminRegistrationsPage({
                               label="Remove"
                               confirmLabel="Confirm remove"
                               variant="ghost"
-                              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                               ariaLabel={`Remove ${row.name} from ${row.title}`}
                             />
                           </div>
@@ -272,7 +272,7 @@ export default async function AdminRegistrationsPage({
               </div>
 
               {totalPages > 1 ? (
-                <div className="flex items-center justify-between gap-3 pt-2">
+                <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-3">
                   <p className="text-sm text-muted-foreground">
                     {currentPage * PAGE_SIZE - PAGE_SIZE + 1}–
                     {Math.min(currentPage * PAGE_SIZE, total)} of {total}

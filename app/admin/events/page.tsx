@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { db, sql } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 
@@ -66,39 +67,41 @@ export default async function AdminEventsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-card px-5 py-4">
-        <div className="flex flex-col gap-1">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-5 shadow-sm">
+        <div className="flex flex-col gap-1.5">
           <p className="tdc-mono-label text-[11px] text-primary">
             consoles / events
           </p>
-          <h1 className="text-xl font-semibold tracking-tight">Events</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Events</h1>
           <p className="text-sm text-muted-foreground">
             {rows.length} upcoming and past event{rows.length === 1 ? "" : "s"}.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-        <Link href="/api/admin/export/events">
-          <Button variant="outline">Download CSV</Button>
-        </Link>
-        <Link href="/admin/events/new">
-          <Button className="inline-flex items-center gap-1.5">
-            <Plus aria-hidden="true" className="size-4" />
-            New event
-          </Button>
-        </Link>
-      </div>
+          <Link href="/api/admin/export/events">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              Download CSV
+            </Button>
+          </Link>
+          <Link href="/admin/events/new">
+            <Button className="inline-flex items-center gap-1.5 bg-gradient-to-r from-primary to-primary/90 shadow-sm transition-all hover:shadow-md hover:brightness-105">
+              <Plus aria-hidden="true" className="size-4" />
+              New event
+            </Button>
+          </Link>
+        </div>
       </header>
 
-      <Card>
-        <CardHeader className="flex-row items-center gap-3 space-y-0">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row items-center gap-3 space-y-0 border-b pb-4">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
             <CalendarDays aria-hidden="true" className="size-5" />
           </span>
-          <CardTitle className="text-sm font-semibold">
+          <CardTitle className="text-base font-semibold">
             All events
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
+        <CardContent className="flex flex-col gap-3 p-4">
           {error === "delete" ? (
             <div
               role="alert"
@@ -125,7 +128,7 @@ export default async function AdminEventsPage({
           ) : null}
 
           {rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="py-8 text-sm text-muted-foreground">
               No events yet. Create the first one.
             </p>
           ) : (
@@ -137,33 +140,39 @@ export default async function AdminEventsPage({
                 return (
                   <li
                     key={event.id}
-                    className="flex flex-wrap items-start justify-between gap-3 rounded-md border p-3"
+                    className="group flex flex-wrap items-start justify-between gap-3 rounded-xl border border-border/60 bg-card/60 p-4 transition-all hover:border-primary/30 hover:shadow-sm"
                   >
-                    <div className="flex min-w-0 flex-col gap-1">
-                      <span className="text-sm font-medium">{event.title}</span>
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <span className="text-sm font-semibold">{event.title}</span>
                       <span className="text-xs text-muted-foreground">
                         {formatDate(event.startsAt)}
                         {event.location ? ` · ${event.location}` : ""}
                       </span>
                       <span className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-[10px] font-medium">
                           {event.domain}
                         </Badge>
                         <Link
                           href={`/admin/registrations?event=${event.id}`}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 transition-colors hover:underline"
                         >
                           <Ticket aria-hidden="true" className="size-3.5" />
                           {registrantCount} registrant
                           {registrantCount === 1 ? "" : "s"}
                         </Link>
-                        <Badge variant={statusMeta[status].variant} className="text-xs">
+                        <Badge
+                          variant={statusMeta[status].variant}
+                          className={cn(
+                            "text-[10px] font-semibold",
+                            status === "open" && "admin-badge-live"
+                          )}
+                        >
                           {statusMeta[status].label}
                         </Badge>
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 rounded-lg border border-border/60 p-1">
                         {STATUS_ORDER.map((candidate) => (
                           <form
                             key={candidate}
@@ -179,7 +188,10 @@ export default async function AdminEventsPage({
                               type="submit"
                               size="sm"
                               variant={candidate === status ? "default" : "ghost"}
-                              className={candidate === status ? "" : "text-muted-foreground"}
+                              className={cn(
+                                "h-7 px-2.5 text-[11px] font-medium",
+                                candidate === status ? "shadow-sm" : "text-muted-foreground hover:text-foreground"
+                              )}
                               aria-label={`Set registration status to ${candidate}`}
                               aria-pressed={candidate === status}
                               disabled={candidate === status}
@@ -190,7 +202,7 @@ export default async function AdminEventsPage({
                         ))}
                       </div>
                       <Link href={`/admin/events/${event.id}`}>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="gap-1.5">
                           Edit
                         </Button>
                       </Link>

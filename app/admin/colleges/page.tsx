@@ -23,6 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { adminCollegesRows } from "@/lib/admin/list-queries";
 
 const PAGE_SIZE = 20;
@@ -124,24 +125,24 @@ export default async function AdminCollegesPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-card px-5 py-4">
-        <div className="flex flex-col gap-1">
+      <header className="flex flex-wrap items-start justify-between gap-4 rounded-xl border bg-gradient-to-r from-card to-card/80 px-5 py-5 shadow-sm">
+        <div className="flex flex-col gap-1.5">
           <p className="tdc-mono-label text-[11px] text-primary">
             consoles / colleges
           </p>
-          <h1 className="text-xl font-semibold tracking-tight">Colleges</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Colleges</h1>
           <p className="text-sm text-muted-foreground">
             {total} college{total === 1 ? "" : "s"} members can pick during
             sign-up.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
+        <Button asChild variant="outline" size="sm" className="gap-1.5">
           <Link href="/api/admin/export/colleges">Download CSV</Link>
         </Button>
       </header>
 
-      <Card>
-        <CardHeader className="flex-row items-center gap-3 space-y-0">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row items-center gap-3 space-y-0 border-b pb-4">
           <div>
             <CardTitle className="text-sm font-semibold">
               Add a college
@@ -151,15 +152,15 @@ export default async function AdminCollegesPage({
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <CollegeForm />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
+      <Card className="admin-card-hover border shadow-sm">
+        <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0 border-b pb-4">
           <div>
-            <CardTitle>All colleges</CardTitle>
+            <CardTitle className="text-base">All colleges</CardTitle>
             <CardDescription>
               Showing page {currentPage} of {totalPages}.
             </CardDescription>
@@ -193,7 +194,7 @@ export default async function AdminCollegesPage({
             ) : null}
           </form>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 p-0">
           {created ? (
             <Banner kind="success">College added. Members can pick it now.</Banner>
           ) : null}
@@ -211,7 +212,7 @@ export default async function AdminCollegesPage({
           ) : null}
 
           {rows.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">
+            <p className="py-8 text-sm text-muted-foreground">
               {hasFilters
                 ? "No colleges match your filters."
                 : "No colleges yet. Add the first one above."}
@@ -220,44 +221,47 @@ export default async function AdminCollegesPage({
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                    <th className="py-2 pr-4 font-medium">Name</th>
-                    <th className="py-2 pr-4 font-medium">Code</th>
-                    <th className="py-2 pr-4 font-medium">Members</th>
-                    <th className="py-2 pr-4 font-medium">Status</th>
-                    <th className="py-2 pr-4 font-medium">Added</th>
-                    <th className="py-2 text-right font-medium">Actions</th>
+                  <tr className="border-b border-border/60 bg-muted/30 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Code</th>
+                    <th className="px-4 py-3 font-medium">Members</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Added</th>
+                    <th className="px-4 py-3 text-right font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((college) => (
-                    <tr key={college.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4 font-medium">{college.name}</td>
-                      <td className="py-2 pr-4 font-mono text-xs">
+                    <tr key={college.id} className="admin-table-row border-b border-border/60 last:border-0">
+                      <td className="px-4 py-3 font-medium">{college.name}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                         {college.code}
                       </td>
-                      <td className="py-2 pr-4 text-muted-foreground">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {college.memberCount}
                       </td>
-                      <td className="py-2 pr-4">
+                      <td className="px-4 py-3">
                         <Badge
                           variant={college.isActive ? "default" : "outline"}
+                          className={cn(
+                            "text-[10px] font-semibold",
+                            college.isActive && "admin-badge-live"
+                          )}
                         >
                           {college.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </td>
-                      <td className="py-2 pr-4 text-muted-foreground">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {formatDate(college.createdAt)}
                       </td>
-                      <td className="py-2">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button asChild variant="outline" size="sm">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0">
                             <Link
                               href={`/admin/colleges/${college.id}`}
                               aria-label={`Edit ${college.name}`}
                             >
-                              <Pencil aria-hidden="true" className="size-3.5" />
-                              Edit
+                              <Pencil aria-hidden="true" className="size-4" />
                             </Link>
                           </Button>
                           <form action={toggleCollegeAction}>
@@ -273,8 +277,9 @@ export default async function AdminCollegesPage({
                             />
                             <Button
                               type="submit"
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
+                              className="h-8 px-2 text-xs"
                               aria-label={
                                 college.isActive
                                   ? `Deactivate ${college.name}`
@@ -291,7 +296,7 @@ export default async function AdminCollegesPage({
                               label="Delete"
                               confirmLabel="Confirm delete"
                               variant="ghost"
-                              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                               ariaLabel={`Delete ${college.name}`}
                             />
                           ) : null}
@@ -305,7 +310,7 @@ export default async function AdminCollegesPage({
           )}
 
           {totalPages > 1 ? (
-            <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-3">
               <p className="text-sm text-muted-foreground">
                 {currentPage * PAGE_SIZE - PAGE_SIZE + 1}–
                 {Math.min(currentPage * PAGE_SIZE, total)} of {total}

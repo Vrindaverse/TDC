@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { announcements } from "@/lib/db/schema";
 import { announcementSchema } from "@/lib/validation/announcements";
 import { fieldErrorsFromZod, type FieldErrors } from "@/lib/validation/auth";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -29,10 +30,16 @@ function isNextRedirect(error: unknown): boolean {
   );
 }
 
-export async function createAnnouncementAction(
+async function createAnnouncementActionInternal(
   _prev: AnnouncementFormState,
   formData: FormData
 ): Promise<AnnouncementFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const { profile } = await requireAdmin();
 
   const parsed = announcementSchema.safeParse({
@@ -73,10 +80,18 @@ export async function createAnnouncementAction(
   redirect("/admin/announcements");
 }
 
-export async function updateAnnouncementAction(
+export { createAnnouncementActionInternal as createAnnouncementAction };
+
+async function updateAnnouncementActionInternal(
   _prev: AnnouncementFormState,
   formData: FormData
 ): Promise<AnnouncementFormState> {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    return { error: "Invalid request. Please refresh and try again." };
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -102,13 +117,18 @@ export async function updateAnnouncementAction(
       return { error: "That announcement no longer exists." };
     }
 
-    await db
+    const result = await db
       .update(announcements)
       .set({
         title: parsed.data.title,
         body: parsed.data.body,
       })
-      .where(eq(announcements.id, id));
+      .where(eq(announcements.id, id))
+      .returning({ id: announcements.id });
+
+    if (result.length === 0) {
+      return { error: "That announcement no longer exists." };
+    }
 
     await recordAudit({
       actorId: profile.id,
@@ -131,7 +151,15 @@ export async function updateAnnouncementAction(
   redirect("/admin/announcements?updated=1");
 }
 
-export async function deleteAnnouncementAction(formData: FormData) {
+export { updateAnnouncementActionInternal as updateAnnouncementAction };
+
+async function deleteAnnouncementActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/announcements?error=csrf");
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -176,7 +204,15 @@ export async function deleteAnnouncementAction(formData: FormData) {
   redirect("/admin/announcements?deleted=1");
 }
 
-export async function toggleAnnouncementAction(formData: FormData) {
+export { deleteAnnouncementActionInternal as deleteAnnouncementAction };
+
+async function toggleAnnouncementActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/announcements?error=csrf");
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -199,8 +235,17 @@ export async function toggleAnnouncementAction(formData: FormData) {
       outcome = "not_found";
     } else {
       const patch = field === "pinned" ? { pinned: value } : { isActive: value };
-      await db.update(announcements).set(patch).where(eq(announcements.id, id));
-      detail = `${existing.title}: ${field} → ${value}`;
+      const result = await db
+        .update(announcements)
+        .set(patch)
+        .where(eq(announcements.id, id))
+        .returning({ id: announcements.id });
+
+      if (result.length === 0) {
+        outcome = "not_found";
+      } else {
+        detail = `${existing.title}: ${field} → ${value}`;
+      }
     }
   } catch (err) {
     console.error("[admin/announcements] toggle failed:", err);
@@ -223,3 +268,5 @@ export async function toggleAnnouncementAction(formData: FormData) {
   revalidatePath("/");
   redirect("/admin/announcements");
 }
+
+export { toggleAnnouncementActionInternal as toggleAnnouncementAction };

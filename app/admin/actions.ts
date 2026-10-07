@@ -9,11 +9,18 @@ import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/guards";
 import { db, sql } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function deleteUserAction(formData: FormData) {
+async function deleteUserActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/users?error=csrf");
+  }
+
   const { session, profile: actor } = await requireAdmin();
 
   const userId = String(formData.get("userId") ?? "").trim();
@@ -70,9 +77,17 @@ export async function deleteUserAction(formData: FormData) {
   redirect("/admin/users?deleted=1");
 }
 
+export { deleteUserActionInternal as deleteUserAction };
+
 const USER_DETAIL_PATH = /^\/admin\/users\/[0-9a-f-]{36}$/;
 
-export async function setUserRoleAction(formData: FormData) {
+async function setUserRoleActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect("/admin/users?error=csrf");
+  }
+
   const { session, profile: actor } = await requireAdmin();
 
   const userId = String(formData.get("userId") ?? "").trim();
@@ -130,3 +145,5 @@ export async function setUserRoleAction(formData: FormData) {
   revalidatePath("/profile");
   redirect(back);
 }
+
+export { setUserRoleActionInternal as setUserRoleAction };

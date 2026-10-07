@@ -8,6 +8,7 @@ import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { contactMessages } from "@/lib/db/schema";
+import { validateCsrfToken } from "@/lib/csrf";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,7 +24,13 @@ function withParam(path: string, key: string, value: string) {
   return `${path}${path.includes("?") ? "&" : "?"}${key}=${value}`;
 }
 
-export async function setMessageStatusAction(formData: FormData) {
+async function setMessageStatusActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect(withParam(safeBack(formData.get("back")), "error", "csrf"));
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -45,15 +52,21 @@ export async function setMessageStatusAction(formData: FormData) {
     if (!existing) {
       outcome = "not_found";
     } else {
-      await db
+      const result = await db
         .update(contactMessages)
         .set(
           status === "read"
             ? { status: "read", readAt: new Date() }
             : { status: "new", readAt: null }
         )
-        .where(eq(contactMessages.id, id));
-      detail = `${existing.subject} → ${status}`;
+        .where(eq(contactMessages.id, id))
+        .returning({ id: contactMessages.id });
+
+      if (result.length === 0) {
+        outcome = "not_found";
+      } else {
+        detail = `${existing.subject} → ${status}`;
+      }
     }
   } catch (err) {
     console.error("[admin/messages] status change failed:", err);
@@ -77,7 +90,15 @@ export async function setMessageStatusAction(formData: FormData) {
   redirect(back);
 }
 
-export async function deleteMessageAction(formData: FormData) {
+export { setMessageStatusActionInternal as setMessageStatusAction };
+
+async function deleteMessageActionInternal(formData: FormData) {
+  const clientToken = formData.get("_csrf") as string | null;
+  const valid = await validateCsrfToken(clientToken ?? "");
+  if (!valid) {
+    redirect(withParam(safeBack(formData.get("back")), "error", "csrf"));
+  }
+
   const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
@@ -98,8 +119,16 @@ export async function deleteMessageAction(formData: FormData) {
     if (!existing) {
       outcome = "not_found";
     } else {
-      await db.delete(contactMessages).where(eq(contactMessages.id, id));
-      detail = existing.subject;
+      const result = await db
+        .delete(contactMessages)
+        .where(eq(contactMessages.id, id))
+        .returning({ id: contactMessages.id });
+
+      if (result.length === 0) {
+        outcome = "not_found";
+      } else {
+        detail = existing.subject;
+      }
     }
   } catch (err) {
     console.error("[admin/messages] delete failed:", err);
@@ -122,3 +151,5 @@ export async function deleteMessageAction(formData: FormData) {
   revalidatePath("/admin/messages");
   redirect(withParam(back, "deleted", "1"));
 }
+
+export { deleteMessageActionInternal as deleteMessageAction };

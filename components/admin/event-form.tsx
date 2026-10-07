@@ -232,6 +232,7 @@ export function EventForm({
       noValidate
       className="flex flex-col gap-5"
     >
+      <input type="hidden" name="_csrf" />
       {event ? <input type="hidden" name="id" value={event.id} /> : null}
 
       {state?.error ? (
