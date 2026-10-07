@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { eq, and, lt, desc } from "drizzle-orm";
-import { ProfileClient, calculateProfileCompletion } from "@/components/profile/profile-client";
+import { ProfileClient } from "@/components/profile/profile-client";
+import { calculateProfileCompletion } from "@/lib/profile-completion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

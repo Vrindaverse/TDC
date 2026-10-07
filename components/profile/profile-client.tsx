@@ -723,21 +723,6 @@ function Switch({
   );
 }
 
-// Helper function to calculate profile completion percentage
-export function calculateProfileCompletion(profile: Profile): number {
-  let completed = 0;
-  const totalFields = 6;
-  
-  if (profile.name) completed++;
-  if (profile.mobile) completed++;
-  if (profile.collegeId) completed++;
-  if (profile.enrollmentNumber) completed++;
-  if (profile.avatarKey) completed++;
-  if (profile.id) completed++;
-  
-  return Math.round((completed / totalFields) * 100);
-}
-
 // Member Stat Card Component
 function MemberStatCard({ 
   label, 
