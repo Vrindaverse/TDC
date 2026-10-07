@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,9 +10,12 @@ export function RegistrationSuccessDialog({
 }: {
   message: string;
 }) {
+  const [dismissed, setDismissed] = useState(false);
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        setDismissed(true);
         const url = new URL(window.location.href);
         url.searchParams.delete("registered");
         window.history.replaceState(null, "", url.toString());
@@ -26,7 +29,10 @@ export function RegistrationSuccessDialog({
     const url = new URL(window.location.href);
     url.searchParams.delete("registered");
     window.history.replaceState(null, "", url.toString());
+    setDismissed(true);
   }
+
+  if (dismissed) return null;
 
   return (
     <div

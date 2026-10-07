@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { colleges, pendingRegistrations, profiles } from "@/lib/db/schema";
 import { fieldErrorsFromZod, registerSchema } from "@/lib/validation/auth";
 import { validateCsrfToken } from "@/lib/csrf";
+import { findUserIdByEmail } from "@/lib/db/users";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { CONFIG } from "@/lib/config";
@@ -64,6 +65,36 @@ async function registerActionInternal(
       .limit(1);
     if (collegeRows.length === 0) {
       return { fieldErrors: { collegeId: "Select a valid college." } };
+    }
+
+    const duplicateMessages: Record<string, string> = {};
+
+    const existingUserId = await findUserIdByEmail(email);
+    if (existingUserId) {
+      duplicateMessages.email = "This email is already registered.";
+    }
+
+    const pendingMobile = await db
+      .select({ email: pendingRegistrations.email })
+      .from(pendingRegistrations)
+      .where(eq(pendingRegistrations.mobile, input.mobile))
+      .limit(1);
+    if (pendingMobile.length > 0) {
+      duplicateMessages.mobile = "This mobile number is already registered.";
+    }
+
+    const pendingEnrollment = await db
+      .select({ email: pendingRegistrations.email })
+      .from(pendingRegistrations)
+      .where(eq(pendingRegistrations.enrollmentNumber, input.enrollmentNumber))
+      .limit(1);
+    if (pendingEnrollment.length > 0) {
+      duplicateMessages.enrollmentNumber =
+        "This enrollment number is already registered.";
+    }
+
+    if (Object.keys(duplicateMessages).length > 0) {
+      return { fieldErrors: duplicateMessages };
     }
 
     const mobileRows = await db

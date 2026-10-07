@@ -64,6 +64,13 @@ export function RegisterForm({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const csrfToken = useCsrfToken();
+  const [dismissedDupesFor, setDismissedDupesFor] = useState<typeof state>(null);
+
+  const duplicateEntries = Object.entries(state?.fieldErrors ?? {}).filter(
+    ([, message]) => typeof message === "string" && message.includes("already registered")
+  );
+  const showDuplicateDialog =
+    duplicateEntries.length > 0 && state !== dismissedDupesFor;
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -123,6 +130,38 @@ export function RegisterForm({
       noValidate
       className="flex flex-col gap-5"
     >
+      {showDuplicateDialog ? (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="duplicate-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+        >
+          <div className="w-full max-w-sm rounded-lg border bg-background p-6 shadow-xl">
+            <h2
+              id="duplicate-dialog-title"
+              className="text-lg font-semibold tracking-tight"
+            >
+              Already registered
+            </h2>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              {duplicateEntries.map(([field, message]) => (
+                <li key={field}>{message as string}</li>
+              ))}
+            </ul>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Use different details, or log in if you already have an account.
+            </p>
+            <Button
+              type="button"
+              className="mt-4 w-full"
+              onClick={() => setDismissedDupesFor(state)}
+            >
+              Got it
+            </Button>
+          </div>
+        </div>
+      ) : null}
       <input type="hidden" name="_csrf" value={csrfToken} />
       {state?.error ? (
         <div
