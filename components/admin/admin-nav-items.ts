@@ -1,6 +1,8 @@
 import {
   Bell,
   CalendarDays,
+  GraduationCap,
+  History,
   LayoutDashboard,
   Megaphone,
   Ticket,
@@ -14,6 +16,8 @@ export const ADMIN_NAV_ITEMS = [
   { label: "Registrations", href: "/admin/registrations", icon: Ticket },
   { label: "Messages", href: "/admin/messages", icon: Bell },
   { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
+  { label: "Colleges", href: "/admin/colleges", icon: GraduationCap },
+  { label: "Activity", href: "/admin/activity", icon: History },
 ];
 
 export const VISIT_SITE_HREF = "/?view=site";

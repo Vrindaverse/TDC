@@ -84,6 +84,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 
 export function EventForm({
   event,
+  posterPreviewUrl,
 }: {
   event?: {
     id: string;
@@ -96,6 +97,8 @@ export function EventForm({
     startsAt: Date;
     endsAt: Date | null;
   };
+  /** Resolved URL for an already-uploaded poster (storage keys don't resolve client-side). */
+  posterPreviewUrl?: string;
 }) {
   const action = event ? updateEventAction : createEventAction;
   const [state, formAction, pending] = useActionState<
@@ -114,6 +117,11 @@ export function EventForm({
   });
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(
+    event?.poster && !event.poster.startsWith("/") ? (posterPreviewUrl ?? null) : null
+  );
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -177,6 +185,45 @@ export function EventForm({
       ? `event-${field}-error`
       : undefined,
   });
+
+  const handlePosterFile = async (
+    changeEvent: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = changeEvent.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("poster", file);
+      const response = await fetch("/api/admin/events/poster", {
+        method: "POST",
+        body,
+      });
+      const data = (await response.json()) as {
+        poster?: string;
+        posterUrl?: string;
+        error?: string;
+      };
+      if (!response.ok || !data.poster) {
+        setUploadError(data.error ?? "The upload failed. Please try again.");
+        return;
+      }
+      setUploadedUrl(data.posterUrl ?? null);
+      update("poster", data.poster);
+    } catch {
+      setUploadError("The upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+      changeEvent.target.value = "";
+    }
+  };
+
+  const posterPreview = values.poster.startsWith("/")
+    ? values.poster
+    : values.poster
+      ? uploadedUrl
+      : null;
 
   return (
     <form
@@ -275,7 +322,10 @@ export function EventForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="event-poster">Poster</Label>
-        <Select {...selectProps("poster")} disabled={pending}>
+        <Select {...selectProps("poster")} disabled={pending || uploading}>
+          {values.poster && !EVENT_POSTERS.includes(values.poster) ? (
+            <option value={values.poster}>Uploaded poster</option>
+          ) : null}
           {EVENT_POSTERS.map((poster) => (
             <option key={poster} value={poster}>
               {poster.split("/").pop()}
@@ -283,6 +333,45 @@ export function EventForm({
           ))}
         </Select>
         <FieldError id="event-poster-error" message={displayErrors.poster} />
+
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1">
+            <Label
+              htmlFor="event-poster-file"
+              className="text-xs text-muted-foreground"
+            >
+              Or upload an image (max 5 MB)
+            </Label>
+            <Input
+              id="event-poster-file"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+              onChange={handlePosterFile}
+              disabled={pending || uploading}
+              className="max-w-xs"
+            />
+          </div>
+          {posterPreview ? (
+            // eslint-disable-next-line @next/next/no-img-element -- preview accepts any uploaded URL, including cross-origin S3
+            <img
+              src={posterPreview}
+              alt=""
+              className="h-16 w-28 rounded-md border object-cover"
+            />
+          ) : null}
+        </div>
+
+        {uploading ? (
+          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 aria-hidden="true" className="size-3 animate-spin" />
+            Uploading poster…
+          </p>
+        ) : null}
+        {uploadError ? (
+          <p role="alert" className="text-sm text-destructive">
+            {uploadError}
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">

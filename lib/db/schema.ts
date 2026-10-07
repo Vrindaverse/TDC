@@ -183,6 +183,33 @@ export const announcements = pgTable(
   })
 );
 
+/**
+ * Append-only record of admin console actions. `actorName` is denormalized so
+ * the entry stays readable after the acting profile is deleted, in which case
+ * `actorId` is set null.
+ */
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorId: uuid("actor_id").references(() => profiles.id, {
+      onDelete: "set null",
+    }),
+    actorName: text("actor_name").notNull(),
+    action: text("action").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id"),
+    detail: text("detail"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    createdAtIdx: index("audit_log_created_at_idx").on(table.createdAt),
+    actionIdx: index("audit_log_action_idx").on(table.action),
+  })
+);
+
 export type College = typeof colleges.$inferSelect;
 export type Profile = typeof profiles.$inferSelect;
 export type EventRecord = typeof events.$inferSelect;
@@ -190,3 +217,4 @@ export type Registration = typeof registrations.$inferSelect;
 export type PendingRegistration = typeof pendingRegistrations.$inferSelect;
 export type ContactMessage = typeof contactMessages.$inferSelect;
 export type Announcement = typeof announcements.$inferSelect;
+export type AuditLogEntry = typeof auditLog.$inferSelect;

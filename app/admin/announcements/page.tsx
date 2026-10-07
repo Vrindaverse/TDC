@@ -1,8 +1,20 @@
 import { desc } from "drizzle-orm";
-import { Megaphone, Pin, PinOff, Trash2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Megaphone,
+  Pencil,
+  Pin,
+  PinOff,
+  TriangleAlert,
+} from "lucide-react";
+import Link from "next/link";
 
 import { AnnouncementForm } from "@/components/admin/announcement-form";
-import { deleteAnnouncementAction, toggleAnnouncementAction } from "@/app/admin/announcements/actions";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
+import {
+  deleteAnnouncementAction,
+  toggleAnnouncementAction,
+} from "@/app/admin/announcements/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,19 +34,40 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
+const bannerClass = "flex items-start gap-3 rounded-lg border p-4 text-sm";
+const successBanner = `${bannerClass} border-primary/30 bg-primary/5 text-foreground`;
+const errorBanner = `${bannerClass} border-destructive/30 bg-destructive/5`;
+
 export const instant = false;
+
+const errorMessages: Record<string, string> = {
+  delete: "We couldn't delete that announcement. Please try again.",
+  update: "We couldn't update that announcement. Please try again.",
+  not_found: "That announcement no longer exists.",
+};
 
 export default async function AdminAnnouncementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    edit?: string;
+    updated?: string;
+    deleted?: string;
+  }>;
 }) {
-  const { error } = await searchParams;
+  const { error, edit, updated, deleted } = await searchParams;
+
   const rows = await db
     .select()
     .from(announcements)
     .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
     .limit(100);
+
+  const editing =
+    edit && /^[0-9a-f-]{36}$/i.test(edit)
+      ? rows.find((row) => row.id === edit)
+      : undefined;
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,6 +83,11 @@ export default async function AdminAnnouncementsPage({
             Posts shown on the member profile page.
           </p>
         </div>
+        {editing ? (
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin/announcements">Cancel editing</Link>
+          </Button>
+        ) : null}
       </header>
 
       <Card>
@@ -59,15 +97,23 @@ export default async function AdminAnnouncementsPage({
           </span>
           <div>
             <CardTitle className="text-sm font-semibold">
-              New announcement
+              {editing ? "Edit announcement" : "New announcement"}
             </CardTitle>
             <CardDescription className="text-xs">
-              Active announcements appear for every member.
+              {editing
+                ? "Changes show up for every member right away."
+                : "Active announcements appear for every member."}
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          <AnnouncementForm />
+          <AnnouncementForm
+            announcement={
+              editing
+                ? { id: editing.id, title: editing.title, body: editing.body }
+                : undefined
+            }
+          />
         </CardContent>
       </Card>
 
@@ -76,31 +122,36 @@ export default async function AdminAnnouncementsPage({
           <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Megaphone aria-hidden="true" className="size-5" />
           </span>
-          <CardTitle className="text-sm font-semibold">All announcements</CardTitle>
+          <CardTitle className="text-sm font-semibold">
+            All announcements
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          {error === "delete" ? (
-            <div
-              role="alert"
-              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
-              We couldn&apos;t delete that announcement. Please try again.
+          {updated ? (
+            <div role="status" className={successBanner}>
+              <CheckCircle2
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-primary"
+              />
+              <p>Announcement updated.</p>
             </div>
           ) : null}
-          {error === "update" ? (
-            <div
-              role="alert"
-              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
-              We couldn&apos;t update that announcement. Please try again.
+          {deleted ? (
+            <div role="status" className={successBanner}>
+              <CheckCircle2
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-primary"
+              />
+              <p>Announcement deleted.</p>
             </div>
           ) : null}
-          {error === "not_found" ? (
-            <div
-              role="alert"
-              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-            >
-              That announcement no longer exists.
+          {error && errorMessages[error] ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>{errorMessages[error]}</p>
             </div>
           ) : null}
 
@@ -113,7 +164,11 @@ export default async function AdminAnnouncementsPage({
               {rows.map((announcement) => (
                 <li
                   key={announcement.id}
-                  className="flex flex-col gap-3 rounded-md border p-3"
+                  className={
+                    editing?.id === announcement.id
+                      ? "flex flex-col gap-3 rounded-md border border-primary/40 bg-primary/5 p-3"
+                      : "flex flex-col gap-3 rounded-md border p-3"
+                  }
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex min-w-0 flex-col gap-1">
@@ -137,6 +192,10 @@ export default async function AdminAnnouncementsPage({
                       </span>
                       <span className="text-xs text-muted-foreground">
                         Posted {formatDate(announcement.createdAt)}
+                        {announcement.updatedAt.getTime() !==
+                        announcement.createdAt.getTime()
+                          ? ` · edited ${formatDate(announcement.updatedAt)}`
+                          : ""}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -189,7 +248,24 @@ export default async function AdminAnnouncementsPage({
                           {announcement.pinned ? "Unpin" : "Pin"}
                         </Button>
                       </form>
-                      <DeleteAnnouncementButton id={announcement.id} />
+                      <Button asChild variant="outline" size="sm">
+                        <Link
+                          href={`/admin/announcements?edit=${announcement.id}`}
+                          aria-label={`Edit ${announcement.title}`}
+                        >
+                          <Pencil aria-hidden="true" className="size-3.5" />
+                          Edit
+                        </Link>
+                      </Button>
+                      <ConfirmSubmitButton
+                        action={deleteAnnouncementAction}
+                        fields={{ id: announcement.id }}
+                        label="Delete"
+                        confirmLabel="Confirm delete"
+                        variant="ghost"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        ariaLabel="Delete announcement"
+                      />
                     </div>
                   </div>
                   <p className="whitespace-pre-wrap text-sm text-muted-foreground">
@@ -202,22 +278,5 @@ export default async function AdminAnnouncementsPage({
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function DeleteAnnouncementButton({ id }: { id: string }) {
-  return (
-    <form action={deleteAnnouncementAction}>
-      <input type="hidden" name="id" value={id} />
-      <Button
-        type="submit"
-        variant="ghost"
-        size="sm"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-        aria-label="Delete announcement"
-      >
-        <Trash2 aria-hidden="true" className="size-4" />
-      </Button>
-    </form>
   );
 }

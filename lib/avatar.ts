@@ -85,3 +85,54 @@ export function extensionForMime(mime: string): AvatarExtension | null {
       return null;
   }
 }
+
+export const MAX_POSTER_BYTES = 5 * 1024 * 1024;
+
+/** Storage key for an uploaded event poster: `events/<uuid>.<ext>`. */
+export function posterKey(ext: AvatarExtension) {
+  return `events/${randomUUID()}.${ext}`;
+}
+
+export async function putPosterObject(
+  ext: AvatarExtension,
+  body: Uint8Array,
+  contentType: string
+): Promise<string> {
+  const key = posterKey(ext);
+  await getS3Client().send(
+    new PutObjectCommand({
+      Bucket: AVATAR_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: AVATAR_CACHE_CONTROL,
+    })
+  );
+  return key;
+}
+
+export async function deletePosterObject(key: string) {
+  await deleteAvatarObject(key);
+}
+
+/**
+ * Turns whatever is stored in `events.poster` into a URL the browser can
+ * load: bundled `/images/…` paths and full URLs pass through, storage keys
+ * are resolved against the configured endpoint.
+ */
+export function resolvePosterUrl(poster: string | null | undefined): string {
+  if (!poster) return "";
+  if (
+    poster.startsWith("/") ||
+    poster.startsWith("http://") ||
+    poster.startsWith("https://")
+  ) {
+    return poster;
+  }
+  return avatarPublicUrl(poster) ?? "";
+}
+
+/** True when the poster is an uploaded storage object rather than a bundled asset. */
+export function isUploadedPoster(poster: string | null | undefined): boolean {
+  return Boolean(poster) && !poster!.startsWith("/") && !poster!.startsWith("http");
+}

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { deleteAvatarObject } from "@/lib/avatar";
+import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/guards";
 import { db, sql } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
@@ -13,7 +14,7 @@ const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function deleteUserAction(formData: FormData) {
-  const { session } = await requireAdmin();
+  const { session, profile: actor } = await requireAdmin();
 
   const userId = String(formData.get("userId") ?? "").trim();
   if (!UUID_PATTERN.test(userId)) {
@@ -49,8 +50,21 @@ export async function deleteUserAction(formData: FormData) {
     }
   }
 
+  const [emailRow] = await sql`
+    select email from neon_auth."user" where id = ${userId}
+  `;
+
   await sql`delete from neon_auth."user" where id = ${userId}`;
   await db.delete(profiles).where(eq(profiles.userId, userId));
+
+  await recordAudit({
+    actorId: actor.id,
+    actorName: actor.name,
+    action: "user.delete",
+    targetType: "user",
+    targetId: userId,
+    detail: `${profile.name} <${(emailRow as { email?: string } | undefined)?.email ?? "unknown"}>`,
+  });
 
   revalidatePath("/admin", "layout");
   redirect("/admin/users?deleted=1");
@@ -59,7 +73,7 @@ export async function deleteUserAction(formData: FormData) {
 const USER_DETAIL_PATH = /^\/admin\/users\/[0-9a-f-]{36}$/;
 
 export async function setUserRoleAction(formData: FormData) {
-  const { session } = await requireAdmin();
+  const { session, profile: actor } = await requireAdmin();
 
   const userId = String(formData.get("userId") ?? "").trim();
   const role = String(formData.get("role") ?? "").toUpperCase();
@@ -101,6 +115,15 @@ export async function setUserRoleAction(formData: FormData) {
       .update(profiles)
       .set({ role })
       .where(eq(profiles.userId, userId));
+
+    await recordAudit({
+      actorId: actor.id,
+      actorName: actor.name,
+      action: "user.role",
+      targetType: "user",
+      targetId: userId,
+      detail: `${profile.name}: ${profile.role} → ${role}`,
+    });
   }
 
   revalidatePath("/admin", "layout");

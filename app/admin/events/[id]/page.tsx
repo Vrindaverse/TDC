@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { resolvePosterUrl } from "@/lib/avatar";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 
@@ -58,6 +59,7 @@ export default async function AdminEventEditPage({
         </CardHeader>
         <CardContent>
           <EventForm
+            posterPreviewUrl={resolvePosterUrl(event.poster)}
             event={{
               ...event,
               registrationStatus: event.registrationStatus as

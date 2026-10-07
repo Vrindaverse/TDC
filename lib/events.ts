@@ -1,3 +1,4 @@
+import { resolvePosterUrl } from "@/lib/avatar";
 import type { EventRecord } from "@/lib/db/schema";
 import type { EventItem, RegistrationStatus } from "@/lib/site-data";
 
@@ -25,7 +26,7 @@ export function dbEventToItem(event: EventRecord): EventItem {
   return {
     id: event.id,
     title: event.title,
-    poster: event.poster ?? "",
+    poster: resolvePosterUrl(event.poster),
     posterHeight: 828,
     date: formatDate(event.startsAt),
     time: formatTime(event.startsAt),

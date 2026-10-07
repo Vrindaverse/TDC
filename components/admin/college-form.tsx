@@ -1,25 +1,23 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
 import {
-  createAnnouncementAction,
-  updateAnnouncementAction,
-  type AnnouncementFormState,
-} from "@/app/admin/announcements/actions";
+  createCollegeAction,
+  updateCollegeAction,
+  type CollegeFormState,
+} from "@/app/admin/colleges/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { announcementSchema } from "@/lib/validation/announcements";
 import { fieldErrorsFromZod, type FieldErrors } from "@/lib/validation/auth";
+import { collegeSchema } from "@/lib/validation/colleges";
 
-type Values = { title: string; body: string };
+type Values = { name: string; code: string };
 
-const FIELDS: (keyof Values)[] = ["title", "body"];
+const FIELDS: (keyof Values)[] = ["name", "code"];
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
@@ -30,26 +28,26 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
-export function AnnouncementForm({
-  announcement,
+export function CollegeForm({
+  college,
 }: {
-  announcement?: { id: string; title: string; body: string };
-} = {}) {
-  const action = announcement ? updateAnnouncementAction : createAnnouncementAction;
+  college?: { id: string; name: string; code: string };
+}) {
+  const action = college ? updateCollegeAction : createCollegeAction;
   const [state, formAction, pending] = useActionState<
-    AnnouncementFormState,
+    CollegeFormState,
     FormData
   >(action, null);
   const [values, setValues] = useState<Values>({
-    title: announcement?.title ?? "",
-    body: announcement?.body ?? "",
+    name: college?.name ?? "",
+    code: college?.code ?? "",
   });
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
-    if (first) document.getElementById(`announcement-${first}`)?.focus();
+    if (first) document.getElementById(`college-${first}`)?.focus();
   }, [state]);
 
   const displayErrors = useMemo<FieldErrors>(() => {
@@ -75,15 +73,27 @@ export function AnnouncementForm({
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    const parsed = announcementSchema.safeParse(values);
+    const parsed = collegeSchema.safeParse(values);
     if (!parsed.success) {
       event.preventDefault();
       const nextErrors = fieldErrorsFromZod(parsed.error);
       setClientErrors(nextErrors);
       const first = FIELDS.find((field) => nextErrors[field]);
-      if (first) document.getElementById(`announcement-${first}`)?.focus();
+      if (first) document.getElementById(`college-${first}`)?.focus();
     }
   };
+
+  const fieldProps = (field: keyof Values) => ({
+    id: `college-${field}`,
+    name: field,
+    value: values[field],
+    onChange: (changeEvent: React.ChangeEvent<HTMLInputElement>) =>
+      update(field, changeEvent.target.value),
+    "aria-invalid": Boolean(displayErrors[field]) || undefined,
+    "aria-describedby": displayErrors[field]
+      ? `college-${field}-error`
+      : undefined,
+  });
 
   return (
     <form
@@ -92,9 +102,7 @@ export function AnnouncementForm({
       noValidate
       className="flex flex-col gap-4"
     >
-      {announcement ? (
-        <input type="hidden" name="id" value={announcement.id} />
-      ) : null}
+      {college ? <input type="hidden" name="id" value={college.id} /> : null}
 
       {state?.error ? (
         <div
@@ -105,39 +113,28 @@ export function AnnouncementForm({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="announcement-title">Title</Label>
-        <Input
-          id="announcement-title"
-          name="title"
-          value={values.title}
-          onChange={(event) => update("title", event.target.value)}
-          placeholder="e.g. Update: fetch-a-thon venue change"
-          disabled={pending}
-          aria-invalid={Boolean(displayErrors.title) || undefined}
-          aria-describedby={
-            displayErrors.title ? "announcement-title-error" : undefined
-          }
-        />
-        <FieldError id="announcement-title-error" message={displayErrors.title} />
-      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="college-name">College name</Label>
+          <Input
+            {...fieldProps("name")}
+            type="text"
+            placeholder="Shri Govindram Seksaria Institute of Technology"
+            disabled={pending}
+          />
+          <FieldError id="college-name-error" message={displayErrors.name} />
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="announcement-body">Body</Label>
-        <Textarea
-          id="announcement-body"
-          name="body"
-          value={values.body}
-          onChange={(event) => update("body", event.target.value)}
-          rows={4}
-          placeholder="What should members know?"
-          disabled={pending}
-          aria-invalid={Boolean(displayErrors.body) || undefined}
-          aria-describedby={
-            displayErrors.body ? "announcement-body-error" : undefined
-          }
-        />
-        <FieldError id="announcement-body-error" message={displayErrors.body} />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="college-code">Code</Label>
+          <Input
+            {...fieldProps("code")}
+            type="text"
+            placeholder="SGSITS"
+            disabled={pending}
+          />
+          <FieldError id="college-code-error" message={displayErrors.code} />
+        </div>
       </div>
 
       <div className="flex gap-3">
@@ -147,17 +144,12 @@ export function AnnouncementForm({
               <Loader2 aria-hidden="true" className="size-4 animate-spin" />
               Saving…
             </>
-          ) : announcement ? (
+          ) : college ? (
             "Save changes"
           ) : (
-            "Publish announcement"
+            "Add college"
           )}
         </Button>
-        {announcement ? (
-          <Button asChild variant="ghost">
-            <Link href="/admin/announcements">Cancel</Link>
-          </Button>
-        ) : null}
       </div>
     </form>
   );

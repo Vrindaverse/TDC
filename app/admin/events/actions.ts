@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { recordAudit } from "@/lib/admin/audit";
+import { deletePosterObject, isUploadedPoster } from "@/lib/avatar";
 import { requireAdmin } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
@@ -32,19 +34,33 @@ export async function createEventAction(
   _prev: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
-  await requireAdmin();
+  const { profile } = await requireAdmin();
 
   const parsed = parseForm(formData);
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  let eventId: string;
   try {
-    await db.insert(events).values(parsed.data);
+    const [inserted] = await db
+      .insert(events)
+      .values(parsed.data)
+      .returning({ id: events.id });
+    eventId = inserted.id;
   } catch (err) {
     console.error("[admin/events] create failed:", err);
     return { error: "We couldn't save the event. Please try again." };
   }
+
+  await recordAudit({
+    actorId: profile.id,
+    actorName: profile.name,
+    action: "event.create",
+    targetType: "event",
+    targetId: eventId,
+    detail: parsed.data.title,
+  });
 
   revalidatePath("/");
   revalidatePath("/events");
@@ -55,7 +71,7 @@ export async function updateEventAction(
   _prev: EventFormState,
   formData: FormData
 ): Promise<EventFormState> {
-  await requireAdmin();
+  const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
   const parsed = parseForm(formData);
@@ -63,9 +79,10 @@ export async function updateEventAction(
     return { fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  let replacedPoster: string | null = null;
   try {
     const existing = await db
-      .select({ id: events.id })
+      .select({ id: events.id, title: events.title, poster: events.poster })
       .from(events)
       .where(eq(events.id, id))
       .limit(1);
@@ -74,10 +91,39 @@ export async function updateEventAction(
     }
 
     await db.update(events).set(parsed.data).where(eq(events.id, id));
+
+    const previousPoster = existing[0].poster;
+    if (
+      previousPoster &&
+      previousPoster !== parsed.data.poster &&
+      isUploadedPoster(previousPoster)
+    ) {
+      replacedPoster = previousPoster;
+    }
+
+    await recordAudit({
+      actorId: profile.id,
+      actorName: profile.name,
+      action: "event.update",
+      targetType: "event",
+      targetId: id,
+      detail:
+        existing[0].title === parsed.data.title
+          ? parsed.data.title
+          : `"${existing[0].title}" → "${parsed.data.title}"`,
+    });
   } catch (err) {
     if (isNextNotFound(err)) throw err;
     console.error("[admin/events] update failed:", err);
     return { error: "We couldn't save the event. Please try again." };
+  }
+
+  if (replacedPoster) {
+    try {
+      await deletePosterObject(replacedPoster);
+    } catch (err) {
+      console.error("[admin/events] old poster cleanup failed:", err);
+    }
   }
 
   revalidatePath("/");
@@ -86,16 +132,49 @@ export async function updateEventAction(
 }
 
 export async function deleteEventAction(formData: FormData) {
-  await requireAdmin();
+  const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
 
+  let outcome: "ok" | "failed" = "ok";
+  let detail: string | null = null;
+  let uploadedPoster: string | null = null;
   try {
-    await db.delete(events).where(eq(events.id, id));
+    const [existing] = await db
+      .select({ id: events.id, title: events.title, poster: events.poster })
+      .from(events)
+      .where(eq(events.id, id))
+      .limit(1);
+    if (existing) {
+      detail = existing.title;
+      if (isUploadedPoster(existing.poster)) {
+        uploadedPoster = existing.poster;
+      }
+      await db.delete(events).where(eq(events.id, id));
+    }
   } catch (err) {
     console.error("[admin/events] delete failed:", err);
-    redirect("/admin/events?error=delete");
+    outcome = "failed";
   }
+
+  if (outcome === "failed") redirect("/admin/events?error=delete");
+
+  if (uploadedPoster) {
+    try {
+      await deletePosterObject(uploadedPoster);
+    } catch (err) {
+      console.error("[admin/events] poster cleanup failed:", err);
+    }
+  }
+
+  await recordAudit({
+    actorId: profile.id,
+    actorName: profile.name,
+    action: "event.delete",
+    targetType: "event",
+    targetId: id,
+    detail,
+  });
 
   revalidatePath("/");
   revalidatePath("/events");
@@ -103,7 +182,7 @@ export async function deleteEventAction(formData: FormData) {
 }
 
 export async function setEventRegistrationStatusAction(formData: FormData) {
-  await requireAdmin();
+  const { profile } = await requireAdmin();
 
   const id = String(formData.get("id") ?? "");
   const registrationStatus = String(formData.get("registrationStatus") ?? "");
@@ -112,22 +191,40 @@ export async function setEventRegistrationStatusAction(formData: FormData) {
     redirect("/admin/events?error=status");
   }
 
+  let outcome: "ok" | "not_found" | "failed" = "ok";
+  let detail: string | null = null;
   try {
-    const existing = await db
-      .select({ id: events.id })
+    const [existing] = await db
+      .select({ id: events.id, title: events.title, status: events.registrationStatus })
       .from(events)
       .where(eq(events.id, id))
       .limit(1);
-    if (existing.length === 0) {
-      redirect("/admin/events?error=not_found");
+    if (!existing) {
+      outcome = "not_found";
+    } else if (existing.status !== registrationStatus) {
+      await db
+        .update(events)
+        .set({ registrationStatus: registrationStatus as "open" | "closing" | "closed" })
+        .where(eq(events.id, id));
+      detail = `${existing.title}: ${existing.status} → ${registrationStatus}`;
     }
-    await db
-      .update(events)
-      .set({ registrationStatus: registrationStatus as "open" | "closing" | "closed" })
-      .where(eq(events.id, id));
   } catch (err) {
     console.error("[admin/events] status toggle failed:", err);
-    redirect("/admin/events?error=status");
+    outcome = "failed";
+  }
+
+  if (outcome === "not_found") redirect("/admin/events?error=not_found");
+  if (outcome === "failed") redirect("/admin/events?error=status");
+
+  if (detail) {
+    await recordAudit({
+      actorId: profile.id,
+      actorName: profile.name,
+      action: "event.status",
+      targetType: "event",
+      targetId: id,
+      detail,
+    });
   }
 
   revalidatePath("/");

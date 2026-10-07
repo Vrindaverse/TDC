@@ -1,0 +1,53 @@
+import { db } from "@/lib/db";
+import { auditLog } from "@/lib/db/schema";
+
+export const AUDIT_ACTIONS = [
+  "user.delete",
+  "user.role",
+  "event.create",
+  "event.update",
+  "event.delete",
+  "event.status",
+  "registration.delete",
+  "message.read",
+  "message.unread",
+  "message.delete",
+  "announcement.create",
+  "announcement.update",
+  "announcement.delete",
+  "announcement.toggle",
+  "college.create",
+  "college.update",
+  "college.toggle",
+  "college.delete",
+] as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
+export type AuditEntry = {
+  actorId: string | null;
+  actorName: string;
+  action: AuditAction;
+  targetType: "user" | "event" | "registration" | "message" | "announcement" | "college";
+  targetId?: string | null;
+  detail?: string | null;
+};
+
+/**
+ * Records an admin action without ever throwing — an audit failure must not
+ * fail the admin operation it describes.
+ */
+export async function recordAudit(entry: AuditEntry): Promise<void> {
+  try {
+    await db.insert(auditLog).values({
+      actorId: entry.actorId,
+      actorName: entry.actorName,
+      action: entry.action,
+      targetType: entry.targetType,
+      targetId: entry.targetId ?? null,
+      detail: entry.detail ?? null,
+    });
+  } catch (err) {
+    console.error("[audit] failed to record entry:", err);
+  }
+}

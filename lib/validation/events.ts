@@ -3,6 +3,9 @@ import { z } from "zod";
 export const registrationStatuses = ["open", "closing", "closed"] as const;
 export type RegistrationStatusValue = (typeof registrationStatuses)[number];
 
+const BUNDLED_POSTER_PATTERN = /^\/images\/events\/[a-z0-9._-]+$/i;
+const UPLOADED_POSTER_PATTERN = /^events\/[0-9a-f-]+\.[a-z0-9]+$/i;
+
 export const eventSchema = z
   .object({
     title: z
@@ -12,7 +15,17 @@ export const eventSchema = z
       .max(120, "Title is too long"),
     description: z.string().trim().max(2000, "Description is too long"),
     location: z.string().trim().max(200, "Location is too long"),
-    poster: z.string().trim().max(300, "Poster path is too long"),
+    poster: z
+      .string()
+      .trim()
+      .max(300, "Poster path is too long")
+      .refine(
+        (value) =>
+          value === "" ||
+          BUNDLED_POSTER_PATTERN.test(value) ||
+          UPLOADED_POSTER_PATTERN.test(value),
+        "Pick a preset poster or upload an image"
+      ),
     domain: z
       .string()
       .trim()
