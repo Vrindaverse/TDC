@@ -13,6 +13,8 @@ import { events } from "@/lib/db/schema";
 
 type TableName = "registrations" | "users" | "messages" | "events";
 
+export const maxDuration = 30;
+
 function toIso(value: unknown): string {
   if (value == null) return "";
   if (value instanceof Date) return value.toISOString();

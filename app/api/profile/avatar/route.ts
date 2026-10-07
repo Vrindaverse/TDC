@@ -12,6 +12,8 @@ import {
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 
+export const maxDuration = 30;
+
 export async function POST(request: NextRequest) {
   const session = await getSession();
   if (!session?.user) {
