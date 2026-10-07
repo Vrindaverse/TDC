@@ -159,9 +159,34 @@ export const contactMessages = pgTable(
   })
 );
 
+export const announcements = pgTable(
+  "announcements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    createdBy: uuid("created_by").references(() => profiles.id, {
+      onDelete: "set null",
+    }),
+    pinned: boolean("pinned").notNull().default(false),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => sql`now()`),
+  },
+  (table) => ({
+    activeIdx: index("announcements_active_idx").on(table.isActive),
+  })
+);
+
 export type College = typeof colleges.$inferSelect;
 export type Profile = typeof profiles.$inferSelect;
 export type EventRecord = typeof events.$inferSelect;
 export type Registration = typeof registrations.$inferSelect;
 export type PendingRegistration = typeof pendingRegistrations.$inferSelect;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+export type Announcement = typeof announcements.$inferSelect;

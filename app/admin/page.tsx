@@ -87,6 +87,41 @@ export default async function AdminOverviewPage() {
      limit 5
   `;
 
+  const weeklySignups = await sql`
+    select to_char(week_start, 'Mon DD') as label,
+           count(p.id)::int as n
+      from generate_series(
+             date_trunc('week', now()) - interval '7 weeks',
+             date_trunc('week', now()),
+             interval '1 week'
+           ) as week_start
+      left join public.profiles p
+             on p.created_at >= week_start
+            and p.created_at <  week_start + interval '1 week'
+     group by label, week_start
+     order by week_start
+  `;
+
+  const registrationsByEvent = await sql`
+    select e.title as title,
+           count(r.id)::int as n
+      from public.events e
+      left join public.registrations r on r.event_id = e.id
+     group by e.id, e.title
+     order by n desc
+     limit 8
+  `;
+
+  const membersByCollege = await sql`
+    select c.name as college,
+           count(p.id)::int as n
+      from public.profiles p
+      join public.colleges c on c.id = p.college_id
+     group by c.name
+     order by n desc
+     limit 8
+  `;
+
   const stats = [
     {
       label: "Members",
@@ -174,6 +209,33 @@ export default async function AdminOverviewPage() {
             <div key={stat.label}>{body}</div>
           );
         })}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <TrendCard
+          title="Sign-ups per week"
+          description="New members, last 8 weeks."
+          items={(weeklySignups as { label: string; n: number }[]).map(
+            (row) => ({ label: row.label, n: row.n })
+          )}
+          labelWidth="w-16"
+        />
+        <TrendCard
+          title="Registrations by event"
+          description="Sign-ups per event, most first."
+          items={(registrationsByEvent as { title: string; n: number }[]).map(
+            (row) => ({ label: row.title, n: row.n })
+          )}
+          labelWidth="w-32"
+        />
+        <TrendCard
+          title="Members by college"
+          description="College distribution of members."
+          items={(membersByCollege as { college: string; n: number }[]).map(
+            (row) => ({ label: row.college, n: row.n })
+          )}
+          labelWidth="w-32"
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -308,5 +370,54 @@ export default async function AdminOverviewPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+function TrendCard({
+  title,
+  description,
+  items,
+  labelWidth,
+}: {
+  title: string;
+  description: string;
+  items: { label: string; n: number }[];
+  labelWidth: string;
+}) {
+  const max = Math.max(1, ...items.map((item) => item.n));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No data yet.</p>
+        ) : (
+          <ul className="flex flex-col gap-2.5">
+            {items.map((item) => (
+              <li key={item.label} className="flex items-center gap-3">
+                <span
+                  className={`shrink-0 truncate text-xs text-muted-foreground ${labelWidth}`}
+                >
+                  {item.label}
+                </span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-2 rounded-full bg-primary"
+                    style={{ width: `${Math.max(4, (item.n / max) * 100)}%` }}
+                  />
+                </div>
+                <span className="w-8 shrink-0 text-right text-xs font-medium tabular-nums">
+                  {item.n}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -24,6 +24,13 @@ export function friendlyAuthError(error: unknown): string {
   ) {
     return "An account with this email already exists. Try signing in instead.";
   }
+  if (
+    raw.includes("maybe too many attempts") ||
+    raw.includes("too_many_attempts") ||
+    raw.includes("too many attempts")
+  ) {
+    return "Too many code attempts. Please request a fresh code and try again.";
+  }
   if (raw.includes("rate") || raw.includes("too many") || raw.includes("limit")) {
     return "Too many attempts. Please wait a minute and try again.";
   }
@@ -42,8 +49,13 @@ export function friendlyAuthError(error: unknown): string {
   if (raw.includes("origin") || raw.includes("trusted")) {
     return "This request was blocked. Please try again from the site directly.";
   }
-  if (raw.includes("otp") || raw.includes("code") || raw.includes("verif")) {
-    return "That verification code is invalid or has expired.";
+  if (
+    raw.includes("otp") ||
+    raw.includes("code") ||
+    raw.includes("verif") ||
+    raw.includes("expired")
+  ) {
+    return "That code is invalid or has expired. Codes last 15 minutes — request a new one and enter it right away.";
   }
   return "Something went wrong. Please try again.";
 }

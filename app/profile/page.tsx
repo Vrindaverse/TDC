@@ -1,10 +1,11 @@
 import { desc, eq } from "drizzle-orm";
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, Megaphone } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AvatarUpload } from "@/components/profile/avatar-upload";
 import { RegistrationSuccessDialog } from "@/components/registration-success-dialog";
+import { ChangePasswordForm } from "@/components/auth/change-password-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +19,7 @@ import { signOutAction } from "@/lib/auth/actions";
 import { avatarPublicUrl } from "@/lib/avatar";
 import { requireProfile } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
-import { colleges, events, registrations } from "@/lib/db/schema";
+import { announcements, colleges, events, registrations } from "@/lib/db/schema";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -74,6 +75,13 @@ export default async function ProfilePage({
 
   const firstName = profile.name.split(" ")[0];
 
+  const activeAnnouncements = await db
+    .select()
+    .from(announcements)
+    .where(eq(announcements.isActive, true))
+    .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
+    .limit(5);
+
   return (
     <>
       {registered ? (
@@ -118,6 +126,44 @@ export default async function ProfilePage({
           </div>
         </CardContent>
       </Card>
+
+      {activeAnnouncements.length > 0 ? (
+        <Card>
+          <CardHeader className="flex-row items-center gap-3 space-y-0">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Megaphone aria-hidden="true" className="size-5" />
+            </span>
+            <div>
+              <CardTitle className="text-sm font-semibold">
+                Announcements
+              </CardTitle>
+              <CardDescription className="text-xs">
+                From the TDC team.
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {activeAnnouncements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className="flex flex-col gap-1 rounded-md border p-3"
+              >
+                <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                  {announcement.title}
+                  {announcement.pinned ? (
+                    <Badge variant="secondary" className="text-xs">
+                      Pinned
+                    </Badge>
+                  ) : null}
+                </span>
+                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  {announcement.body}
+                </p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -196,6 +242,18 @@ export default async function ProfilePage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Password</CardTitle>
+          <CardDescription>
+            Change your password. Other devices will be signed out.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChangePasswordForm />
+        </CardContent>
+      </Card>
     </div>
     </>
   );

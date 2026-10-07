@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -127,7 +128,16 @@ export function LoginForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="login-password">Password</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="login-password">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              tabIndex={-1}
+            >
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
             <Input
               {...fieldProps("password")}

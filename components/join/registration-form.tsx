@@ -14,6 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  OtpExpiryNote,
+  useOtpExpiry,
+} from "@/components/auth/otp-expiry";
 import { semesterOptions } from "@/lib/validation/join";
 
 export type EventOption = { id: string; label: string };
@@ -116,6 +120,13 @@ export function GuestRegistrationForm({
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
+  const [sendCount, setSendCount] = useState(0);
+  const [sendSeen, setSendSeen] = useState(false);
+  if (Boolean(sendState?.sent) && !sendSeen) {
+    setSendSeen(true);
+    setSendCount((value) => value + 1);
+  }
+  const { expired, label } = useOtpExpiry(sendCount);
 
   const codeSent = sendState?.sent;
   const verified = verifyState?.verified;
@@ -227,6 +238,7 @@ export function GuestRegistrationForm({
                     <span className="text-foreground">{email}</span>. It may
                     take a minute — check your spam folder too.
                   </p>
+                  <OtpExpiryNote expired={expired} label={label} />
                   <div className="flex flex-wrap items-end gap-3">
                     <div className="w-40">
                       <Label htmlFor="join-otp" className={labelClassName}>
@@ -274,7 +286,7 @@ export function GuestRegistrationForm({
                       formAction={verifyFormAction}
                       size="sm"
                       onClick={handleVerify}
-                      disabled={busy}
+                      disabled={busy || expired}
                     >
                       {verifyPending ? (
                         <Loader2

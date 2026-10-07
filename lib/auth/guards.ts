@@ -139,6 +139,30 @@ export async function clearJoinVerifiedCookie() {
   store.delete(JOIN_VERIFIED_COOKIE);
 }
 
+const RESET_EMAIL_COOKIE = "tdc_reset_email";
+const RESET_MAX_AGE = 60 * 15;
+
+export async function setResetEmailCookie(email: string) {
+  const store = await cookies();
+  store.set(RESET_EMAIL_COOKIE, email.toLowerCase(), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: RESET_MAX_AGE,
+    path: "/",
+  });
+}
+
+export async function getResetEmail(): Promise<string | null> {
+  const store = await cookies();
+  return store.get(RESET_EMAIL_COOKIE)?.value ?? null;
+}
+
+export async function clearResetEmailCookie() {
+  const store = await cookies();
+  store.delete(RESET_EMAIL_COOKIE);
+}
+
 const JOIN_SHADOW_COOKIE = "tdc_join_shadow";
 
 export async function setJoinShadowCookie(email: string) {

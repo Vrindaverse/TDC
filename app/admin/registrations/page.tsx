@@ -1,3 +1,4 @@
+import { desc } from "drizzle-orm";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { adminRegistrationsRows } from "@/lib/admin/list-queries";
+import { db } from "@/lib/db";
+import { events } from "@/lib/db/schema";
 
 function formatDate(value: Date | string | null | undefined) {
   if (value == null) return "—";
@@ -23,27 +26,67 @@ function formatDate(value: Date | string | null | undefined) {
 
 export const instant = false;
 
-export default async function AdminRegistrationsPage() {
-  const rows = await adminRegistrationsRows();
+export default async function AdminRegistrationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ event?: string }>;
+}) {
+  const { event } = await searchParams;
+  const eventId = event && /^[0-9a-f-]{36}$/i.test(event) ? event : undefined;
+
+  const eventList = await db
+    .select({ id: events.id, title: events.title })
+    .from(events)
+    .orderBy(desc(events.startsAt))
+    .limit(200);
+
+  const selectedEvent = eventId
+    ? eventList.find((candidate) => candidate.id === eventId)
+    : undefined;
+
+  const rows = await adminRegistrationsRows({ eventId });
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between gap-3 space-y-0">
+      <CardHeader className="flex-row flex-wrap items-center justify-between gap-3 space-y-0">
         <div>
           <CardTitle>Registrations</CardTitle>
           <CardDescription>
-            {rows.length} registration{rows.length === 1 ? "" : "s"} across all
-            events.
+            {rows.length} registration{rows.length === 1 ? "" : "s"}
+            {selectedEvent ? ` for ${selectedEvent.title}` : " across all events"}.
           </CardDescription>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/api/admin/export/registrations">Download CSV</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <form method="get">
+            <select
+              name="event"
+              defaultValue={eventId ?? ""}
+              className="h-9 rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Filter by event"
+              onChange={(e) => {
+                const target = e.target as HTMLSelectElement;
+                if (target.form) target.form.submit();
+              }}
+            >
+              <option value="">All events</option>
+              {eventList.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.title}
+                </option>
+              ))}
+            </select>
+          </form>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/api/admin/export/registrations">Download CSV</Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No registrations yet.
+            {selectedEvent
+              ? "No registrations for this event yet."
+              : "No registrations yet."}
           </p>
         ) : (
           <div className="overflow-x-auto">

@@ -55,3 +55,55 @@ export async function deleteUserAction(formData: FormData) {
   revalidatePath("/admin", "layout");
   redirect("/admin/users?deleted=1");
 }
+
+const USER_DETAIL_PATH = /^\/admin\/users\/[0-9a-f-]{36}$/;
+
+export async function setUserRoleAction(formData: FormData) {
+  const { session } = await requireAdmin();
+
+  const userId = String(formData.get("userId") ?? "").trim();
+  const role = String(formData.get("role") ?? "").toUpperCase();
+  const back = String(formData.get("back") ?? "/admin/users");
+
+  if (!UUID_PATTERN.test(userId) || (role !== "USER" && role !== "ADMIN")) {
+    redirect("/admin/users?error=bad_role");
+  }
+  if (!back.startsWith("/admin/users") || back.includes("://")) {
+    redirect("/admin/users");
+  }
+  if (!USER_DETAIL_PATH.test(back) && back !== "/admin/users") {
+    redirect("/admin/users");
+  }
+  if (userId === session.user.id) {
+    redirect("/admin/users?error=self_role");
+  }
+
+  const [profile] = await db
+    .select()
+    .from(profiles)
+    .where(eq(profiles.userId, userId))
+    .limit(1);
+  if (!profile) {
+    redirect("/admin/users?error=not_found");
+  }
+
+  if (role === "USER" && profile.role === "ADMIN") {
+    const [rows] = await sql`
+      select count(*)::int as n from public.profiles where role = 'ADMIN'
+    `;
+    if (Number(rows.n) <= 1) {
+      redirect("/admin/users?error=last_admin");
+    }
+  }
+
+  if (role !== profile.role) {
+    await db
+      .update(profiles)
+      .set({ role })
+      .where(eq(profiles.userId, userId));
+  }
+
+  revalidatePath("/admin", "layout");
+  revalidatePath("/profile");
+  redirect(back);
+}

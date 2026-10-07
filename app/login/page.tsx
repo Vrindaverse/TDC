@@ -18,7 +18,13 @@ async function SignedInRedirect() {
   return null;
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reset?: string }>;
+}) {
+  const { reset } = await searchParams;
+
   return (
     <AuthCard
       label="login"
@@ -33,6 +39,14 @@ export default function LoginPage() {
       <Suspense>
         <SignedInRedirect />
       </Suspense>
+      {reset ? (
+        <div
+          role="status"
+          className="rounded-md border border-green-500/40 bg-green-500/10 px-3 py-2 text-sm text-green-700 dark:text-green-400"
+        >
+          Password updated. Sign in with your new password.
+        </div>
+      ) : null}
       <LoginForm />
     </AuthCard>
   );

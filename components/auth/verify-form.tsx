@@ -13,6 +13,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  OtpExpiryNote,
+  useOtpExpiry,
+} from "@/components/auth/otp-expiry";
 
 const OTP_PATTERN = /^\d{6}$/;
 
@@ -27,6 +31,13 @@ export function VerifyForm({ email }: { email: string }) {
   >(resendOtpAction, null);
   const [otp, setOtp] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
+  const [resendCount, setResendCount] = useState(0);
+  const [resendSeen, setResendSeen] = useState(false);
+  if (Boolean(resendState?.sent) && !resendSeen) {
+    setResendSeen(true);
+    setResendCount((value) => value + 1);
+  }
+  const { expired, label } = useOtpExpiry(resendCount);
 
   useEffect(() => {
     if (state?.fieldErrors?.otp || state?.error) {
@@ -35,7 +46,7 @@ export function VerifyForm({ email }: { email: string }) {
   }, [state]);
 
   const otpError = clientError ?? state?.fieldErrors?.otp;
-  const disabled = pending || resendPending;
+  const disabled = pending || resendPending || expired;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (!OTP_PATTERN.test(otp)) {
@@ -94,6 +105,7 @@ export function VerifyForm({ email }: { email: string }) {
               {otpError}
             </p>
           ) : null}
+          <OtpExpiryNote expired={expired} label={label} />
         </div>
 
         <Button type="submit" className="w-full" disabled={disabled}>
@@ -117,7 +129,7 @@ export function VerifyForm({ email }: { email: string }) {
         <form action={resendFormAction}>
           <button
             type="submit"
-            disabled={disabled}
+            disabled={pending || resendPending}
             className="font-medium text-foreground underline underline-offset-4 hover:no-underline disabled:opacity-50"
           >
             {resendPending ? "Sending…" : "Resend code"}

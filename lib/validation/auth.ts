@@ -68,8 +68,37 @@ export const completeProfileSchema = z.object({
     ),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.email("Enter a valid email address").max(254, "Email is too long"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    otp: otpSchema.shape.otp,
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Confirm your new password"),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password"),
+    newPassword: passwordSchema,
+    confirmPassword: z.string().min(1, "Confirm your new password"),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
 export type RegisterInput = z.input<typeof registerSchema>;
 export type CompleteProfileInput = z.input<typeof completeProfileSchema>;
+export type ForgotPasswordInput = z.input<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;
+export type ChangePasswordInput = z.input<typeof changePasswordSchema>;
 
 export type FieldErrors = Record<string, string>;
 

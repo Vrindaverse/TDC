@@ -98,7 +98,7 @@ export async function GET(
       "Email verified",
       "Joined at",
     ];
-    const rows = await adminUsersRows();
+    const { rows } = await adminUsersRows({ pageSize: 500 });
     body = rows.map((row) => [
       row.name,
       row.email,

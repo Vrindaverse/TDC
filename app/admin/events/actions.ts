@@ -102,6 +102,39 @@ export async function deleteEventAction(formData: FormData) {
   redirect("/admin/events");
 }
 
+export async function setEventRegistrationStatusAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  const registrationStatus = String(formData.get("registrationStatus") ?? "");
+
+  if (!["open", "closing", "closed"].includes(registrationStatus)) {
+    redirect("/admin/events?error=status");
+  }
+
+  try {
+    const existing = await db
+      .select({ id: events.id })
+      .from(events)
+      .where(eq(events.id, id))
+      .limit(1);
+    if (existing.length === 0) {
+      redirect("/admin/events?error=not_found");
+    }
+    await db
+      .update(events)
+      .set({ registrationStatus: registrationStatus as "open" | "closing" | "closed" })
+      .where(eq(events.id, id));
+  } catch (err) {
+    console.error("[admin/events] status toggle failed:", err);
+    redirect("/admin/events?error=status");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/events");
+  redirect("/admin/events");
+}
+
 function isNextError(error: unknown, digest: string): boolean {
   return (
     typeof error === "object" &&
