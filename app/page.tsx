@@ -9,7 +9,6 @@ import { BentoTile } from "@/components/bento-tile";
 import { Hero } from "@/components/hero";
 import { Marquee } from "@/components/marquee";
 import { Section } from "@/components/section";
-import { TargetCursor } from "@/components/target-cursor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProfile, getSession } from "@/lib/auth/guards";
@@ -85,7 +84,6 @@ export default async function Home({
         <AdminGate searchParams={searchParams} />
       </Suspense>
 
-      <TargetCursor />
 
       <Hero />
 
