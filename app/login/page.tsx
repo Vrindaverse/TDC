@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   title: "Sign in",
 };
 
+export const instant = false;
+
 async function SignedInRedirect() {
   const session = await getSession();
   if (session?.user) {
