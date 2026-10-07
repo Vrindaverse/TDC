@@ -17,6 +17,8 @@ export const metadata: Metadata = {
     "Workshops, build sessions, hackathons and talks run by the Technocrats Developer Community.",
 };
 
+export const instant = false;
+
 async function getEventsData() {
   "use cache";
   cacheLife("minutes");
@@ -86,7 +88,7 @@ export default async function EventsPage() {
                   action={
                     canRegister &&
                     event.registrationStatus === "open" &&
-                    new Date(event.startsAt) > new Date()
+                    new Date(`${event.date}T${event.time}`) > new Date()
                       ? {
                           label: "Register",
                           href: "#",

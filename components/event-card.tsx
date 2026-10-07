@@ -40,7 +40,7 @@ interface EventCardProps {
   /** Server action for registration (overrides action link). */
   formAction?: (prev: unknown, formData: FormData) => Promise<unknown>;
   /** Fallback link action for non-registration cases. */
-  action?: { label: string; href: string };
+  action?: { label: string; href: string; onClick?: (e: React.MouseEvent) => void } | null;
 }
 
 export function EventCard({
@@ -122,7 +122,7 @@ export function EventCard({
             )}
             <ArrowRight aria-hidden="true" className="transition-transform group-hover/button:translate-x-0.5" />
           </Button>
-          {state && (
+          {state !== null && state !== undefined && (
             <p className="mt-2 text-sm text-destructive" role="alert">
               {String(state)}
             </p>
@@ -131,7 +131,7 @@ export function EventCard({
       ) : actionLink && !past ? (
         <div className="relative mt-auto pt-6">
           <Button asChild size="sm" className="group/button w-full shadow-sm">
-            <a href={actionLink.href}>
+            <a href={actionLink.href} onClick={actionLink.onClick}>
               {actionLink.label}
               <ArrowRight aria-hidden="true" className="transition-transform group-hover/button:translate-x-0.5" />
             </a>

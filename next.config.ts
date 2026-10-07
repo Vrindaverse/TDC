@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   // instead of hitting the 60s default and burning retries.
   staticPageGenerationTimeout: 120,
   experimental: {
-    // Cap build workers so small build machines don't thrash swap.
     cpus: 4,
   },
   images: {
