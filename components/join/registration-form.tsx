@@ -2,6 +2,7 @@
 
 import { BadgeCheck, Loader2, Mail } from "lucide-react";
 import { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
 import type { FormEvent, MouseEvent } from "react";
 
 import {
@@ -26,7 +27,34 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_PATTERN = /^\d{6}$/;
 
 const selectClassName =
-  "mt-2 w-full rounded-md border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary";
+  "mt-2 h-10 w-full appearance-none rounded-md border border-input bg-transparent px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50 dark:bg-input/30";
+
+function PendingSubmitButton({
+  children,
+  disabled,
+}: {
+  children: React.ReactNode;
+  disabled?: boolean;
+}) {
+  const { pending } = useFormStatus();
+  return (
+    <Button
+      type="submit"
+      size="lg"
+      className="tdc-mono mt-1 w-full cursor-target"
+      disabled={disabled || pending}
+    >
+      {pending ? (
+        <>
+          <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+          submitting…
+        </>
+      ) : (
+        children
+      )}
+    </Button>
+  );
+}
 
 const labelClassName =
   "text-xs font-medium tracking-wide text-muted-foreground uppercase";
@@ -90,13 +118,7 @@ export function MemberRegistrationForm({
         will be attached to this sign-up.
       </p>
 
-      <Button
-        type="submit"
-        size="lg"
-        className="tdc-mono mt-1 w-full cursor-target"
-      >
-        register for this event
-      </Button>
+      <PendingSubmitButton>register for this event</PendingSubmitButton>
     </form>
   );
 }
@@ -160,7 +182,10 @@ export function GuestRegistrationForm({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="rounded-lg border border-dashed p-4">
+      <div className="rounded-xl border border-dashed bg-muted/20 p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Step 1 — verify your email
+        </p>
         <form
           action={sendFormAction}
           onSubmit={handleSend}
@@ -318,6 +343,9 @@ export function GuestRegistrationForm({
         className="flex flex-col gap-5"
       >
         <input type="hidden" name="email" value={email} />
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Step 2 — your details
+        </p>
 
         <div>
           <Label htmlFor="join-name" className={labelClassName}>
@@ -407,14 +435,9 @@ export function GuestRegistrationForm({
           </select>
         </div>
 
-        <Button
-          type="submit"
-          size="lg"
-          className="tdc-mono mt-1 w-full cursor-target"
-          disabled={!verified || busy}
-        >
+        <PendingSubmitButton disabled={!verified || busy}>
           register for this event
-        </Button>
+        </PendingSubmitButton>
 
         <p className="text-xs text-muted-foreground">
           No account? No problem. Members can track their sign-ups on their
