@@ -481,7 +481,7 @@ function OverviewSection({
 function EventsSection({ 
   upcoming, 
   past 
->: {
+}: {
   upcoming: any[];
   past: any[];
 }) {
