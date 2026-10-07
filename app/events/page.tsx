@@ -5,9 +5,11 @@ import { cacheLife } from "next/cache";
 import { EventCard } from "@/components/event-card";
 import { SectionHeading } from "@/components/section-heading";
 import { MutedBand, Section } from "@/components/section";
+import { getSession, getProfile } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { dbEventToItem } from "@/lib/events";
+import { registerForEventAction } from "@/app/events/actions";
 
 export const metadata: Metadata = {
   title: "Events",
@@ -43,7 +45,11 @@ async function getEventsData() {
 }
 
 export default async function EventsPage() {
+  const session = await getSession();
+  const profile = session?.user ? await getProfile(session.user.id) : null;
   const { upcoming: upcomingEvents, past: pastEvents } = await getEventsData();
+
+  const canRegister = profile !== null;
 
   return (
     <>
@@ -72,7 +78,35 @@ export default async function EventsPage() {
           {upcomingEvents.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {upcomingEvents.map((event) => (
-                <EventCard key={event.id} event={event} showTime />
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  showTime
+                  showRegistration={true}
+                  action={
+                    canRegister &&
+                    event.registrationStatus === "open" &&
+                    new Date(event.startsAt) > new Date()
+                      ? {
+                          label: "Register",
+                          href: "#",
+                          onClick: (e: React.MouseEvent) => {
+                            e.preventDefault();
+                            const form = document.createElement("form");
+                            form.method = "POST";
+                            form.action = "/api/events/register";
+                            const input = document.createElement("input");
+                            input.type = "hidden";
+                            input.name = "eventId";
+                            input.value = event.id;
+                            form.appendChild(input);
+                            document.body.appendChild(form);
+                            form.submit();
+                          },
+                        }
+                      : null
+                  }
+                />
               ))}
             </div>
           ) : (

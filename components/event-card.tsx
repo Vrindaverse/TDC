@@ -1,8 +1,8 @@
-import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
   Clock,
+  Loader2,
   MapPin,
   TriangleAlert,
   UserCheck,
@@ -11,6 +11,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useActionState } from "react";
 import type { EventItem, RegistrationStatus } from "@/lib/site-data";
 
 const statusMeta: Record<
@@ -34,17 +35,18 @@ interface EventCardProps {
   showRegistration?: boolean;
   /** Marks the event as already finished: no action button, "Completed" badge. */
   past?: boolean;
+  /** Server action for registration (overrides action link). */
+  formAction?: (prev: unknown, formData: FormData) => Promise<unknown>;
+  /** Fallback link action for non-registration cases. */
   action?: { label: string; href: string };
 }
 
-/**
- * Shared event card for the home page teaser and the events listing.
- */
 export function EventCard({
   event,
   showTime = false,
   showRegistration = false,
   past = false,
+  formAction,
   action,
 }: EventCardProps) {
   const status = statusMeta[event.registrationStatus];
@@ -52,6 +54,8 @@ export function EventCard({
   const statusLabel = past ? "Completed" : status.label;
   const statusVariant = past ? "outline" : status.variant;
   const showBadge = showRegistration || past;
+
+  const [state, action, pending] = useActionState(formAction ?? (() => {}), null);
 
   return (
     <article className="group relative flex cursor-target flex-col overflow-hidden rounded-2xl border bg-card/80 p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -102,13 +106,33 @@ export function EventCard({
         {event.description}
       </p>
 
-      {action && !past ? (
+      {formAction && !past ? (
+        <form action={action} className="relative mt-auto pt-6">
+          <input type="hidden" name="eventId" value={event.id} />
+          <Button type="submit" size="sm" className="group/button w-full shadow-sm" disabled={pending}>
+            {pending ? (
+              <>
+                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                Registering…
+              </>
+            ) : (
+              "Register"
+            )}
+            <ArrowRight aria-hidden="true" className="transition-transform group-hover/button:translate-x-0.5" />
+          </Button>
+          {state && (
+            <p className="mt-2 text-sm text-destructive" role="alert">
+              {String(state)}
+            </p>
+          )}
+        </form>
+      ) : action && !past ? (
         <div className="relative mt-auto pt-6">
           <Button asChild size="sm" className="group/button w-full shadow-sm">
-            <Link href={action.href}>
+            <a href={action.href}>
               {action.label}
               <ArrowRight aria-hidden="true" className="transition-transform group-hover/button:translate-x-0.5" />
-            </Link>
+            </a>
           </Button>
         </div>
       ) : (
