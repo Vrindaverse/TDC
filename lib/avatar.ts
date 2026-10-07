@@ -42,16 +42,30 @@ function validateMagicBytes(body: Uint8Array, ext: AvatarExtension): boolean {
   return false;
 }
 
+function validateS3Config(): void {
+  const required = [
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_ENDPOINT_URL_S3",
+    "AWS_S3_BUCKET",
+  ];
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required S3 configuration: ${missing.join(", ")}`);
+  }
+}
+
 let s3Client: S3Client | null = null;
 
 function getS3Client() {
   if (s3Client) return s3Client;
+  validateS3Config();
   return (s3Client = new S3Client({
     region: process.env.AWS_REGION ?? "us-east-2",
     endpoint: process.env.AWS_ENDPOINT_URL_S3,
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     },
     forcePathStyle: true,
   }));

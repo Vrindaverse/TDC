@@ -11,13 +11,15 @@ import { colleges, pendingRegistrations, profiles } from "@/lib/db/schema";
 import { fieldErrorsFromZod, registerSchema } from "@/lib/validation/auth";
 import { validateCsrfToken } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
+import { CONFIG } from "@/lib/config";
 
 export type RegisterFormState = {
   error?: string;
   fieldErrors?: Record<string, string>;
 } | null;
 
-const PENDING_TTL_MS = 60 * 60 * 24 * 1000;
+const PENDING_TTL_MS = CONFIG.auth.pendingTtlMs;
 
 async function registerActionInternal(
   _prev: RegisterFormState,
@@ -26,11 +28,13 @@ async function registerActionInternal(
   const clientToken = formData.get("_csrf") as string | null;
   const valid = await validateCsrfToken(clientToken ?? "");
   if (!valid) {
+    logger.warn("CSRF validation failed", { action: "register" });
     return { error: "Invalid request. Please refresh and try again." };
   }
 
   const rateLimit = await checkRateLimit("auth:register");
   if (!rateLimit.success) {
+    logger.warn("Rate limit exceeded", { action: "register" });
     return { error: rateLimit.error ?? "Too many registration attempts. Please try again later." };
   }
 
@@ -45,6 +49,7 @@ async function registerActionInternal(
   });
 
   if (!parsed.success) {
+    logger.warn("Registration validation failed", { action: "register", errors: parsed.error.flatten() });
     return { fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
@@ -93,7 +98,7 @@ async function registerActionInternal(
       password: input.password,
     });
     if (signUpError) {
-      console.error("[register] signUp.email failed:", signUpError.code);
+      logger.error("Neon Auth signUp failed", { action: "register", email, code: signUpError.code });
       return { error: friendlyAuthError(signUpError) };
     }
 
@@ -102,10 +107,7 @@ async function registerActionInternal(
       type: "email-verification",
     });
     if (otpResult.error) {
-      console.error(
-        "[register] sendVerificationOtp failed:",
-        otpResult.error.code ?? otpResult.error.message
-      );
+      logger.error("Neon Auth sendVerificationOtp failed", { action: "register", email, code: otpResult.error.code });
       return {
         error:
           "Your account was created but we could not send the verification code. Please try again.",
@@ -134,8 +136,9 @@ async function registerActionInternal(
       });
 
     await setPendingEmailCookie(email);
+    logger.info("Registration completed", { action: "register", email });
   } catch (err) {
-    console.error("[register] unexpected error:", err);
+    logger.error("Registration unexpected error", { action: "register", email, error: String(err) });
     return {
       error:
         "Something went wrong while creating your account. Please try again.",

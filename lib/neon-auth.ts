@@ -34,6 +34,8 @@ export async function findUserById(id: string): Promise<NeonAuthUser | null> {
   return rows[0] as NeonAuthUser | null;
 }
 
+export const getUserById = findUserById;
+
 export async function isEmailVerified(email: string): Promise<boolean> {
   const user = await findUserByEmail(email);
   return user?.emailVerified === true;
@@ -47,6 +49,18 @@ export async function getUserEmail(id: string): Promise<string | null> {
      limit 1
   `;
   return rows[0]?.email ?? null;
+}
+
+export async function getUserEmails(userIds: string[]): Promise<Map<string, string>> {
+  if (userIds.length === 0) return new Map();
+  const placeholders = userIds.map((_, i) => `$${i + 1}`).join(", ");
+  const query = `select id, email from neon_auth."user" where id in (${placeholders})`;
+  const rows = await sql`select id, email from neon_auth."user" where id in (${sql.raw(placeholders)})`;
+  const map = new Map<string, string>();
+  for (const row of rows) {
+    map.set(row.id, row.email);
+  }
+  return map;
 }
 
 export async function deleteUser(id: string): Promise<void> {

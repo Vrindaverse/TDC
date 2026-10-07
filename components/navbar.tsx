@@ -42,7 +42,7 @@ function Logo({ className }: { className?: string }) {
         aria-hidden="true"
         className="flex size-7 items-center justify-center rounded-[6px] bg-primary text-[0.7rem] font-bold tracking-tight text-primary-foreground"
       >
-        TDyc
+        TD
       </span>
       <span className="text-base">{site.name}</span>
     </Link>

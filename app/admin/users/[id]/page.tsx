@@ -15,7 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireAdmin } from "@/lib/auth/guards";
-import { db, sql } from "@/lib/db";
+import { db } from "@/lib/db";
+import { getUserById } from "@/lib/neon-auth";
 import {
   contactMessages,
   events,
@@ -64,12 +65,7 @@ export default async function AdminUserDetailPage({
     .where(eq(colleges.id, profile.collegeId))
     .limit(1);
 
-  const [account] = await sql`
-    select u.email as email, u."emailVerified" as "emailVerified"
-      from neon_auth."user" u
-     where u.id = ${profile.userId}
-     limit 1
-  `;
+  const account = await getUserById(profile.userId);
 
   const memberRegistrations = await db
     .select({

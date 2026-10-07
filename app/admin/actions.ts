@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -10,6 +10,7 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { db, sql } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { validateCsrfToken } from "@/lib/csrf";
+import { getUserEmail, deleteUser as deleteNeonAuthUser } from "@/lib/neon-auth";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -41,10 +42,11 @@ async function deleteUserActionInternal(formData: FormData) {
   }
 
   if (profile.role === "ADMIN") {
-    const [rows] = await sql`
-      select count(*)::int as n from public.profiles where role = 'ADMIN'
-    `;
-    if (Number(rows.n) <= 1) {
+    const [rows] = await db
+      .select({ count: count() })
+      .from(profiles)
+      .where(eq(profiles.role, "ADMIN"));
+    if (Number(rows.count ?? 0) <= 1) {
       redirect("/admin/users?error=last_admin");
     }
   }
@@ -57,11 +59,9 @@ async function deleteUserActionInternal(formData: FormData) {
     }
   }
 
-  const [emailRow] = await sql`
-    select email from neon_auth."user" where id = ${userId}
-  `;
+  const email = await getUserEmail(userId);
 
-  await sql`delete from neon_auth."user" where id = ${userId}`;
+  await deleteNeonAuthUser(userId);
   await db.delete(profiles).where(eq(profiles.userId, userId));
 
   await recordAudit({
@@ -70,7 +70,7 @@ async function deleteUserActionInternal(formData: FormData) {
     action: "user.delete",
     targetType: "user",
     targetId: userId,
-    detail: `${profile.name} <${(emailRow as { email?: string } | undefined)?.email ?? "unknown"}>`,
+    detail: `${profile.name} <${email ?? "unknown"}>`,
   });
 
   revalidatePath("/admin", "layout");

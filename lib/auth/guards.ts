@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { contactMessages, pendingRegistrations, profiles } from "@/lib/db/schema";
+import { CONFIG } from "@/lib/config";
 
 export type AuthSession = NonNullable<
   Awaited<ReturnType<typeof auth.getSession>>["data"]
@@ -13,7 +14,13 @@ export type AuthSession = NonNullable<
 
 const PENDING_EMAIL_COOKIE = "tdc_pending_email";
 const VERIFIED_COOKIE = "tdc_email_verified";
-const COOKIE_MAX_AGE = 60 * 60 * 24;
+const COOKIE_MAX_AGE = CONFIG.auth.csrfCookieMaxAge;
+const VERIFIED_COOKIE_MAX_AGE = CONFIG.auth.verifiedCookieMaxAge;
+const JOIN_VERIFIED_COOKIE = "tdc_join_verified";
+const JOIN_VERIFIED_MAX_AGE = CONFIG.auth.joinVerifiedMaxAge;
+const RESET_EMAIL_COOKIE = "tdc_reset_email";
+const RESET_MAX_AGE = CONFIG.auth.resetMaxAge;
+const JOIN_SHADOW_COOKIE = "tdc_join_shadow";
 
 export const getSession = cache(async (): Promise<AuthSession | null> => {
   const store = await cookies();
@@ -105,7 +112,7 @@ export async function markEmailVerifiedCookie() {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 15,
+    maxAge: VERIFIED_COOKIE_MAX_AGE,
     path: "/",
   });
 }
@@ -114,9 +121,6 @@ export async function hasVerifiedCookie() {
   const store = await cookies();
   return store.get(VERIFIED_COOKIE)?.value === "1";
 }
-
-const JOIN_VERIFIED_COOKIE = "tdc_join_verified";
-const JOIN_VERIFIED_MAX_AGE = 60 * 20;
 
 export async function setJoinVerifiedCookie(email: string) {
   const store = await cookies();
@@ -139,9 +143,6 @@ export async function clearJoinVerifiedCookie() {
   store.delete(JOIN_VERIFIED_COOKIE);
 }
 
-const RESET_EMAIL_COOKIE = "tdc_reset_email";
-const RESET_MAX_AGE = 60 * 15;
-
 export async function setResetEmailCookie(email: string) {
   const store = await cookies();
   store.set(RESET_EMAIL_COOKIE, email.toLowerCase(), {
@@ -163,7 +164,7 @@ export async function clearResetEmailCookie() {
   store.delete(RESET_EMAIL_COOKIE);
 }
 
-const JOIN_SHADOW_COOKIE = "tdc_join_shadow";
+const JOIN_SHADOW_MAX_AGE = CONFIG.auth.joinShadowMaxAge;
 
 export async function setJoinShadowCookie(email: string) {
   const store = await cookies();
@@ -171,7 +172,7 @@ export async function setJoinShadowCookie(email: string) {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    maxAge: JOIN_VERIFIED_MAX_AGE,
+    maxAge: JOIN_SHADOW_MAX_AGE,
     path: "/",
   });
 }
