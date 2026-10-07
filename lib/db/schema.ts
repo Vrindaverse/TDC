@@ -38,6 +38,10 @@ export const profiles = pgTable(
     enrollmentNumber: text("enrollment_number").notNull().unique(),
     role: text("role").notNull().default("USER"),
     avatarKey: text("avatar_key"),
+    status: text("status").notNull().default("approved"),
+    teamId: uuid("team_id").references(() => teams.id, {
+      onDelete: "set null",
+    }),
     skills: text("skills")
       .array()
       .notNull()
@@ -52,6 +56,10 @@ export const profiles = pgTable(
       .$onUpdate(() => sql`now()`),
   },
   (table) => ({
+    statusCheck: check(
+      "profiles_status_check",
+      sql`${table.status} in ('pending', 'approved', 'rejected')`
+    ),
     roleCheck: check(
       "profiles_role_check",
       sql`${table.role} in ('USER', 'ADMIN')`
@@ -232,6 +240,18 @@ export const rateLimits = pgTable(
   })
 );
 
+export const teams = pgTable(
+  "teams",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  () => ({})
+);
+
 export const teamPosts = pgTable(
   "team_posts",
   {
@@ -269,3 +289,4 @@ export type Announcement = typeof announcements.$inferSelect;
 export type AuditLogEntry = typeof auditLog.$inferSelect;
 export type RateLimit = typeof rateLimits.$inferSelect;
 export type TeamPost = typeof teamPosts.$inferSelect;
+export type Team = typeof teams.$inferSelect;

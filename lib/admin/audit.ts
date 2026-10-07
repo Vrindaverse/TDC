@@ -26,6 +26,8 @@ export const AUDIT_ACTIONS = [
   "team_post.approve",
   "team_post.reject",
   "team_post.delete",
+  "team.create",
+  "team.assign",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -34,7 +36,7 @@ export type AuditEntry = {
   actorId: string | null;
   actorName: string;
   action: AuditAction;
-  targetType: "user" | "event" | "registration" | "message" | "announcement" | "college" | "team_post";
+  targetType: "user" | "event" | "registration" | "message" | "announcement" | "college" | "team_post" | "team";
   targetId?: string | null;
   detail?: string | null;
 };

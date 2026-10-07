@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
-import { setUserRoleAction } from "@/app/admin/actions";
+import { setMemberStatusAction, setUserRoleAction } from "@/app/admin/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,6 +232,7 @@ export default async function AdminUsersPage({
                       <th className="px-4 py-3 font-medium">College</th>
                       <th className="px-4 py-3 font-medium">Enrollment</th>
                       <th className="px-4 py-3 font-medium">Role</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 font-medium">Joined</th>
                       <th className="px-4 py-3 text-right font-medium">Actions</th>
                     </tr>
@@ -262,6 +263,20 @@ export default async function AdminUsersPage({
                             {user.role}
                           </Badge>
                         </td>
+                        <td className="px-4 py-3">
+                          <Badge
+                            variant={
+                              user.status === "approved"
+                                ? "default"
+                                : user.status === "rejected"
+                                  ? "destructive"
+                                  : "outline"
+                            }
+                            className="text-[10px] font-semibold"
+                          >
+                            {user.status}
+                          </Badge>
+                        </td>
                         <td className="px-4 py-3 text-muted-foreground">
                           {formatDate(user.createdAt)}
                         </td>
@@ -272,6 +287,28 @@ export default async function AdminUsersPage({
                                 <Eye aria-hidden="true" className="size-4" />
                               </Button>
                             </Link>
+                            {user.userId === session?.user?.id ? null : user.status !== "approved" ? (
+                              <form action={setMemberStatusAction}>
+                                <CsrfInput />
+                                <input type="hidden" name="userId" value={user.userId} />
+                                <input type="hidden" name="status" value="approved" />
+                                <input type="hidden" name="back" value="/admin/users" />
+                                <Button type="submit" variant="ghost" size="sm" className="h-8 px-2 text-xs">
+                                  Approve
+                                </Button>
+                              </form>
+                            ) : null}
+                            {user.userId === session?.user?.id || user.role === "ADMIN" || user.status === "rejected" ? null : (
+                              <form action={setMemberStatusAction}>
+                                <CsrfInput />
+                                <input type="hidden" name="userId" value={user.userId} />
+                                <input type="hidden" name="status" value="rejected" />
+                                <input type="hidden" name="back" value="/admin/users" />
+                                <Button type="submit" variant="ghost" size="sm" className="h-8 px-2 text-xs text-destructive">
+                                  Reject
+                                </Button>
+                              </form>
+                            )}
                             {user.userId === session?.user?.id ? null : (
                               <form action={setUserRoleAction}>
                                 <CsrfInput />

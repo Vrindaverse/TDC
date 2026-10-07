@@ -128,6 +128,7 @@ async function verifyEmailActionInternal(
             collegeId: pending.collegeId,
             enrollmentNumber: pending.enrollmentNumber,
             role: "USER",
+            status: "pending",
           })
           .onConflictDoUpdate({
             target: profiles.userId,

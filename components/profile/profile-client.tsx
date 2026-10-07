@@ -85,6 +85,7 @@ export function ProfileClient({
   avatarUrl,
   profileCompletion,
   college,
+  teamName,
   myRegistrations,
   pastRegistrations,
   announcementsData,
@@ -99,6 +100,7 @@ export function ProfileClient({
   avatarUrl: string | null;
   profileCompletion: number;
   college: College;
+  teamName: string | null;
   myRegistrations: Registration[];
   pastRegistrations: Registration[];
   announcementsData: Announcement[];
@@ -227,6 +229,7 @@ export function ProfileClient({
         <OverviewSection
           profile={profile}
           college={college}
+          teamName={teamName}
           announcements={announcementsData}
           email={email}
         />
@@ -255,11 +258,13 @@ export function ProfileClient({
 function OverviewSection({
   profile,
   college,
+  teamName,
   announcements,
   email,
 }: {
   profile: Profile;
   college: College;
+  teamName: string | null;
   announcements: Announcement[];
   email: string;
 }) {
@@ -279,6 +284,7 @@ function OverviewSection({
               label="College"
               value={college ? `${college.name} (${college.code})` : "Not set"}
             />
+            <DetailRow label="Team" value={teamName ?? "Not assigned"} />
             <DetailRow
               label="Member since"
               value={formatDate(profile.createdAt)}

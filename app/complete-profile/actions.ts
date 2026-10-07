@@ -97,6 +97,7 @@ async function completeProfileActionInternal(
         collegeId: input.collegeId,
         enrollmentNumber: input.enrollmentNumber,
         role: "USER",
+        status: "pending",
       });
 
       const pending = await getPendingRegistration(session.user.email);

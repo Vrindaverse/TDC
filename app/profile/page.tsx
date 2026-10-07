@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { eq, and, lt, desc } from "drizzle-orm";
 import { ProfileClient } from "@/components/profile/profile-client";
+import {
+  PendingApprovalScreen,
+  RejectedApprovalScreen,
+} from "@/components/profile/membership-gate";
 import { calculateProfileCompletion } from "@/lib/profile-completion";
 import { avatarPublicUrl } from "@/lib/avatar";
 import { requireProfile } from "@/lib/auth/guards";
@@ -12,6 +16,7 @@ import {
   profiles,
   registrations,
   teamPosts,
+  teams,
 } from "@/lib/db/schema";
 
 export const metadata: Metadata = {
@@ -27,6 +32,21 @@ export default async function ProfilePage({
 }) {
   const { registered } = await searchParams;
   const { session, profile } = await requireProfile();
+
+  if (profile.status === "pending") {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <PendingApprovalScreen />
+      </div>
+    );
+  }
+  if (profile.status === "rejected") {
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <RejectedApprovalScreen />
+      </div>
+    );
+  }
   const avatarUrl = profile.avatarKey
     ? avatarPublicUrl(profile.avatarKey)
     : null;
@@ -41,6 +61,16 @@ export default async function ProfilePage({
           })
           .from(colleges)
           .where(eq(colleges.id, profile.collegeId))
+          .limit(1)
+      )[0]
+    : null;
+
+  const team = profile.teamId
+    ? (
+        await db
+          .select({ name: teams.name })
+          .from(teams)
+          .where(eq(teams.id, profile.teamId))
           .limit(1)
       )[0]
     : null;
@@ -143,6 +173,7 @@ export default async function ProfilePage({
         avatarUrl={avatarUrl}
         profileCompletion={profileCompletion}
         college={college}
+        teamName={team?.name ?? null}
         myRegistrations={myRegistrations}
         pastRegistrations={pastRegistrations}
         announcementsData={announcementsData}

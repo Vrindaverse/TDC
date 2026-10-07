@@ -23,6 +23,7 @@ export type AdminUserRow = {
   mobile: string;
   enrollmentNumber: string;
   role: string;
+  status: string;
   createdAt: Date | string;
   college: string | null;
   email: string;
@@ -223,6 +224,7 @@ export async function adminUsersRows(
            p.mobile as mobile,
            p.enrollment_number as "enrollmentNumber",
            p.role as role,
+           p.status as status,
            p.created_at as "createdAt",
            c.name as college,
            u.email as email,

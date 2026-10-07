@@ -1,6 +1,7 @@
 import {
   Bell,
   Handshake,
+  Layers,
   CalendarDays,
   GraduationCap,
   History,
@@ -19,6 +20,7 @@ export const ADMIN_NAV_ITEMS = [
   { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { label: "Colleges", href: "/admin/colleges", icon: GraduationCap },
   { label: "Team Finder", href: "/admin/team", icon: Handshake },
+  { label: "Teams", href: "/admin/teams", icon: Layers },
   { label: "Activity", href: "/admin/activity", icon: History },
 ];
 

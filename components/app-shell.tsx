@@ -53,7 +53,7 @@ export async function AppChrome() {
     );
   }
 
-  if (session?.user && profile && !isAdmin) {
+  if (session?.user && profile && !isAdmin && profile.status === "approved") {
     return (
       <MemberNavbar
         avatarUrl={avatarUrl}

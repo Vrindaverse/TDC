@@ -13,7 +13,7 @@ import {
 } from "@/lib/validation/auth";
 import { validateCsrfToken } from "@/lib/csrf";
 import { db } from "@/lib/db";
-import { colleges, events, profiles, registrations, teamPosts } from "@/lib/db/schema";
+import { colleges, profiles, registrations, teamPosts } from "@/lib/db/schema";
 import { editProfileSchema, teamPostSchema } from "@/lib/validation/profile";
 
 export type ChangePasswordState = {
