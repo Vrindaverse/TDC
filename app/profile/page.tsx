@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { eq, and, lt, desc } from "drizzle-orm";
 import { ProfileClient } from "@/components/profile/profile-client";
 import { calculateProfileCompletion } from "@/lib/profile-completion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { signOutAction } from "@/lib/auth/actions";
 import { avatarPublicUrl } from "@/lib/avatar";
 import { requireProfile } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
