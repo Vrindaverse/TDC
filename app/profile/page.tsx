@@ -9,7 +9,9 @@ import {
   announcements,
   colleges,
   events,
+  profiles,
   registrations,
+  teamPosts,
 } from "@/lib/db/schema";
 
 export const metadata: Metadata = {
@@ -43,7 +45,7 @@ export default async function ProfilePage({
       )[0]
     : null;
 
-  const [myRegistrations, pastRegistrations, announcementsData] =
+  const [myRegistrations, pastRegistrations, announcementsData, collegeList] =
     await Promise.all([
       db
         .select({
@@ -88,6 +90,49 @@ export default async function ProfilePage({
         .where(eq(announcements.isActive, true))
         .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
         .limit(5),
+
+      db
+        .select({ id: colleges.id, name: colleges.name, code: colleges.code })
+        .from(colleges)
+        .where(eq(colleges.isActive, true))
+        .orderBy(colleges.name),
+    ]);
+
+  const [approvedTeamPosts, myTeamPosts, upcomingEventList] =
+    await Promise.all([
+      db
+        .select({
+          id: teamPosts.id,
+          title: teamPosts.title,
+          body: teamPosts.body,
+          createdAt: teamPosts.createdAt,
+          authorName: profiles.name,
+          eventTitle: events.title,
+        })
+        .from(teamPosts)
+        .innerJoin(profiles, eq(teamPosts.profileId, profiles.id))
+        .leftJoin(events, eq(teamPosts.eventId, events.id))
+        .where(eq(teamPosts.status, "approved"))
+        .orderBy(desc(teamPosts.createdAt))
+        .limit(10),
+
+      db
+        .select({
+          id: teamPosts.id,
+          title: teamPosts.title,
+          status: teamPosts.status,
+          createdAt: teamPosts.createdAt,
+        })
+        .from(teamPosts)
+        .where(eq(teamPosts.profileId, profile.id))
+        .orderBy(desc(teamPosts.createdAt))
+        .limit(10),
+
+      db
+        .select({ id: events.id, title: events.title })
+        .from(events)
+        .orderBy(desc(events.startsAt))
+        .limit(20),
     ]);
 
   return (
@@ -102,6 +147,10 @@ export default async function ProfilePage({
         pastRegistrations={pastRegistrations}
         announcementsData={announcementsData}
         email={session.user.email}
+        collegeList={collegeList}
+        approvedTeamPosts={approvedTeamPosts}
+        myTeamPosts={myTeamPosts}
+        upcomingEventList={upcomingEventList}
       />
     </div>
   );

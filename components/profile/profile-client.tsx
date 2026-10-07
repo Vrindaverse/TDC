@@ -29,6 +29,12 @@ import {
 } from "@/components/ui/card";
 import { signOutAction } from "@/lib/auth/actions";
 import { daysUntil, formatDate } from "@/lib/format";
+import {
+  TeamPostsSection,
+  type ApprovedTeamPost,
+  type MyTeamPost,
+} from "@/components/profile/team-posts";
+import { EditProfileForm } from "@/components/profile/edit-profile-form";
 
 type Profile = {
   id: string;
@@ -39,6 +45,8 @@ type Profile = {
   avatarKey: string | null;
   role: string;
   createdAt: Date;
+  skills: string[];
+  bio: string | null;
 };
 
 type Registration = {
@@ -64,7 +72,7 @@ type College = {
   code: string;
 } | null;
 
-type Tab = "overview" | "events" | "settings";
+type Tab = "overview" | "events" | "team" | "settings";
 
 export function ProfileClient({
   registered,
@@ -76,6 +84,10 @@ export function ProfileClient({
   pastRegistrations,
   announcementsData,
   email,
+  collegeList,
+  approvedTeamPosts,
+  myTeamPosts,
+  upcomingEventList,
 }: {
   registered: string | undefined;
   profile: Profile;
@@ -86,6 +98,10 @@ export function ProfileClient({
   pastRegistrations: Registration[];
   announcementsData: Announcement[];
   email: string;
+  collegeList: { id: string; name: string; code: string }[];
+  approvedTeamPosts: ApprovedTeamPost[];
+  myTeamPosts: MyTeamPost[];
+  upcomingEventList: { id: string; title: string }[];
 }) {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const firstName = profile.name.split(" ")[0];
@@ -183,6 +199,7 @@ export function ProfileClient({
           [
             ["overview", "Overview"],
             ["events", "My Events"],
+            ["team", "Team Finder"],
             ["settings", "Settings"],
           ] as const
         ).map(([tab, label]) => (
@@ -216,7 +233,16 @@ export function ProfileClient({
           past={pastRegistrations}
         />
       )}
-      {activeTab === "settings" && <SettingsSection profile={profile} />}
+      {activeTab === "team" && (
+        <TeamPostsSection
+          approvedPosts={approvedTeamPosts}
+          myPosts={myTeamPosts}
+          events={upcomingEventList}
+        />
+      )}
+      {activeTab === "settings" && (
+        <SettingsSection profile={profile} collegeList={collegeList} />
+      )}
     </>
   );
 }
@@ -455,7 +481,13 @@ function EventBadge({
   );
 }
 
-function SettingsSection({ profile }: { profile: Profile }) {
+function SettingsSection({
+  profile,
+  collegeList,
+}: {
+  profile: Profile;
+  collegeList: { id: string; name: string; code: string }[];
+}) {
   const [prefs, setPrefs] = useState({
     eventUpdates: true,
     announcements: true,
@@ -483,6 +515,26 @@ function SettingsSection({ profile }: { profile: Profile }) {
               Sign out
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit profile</CardTitle>
+          <CardDescription>
+            Update your details, bio, and skills
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EditProfileForm
+            name={profile.name}
+            mobile={profile.mobile}
+            collegeId={profile.collegeId}
+            colleges={collegeList}
+            enrollmentNumber={profile.enrollmentNumber}
+            bio={profile.bio}
+            skills={profile.skills}
+          />
         </CardContent>
       </Card>
 
