@@ -258,6 +258,10 @@ export function RegisterForm({
         </div>
       </div>
 
+      <p className="-mb-2 text-xs text-muted-foreground">
+        Use 8+ characters with at least one letter and one number.
+      </p>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="register-password">Password</Label>
@@ -325,6 +329,11 @@ export function RegisterForm({
           />
         </div>
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        By registering you agree to receive a verification email from TDC. New
+        accounts are reviewed by an admin before member access is granted.
+      </p>
 
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? (

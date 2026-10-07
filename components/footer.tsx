@@ -11,7 +11,7 @@ export function Footer() {
   return (
     <footer className="mt-auto border-t bg-gradient-to-b from-background to-muted/20">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2.5">
               <span
@@ -43,6 +43,34 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Get started">
+            <h2 className="text-sm font-semibold text-foreground">
+              Get started
+            </h2>
+            <ul className="mt-5 flex flex-col gap-3">
+              <li>
+                <Link href="/join" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Join the community
+                </Link>
+              </li>
+              <li>
+                <Link href="/register" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Create an account
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Member login
+                </Link>
+              </li>
+              <li>
+                <Link href="/events" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  Upcoming events
+                </Link>
+              </li>
             </ul>
           </nav>
 
@@ -81,12 +109,12 @@ export function Footer() {
             </ul>
             <div className="mt-6">
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Follow us</p>
-              <ul className="mt-3 flex flex-wrap gap-4">
+              <ul className="mt-3 flex flex-wrap gap-2">
                 {socialLinks.map((item) => (
                   <li key={item.label}>
                     <a
                       href={item.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="inline-flex items-center rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
                     >
                       {item.label}
                     </a>
