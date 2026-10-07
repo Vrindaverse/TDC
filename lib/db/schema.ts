@@ -38,6 +38,11 @@ export const profiles = pgTable(
     enrollmentNumber: text("enrollment_number").notNull().unique(),
     role: text("role").notNull().default("USER"),
     avatarKey: text("avatar_key"),
+    skills: text("skills")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    bio: text("bio"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -227,6 +232,33 @@ export const rateLimits = pgTable(
   })
 );
 
+export const teamPosts = pgTable(
+  "team_posts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    eventId: uuid("event_id").references(() => events.id, {
+      onDelete: "cascade",
+    }),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    status: text("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    profileIdIdx: index("team_posts_profile_id_idx").on(table.profileId),
+    statusIdx: index("team_posts_status_idx").on(table.status),
+    statusCheck: check(
+      "team_posts_status_check",
+      sql`${table.status} in ('pending', 'approved', 'rejected')`
+    ),
+  })
+);
+
 export type College = typeof colleges.$inferSelect;
 export type Profile = typeof profiles.$inferSelect;
 export type EventRecord = typeof events.$inferSelect;
@@ -236,3 +268,4 @@ export type ContactMessage = typeof contactMessages.$inferSelect;
 export type Announcement = typeof announcements.$inferSelect;
 export type AuditLogEntry = typeof auditLog.$inferSelect;
 export type RateLimit = typeof rateLimits.$inferSelect;
+export type TeamPost = typeof teamPosts.$inferSelect;
