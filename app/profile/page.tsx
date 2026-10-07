@@ -5,7 +5,12 @@ import { calculateProfileCompletion } from "@/lib/profile-completion";
 import { avatarPublicUrl } from "@/lib/avatar";
 import { requireProfile } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
-import { announcements, colleges, events, registrations } from "@/lib/db/schema";
+import {
+  announcements,
+  colleges,
+  events,
+  registrations,
+} from "@/lib/db/schema";
 
 export const metadata: Metadata = {
   title: "Member Portal",
@@ -38,63 +43,66 @@ export default async function ProfilePage({
       )[0]
     : null;
 
-  const [myRegistrations, pastRegistrations, announcementsData] = await Promise.all([
-    db
-      .select({
-        registrationId: registrations.id,
-        createdAt: registrations.createdAt,
-        eventId: events.id,
-        title: events.title,
-        startsAt: events.startsAt,
-        endsAt: events.endsAt,
-        location: events.location,
-      })
-      .from(registrations)
-      .innerJoin(events, eq(registrations.eventId, events.id))
-      .where(eq(registrations.profileId, profile.id))
-      .orderBy(desc(registrations.createdAt))
-      .limit(10),
-    
-    db
-      .select({
-        registrationId: registrations.id,
-        createdAt: registrations.createdAt,
-        eventId: events.id,
-        title: events.title,
-        startsAt: events.startsAt,
-        endsAt: events.endsAt,
-        location: events.location,
-      })
-      .from(registrations)
-      .innerJoin(events, eq(registrations.eventId, events.id))
-      .where(
-        and(
-          eq(registrations.profileId, profile.id),
-          lt(events.endsAt, new Date())
+  const [myRegistrations, pastRegistrations, announcementsData] =
+    await Promise.all([
+      db
+        .select({
+          registrationId: registrations.id,
+          createdAt: registrations.createdAt,
+          eventId: events.id,
+          title: events.title,
+          startsAt: events.startsAt,
+          endsAt: events.endsAt,
+          location: events.location,
+        })
+        .from(registrations)
+        .innerJoin(events, eq(registrations.eventId, events.id))
+        .where(eq(registrations.profileId, profile.id))
+        .orderBy(desc(registrations.createdAt))
+        .limit(10),
+
+      db
+        .select({
+          registrationId: registrations.id,
+          createdAt: registrations.createdAt,
+          eventId: events.id,
+          title: events.title,
+          startsAt: events.startsAt,
+          endsAt: events.endsAt,
+          location: events.location,
+        })
+        .from(registrations)
+        .innerJoin(events, eq(registrations.eventId, events.id))
+        .where(
+          and(
+            eq(registrations.profileId, profile.id),
+            lt(events.endsAt, new Date()),
+          ),
         )
-      )
-      .orderBy(desc(registrations.createdAt))
-      .limit(5),
-    
-    db
-      .select()
-      .from(announcements)
-      .where(eq(announcements.isActive, true))
-      .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
-      .limit(5)
-  ]);
+        .orderBy(desc(registrations.createdAt))
+        .limit(5),
+
+      db
+        .select()
+        .from(announcements)
+        .where(eq(announcements.isActive, true))
+        .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
+        .limit(5),
+    ]);
 
   return (
-    <ProfileClient
-      registered={registered}
-      profile={profile}
-      avatarUrl={avatarUrl}
-      profileCompletion={profileCompletion}
-      college={college}
-      myRegistrations={myRegistrations}
-      pastRegistrations={pastRegistrations}
-      announcementsData={announcementsData}
-      email={session.user.email}
-    />
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <ProfileClient
+        registered={registered}
+        profile={profile}
+        avatarUrl={avatarUrl}
+        profileCompletion={profileCompletion}
+        college={college}
+        myRegistrations={myRegistrations}
+        pastRegistrations={pastRegistrations}
+        announcementsData={announcementsData}
+        email={session.user.email}
+      />
+    </div>
   );
 }

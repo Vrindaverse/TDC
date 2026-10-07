@@ -92,7 +92,7 @@ export function ProfileClient({
 
   const [now] = useState(() => Date.now());
   const upcoming = myRegistrations.filter(
-    (r) => new Date(r.startsAt).getTime() > now
+    (r) => new Date(r.startsAt).getTime() > now,
   );
   const ongoing = myRegistrations.filter((r) => {
     const start = new Date(r.startsAt).getTime();
@@ -123,11 +123,7 @@ export function ProfileClient({
               ) : (
                 <Badge variant="secondary">Member</Badge>
               )}
-              {college ? (
-                <Badge variant="outline">
-                  {college.code}
-                </Badge>
-              ) : null}
+              {college ? <Badge variant="outline">{college.code}</Badge> : null}
             </div>
           </div>
         </div>
@@ -194,7 +190,7 @@ export function ProfileClient({
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex-1 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === tab
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -214,7 +210,11 @@ export function ProfileClient({
         />
       )}
       {activeTab === "events" && (
-        <EventsSection upcoming={upcoming} ongoing={ongoing} past={pastRegistrations} />
+        <EventsSection
+          upcoming={upcoming}
+          ongoing={ongoing}
+          past={pastRegistrations}
+        />
       )}
       {activeTab === "settings" && <SettingsSection profile={profile} />}
     </>
@@ -248,22 +248,39 @@ function OverviewSection({
               label="College"
               value={college ? `${college.name} (${college.code})` : "Not set"}
             />
-            <DetailRow label="Member since" value={formatDate(profile.createdAt)} />
+            <DetailRow
+              label="Member since"
+              value={formatDate(profile.createdAt)}
+            />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Quick actions</CardTitle>
-            <CardDescription>
-              Jump back into the community
-            </CardDescription>
+            <CardDescription>Jump back into the community</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
-            <QuickAction href="/events" title="Browse events" description="Find your next workshop or hackathon" />
-            <QuickAction href="/join" title="Register now" description="Register for an upcoming event" />
-            <QuickAction href="/contact" title="Contact team" description="Reach out with questions" />
-            <QuickAction href="/about" title="About TDC" description="Learn what the community offers" />
+            <QuickAction
+              href="/events"
+              title="Browse events"
+              description="Find your next workshop or hackathon"
+            />
+            <QuickAction
+              href="/join"
+              title="Register now"
+              description="Register for an upcoming event"
+            />
+            <QuickAction
+              href="/contact"
+              title="Contact team"
+              description="Reach out with questions"
+            />
+            <QuickAction
+              href="/about"
+              title="About TDC"
+              description="Learn what the community offers"
+            />
           </CardContent>
         </Card>
       </div>
@@ -316,7 +333,8 @@ function EventsSection({
   ongoing: Registration[];
   past: Registration[];
 }) {
-  const empty = upcoming.length === 0 && ongoing.length === 0 && past.length === 0;
+  const empty =
+    upcoming.length === 0 && ongoing.length === 0 && past.length === 0;
 
   return (
     <div className="space-y-6">
@@ -399,9 +417,7 @@ function EventListCard({
                 </div>
               ) : null}
               {event.endsAt ? (
-                <p className="text-xs">
-                  Ends {formatDate(event.endsAt)}
-                </p>
+                <p className="text-xs">Ends {formatDate(event.endsAt)}</p>
               ) : null}
             </div>
           </div>
