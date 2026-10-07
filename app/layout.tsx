@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 
-import { Footer } from "@/components/footer";
-import { Navbar } from "@/components/navbar";
+import {
+  AppChrome,
+  AppFooter,
+  ChromeSkeleton,
+} from "@/components/app-shell";
 import { site } from "@/lib/navigation";
 
 import "./globals.css";
@@ -43,9 +47,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        <Navbar />
+        <Suspense fallback={<ChromeSkeleton />}>
+          <AppChrome />
+        </Suspense>
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Suspense fallback={null}>
+          <AppFooter />
+        </Suspense>
       </body>
     </html>
   );

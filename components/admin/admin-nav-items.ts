@@ -1,0 +1,17 @@
+import {
+  Bell,
+  CalendarDays,
+  LayoutDashboard,
+  Ticket,
+  Users,
+} from "lucide-react";
+
+export const ADMIN_NAV_ITEMS = [
+  { label: "Overview", href: "/admin", icon: LayoutDashboard },
+  { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Events", href: "/admin/events", icon: CalendarDays },
+  { label: "Registrations", href: "/admin/registrations", icon: Ticket },
+  { label: "Messages", href: "/admin/messages", icon: Bell },
+];
+
+export const VISIT_SITE_HREF = "/?view=site";

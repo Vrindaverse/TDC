@@ -9,12 +9,48 @@ const socialItems: StaggeredMenuSocialItem[] = [
   { label: 'GitHub', link: 'https://github.com/technocrats-developer-community' }
 ];
 
-export function MobileStaggeredMenu() {
-  const menuItems: StaggeredMenuItem[] = navLinks.map((link) => ({
+export function MobileStaggeredMenu({
+  isAuthenticated,
+  isAdmin,
+}: {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+}) {
+  const authItems: StaggeredMenuItem[] = isAuthenticated
+    ? [
+        {
+          label: 'Profile',
+          ariaLabel: 'Go to profile',
+          link: '/profile'
+        },
+        ...(isAdmin
+          ? [
+              {
+                label: 'Admin',
+                ariaLabel: 'Go to admin console',
+                link: '/admin'
+              }
+            ]
+          : [])
+      ]
+    : [
+        {
+          label: 'Login',
+          ariaLabel: 'Go to login page',
+          link: '/login'
+        },
+        {
+          label: 'Register',
+          ariaLabel: 'Go to registration page',
+          link: '/register'
+        }
+      ];
+
+  const menuItems: StaggeredMenuItem[] = [...navLinks.map((link) => ({
     label: link.label,
     ariaLabel: `Go to ${link.label.toLowerCase()} page`,
     link: link.href
-  }));
+  })), ...authItems];
 
   return (
     <div className="block md:hidden">

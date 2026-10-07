@@ -42,7 +42,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   displaySocials = true,
   displayItemNumbering = true,
   className,
-  logoUrl = '/images/tdc-hero.svg',
   menuButtonColor = '#fff',
   openMenuButtonColor = '#fff',
   accentColor = '#5227FF',
@@ -128,7 +127,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       gsap.set(itemEls, { yPercent: 140, rotate: 10 });
     }
     if (numberEls.length) {
-      gsap.set(numberEls, { '--sm-num-opacity': 0 } as any);
+      gsap.set(numberEls, { '--sm-num-opacity': 0 } as gsap.TweenVars);
     }
     if (socialTitle) {
       gsap.set(socialTitle, { opacity: 0 });
@@ -173,7 +172,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
             duration: 0.6,
             ease: 'power2.out',
             '--sm-num-opacity': 1
-          } as any,
+          } as gsap.TweenVars,
           itemsStart + 0.1
         );
       }
@@ -252,7 +251,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         }
         const numberEls = Array.from(panel.querySelectorAll('.sm-panel-list[data-numbering] .sm-panel-item')) as HTMLAnchorElement[];
         if (numberEls.length) {
-          gsap.set(numberEls, { '--sm-num-opacity': 0 } as any);
+gsap.set(numberEls, { '--sm-num-opacity': 0 } as gsap.TweenVars);
         }
         const socialTitle = panel.querySelector('.sm-socials-title') as HTMLHeadingElement | null;
         const socialLinks = Array.from(panel.querySelectorAll('.sm-socials-link')) as HTMLAnchorElement[];
@@ -381,7 +380,9 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     };
   }, [closeOnClickAway, open, closeMenu]);
 
-  const styleVars: CSSProperties = accentColor ? { ['--sm-accent' as any]: accentColor } : {};
+  const styleVars: CSSProperties = accentColor
+    ? ({ '--sm-accent': accentColor } as CSSProperties)
+    : {};
 
   return (
     <div
@@ -393,7 +394,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
         {(() => {
           const raw = colors && colors.length ? colors.slice(0, 4) : ['#1e1e22', '#35353c'];
-          let arr = [...raw];
+          const arr = [...raw];
           if (arr.length >= 3) {
             const mid = Math.floor(arr.length / 2);
             arr.splice(mid, 1);

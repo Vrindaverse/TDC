@@ -59,8 +59,8 @@ export function Hero() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="tdc-mono cursor-target">
-                <Link href="/about">
-                  explore
+                <Link href="/join">
+                  join us
                   <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
@@ -74,6 +74,14 @@ export function Hero() {
                   <CalendarDays aria-hidden="true" />
                   tdc events
                 </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="ghost"
+                className="tdc-mono cursor-target"
+              >
+                <Link href="/about">explore</Link>
               </Button>
             </div>
 

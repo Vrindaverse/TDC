@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Lock, Mail, MapPin, Phone } from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
 
 import { ContactForm } from "@/components/contact-form";
 import { SectionHeading } from "@/components/section-heading";
 import { Section } from "@/components/section";
+import { Button } from "@/components/ui/button";
+import { getProfile, getSession } from "@/lib/auth/guards";
 import { contactDetails } from "@/lib/site-data";
 
 export const metadata: Metadata = {
@@ -43,7 +47,45 @@ const contactItems = [
   },
 ];
 
+async function ContactFormGate() {
+  const session = await getSession();
+  const profile = session?.user ? await getProfile(session.user.id) : null;
+
+  if (profile) {
+    return (
+      <ContactForm
+        senderName={profile.name}
+        senderEmail={session?.user?.email ?? null}
+      />
+    );
+  }
+
+  return (
+    <div className="rounded-lg border bg-card p-6 text-center">
+      <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Lock aria-hidden="true" className="size-5" />
+      </div>
+      <h3 className="mt-4 text-base font-semibold">
+        Sign in to send us a message
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        Only registered members of TDC can contact the admin team. If
+        you&apos;re not a member yet, register first — it takes a minute.
+      </p>
+      <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+        <Button asChild>
+          <Link href="/login">Sign in</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/register">Create an account</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function ContactPage() {
+
   return (
     <Section>
       <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
@@ -95,7 +137,15 @@ export default function ContactPage() {
         </div>
 
         <div>
-          <ContactForm />
+          <Suspense
+            fallback={
+              <div className="rounded-lg border bg-card p-6 text-center">
+                <p className="text-sm text-muted-foreground">Loading…</p>
+              </div>
+            }
+          >
+            <ContactFormGate />
+          </Suspense>
         </div>
       </div>
     </Section>

@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { asc, gt } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { cacheLife } from "next/cache";
 
 import { BentoTile } from "@/components/bento-tile";
 import { Hero } from "@/components/hero";
@@ -8,15 +12,41 @@ import { Section } from "@/components/section";
 import { TargetCursor } from "@/components/target-cursor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  communityStats,
-  domains,
-  upcomingEvents,
-} from "@/lib/site-data";
-
-const featuredEvents = upcomingEvents.slice(0, 3);
+import { getProfile, getSession } from "@/lib/auth/guards";
+import { db } from "@/lib/db";
+import { events } from "@/lib/db/schema";
+import { dbEventToItem } from "@/lib/events";
+import { communityStats, domains } from "@/lib/site-data";
 
 const tickerItems = domains.map((domain) => domain.title.toUpperCase());
+
+async function getFeaturedEvents() {
+  "use cache";
+  cacheLife("minutes");
+
+  const rows = await db
+    .select()
+    .from(events)
+    .where(gt(events.startsAt, new Date()))
+    .orderBy(asc(events.startsAt))
+    .limit(3);
+
+  return rows.map(dbEventToItem);
+}
+
+async function AdminGate({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const session = await getSession();
+  const profile = session?.user ? await getProfile(session.user.id) : null;
+  const { view } = await searchParams;
+  if (profile?.role === "ADMIN" && view !== "site") {
+    redirect("/admin");
+  }
+  return null;
+}
 
 const entrySteps = [
   {
@@ -42,9 +72,19 @@ const entrySteps = [
   },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const featuredEvents = await getFeaturedEvents();
+
   return (
     <>
+      <Suspense>
+        <AdminGate searchParams={searchParams} />
+      </Suspense>
+
       <TargetCursor />
 
       <Hero />
@@ -93,6 +133,16 @@ export default function Home() {
             className="tdc-reveal lg:col-span-2"
           >
             <ul className="flex flex-1 flex-col">
+              {featuredEvents.length === 0 ? (
+                <li className="py-3">
+                  <p className="tdc-mono text-[11px] text-muted-foreground">
+                    next
+                  </p>
+                  <p className="mt-1 text-sm font-semibold">
+                    Season details coming soon
+                  </p>
+                </li>
+              ) : null}
               {featuredEvents.map((event, index) => (
                 <li
                   key={event.id}

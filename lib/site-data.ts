@@ -154,51 +154,6 @@ export const communityStats: CommunityStat[] = [
   },
 ];
 
-export const upcomingEvents: EventItem[] = [
-  {
-    id: "tdc-season-3",
-    title: "TDC Season 3",
-    poster: "/images/events/tdc-season-3.svg",
-    posterHeight: 828,
-    date: "Announcing Soon",
-    time: "To be announced",
-    location: "Technocrats Campus",
-    description:
-      "Our third season is on its way. Stay tuned for details about tracks, mentors and registration dates.",
-    domain: "Multi-domain",
-    registrationStatus: "open",
-  },
-];
-
-export const pastEvents: EventItem[] = [
-  {
-    id: "tdc-season-2",
-    title: "TDC Season 2",
-    poster: "/images/events/tdc-season-3.svg",
-    posterHeight: 828,
-    date: "Completed",
-    time: "Completed",
-    location: "Technocrats Campus",
-    description:
-      "TDC Season 2 successfully concluded with great participation and amazing projects.",
-    domain: "Multi-domain",
-    registrationStatus: "closed",
-  },
-  {
-    id: "tdc-season-1",
-    title: "TDC Season 1",
-    poster: "/images/events/tdc-season-3.svg",
-    posterHeight: 828,
-    date: "Completed",
-    time: "Completed",
-    location: "Technocrats Campus",
-    description:
-      "The inaugural season of TDC laid the foundation for our growing developer community.",
-    domain: "Multi-domain",
-    registrationStatus: "closed",
-  },
-];
-
 export const communityValues: CommunityValue[] = [
   {
     id: "learn",

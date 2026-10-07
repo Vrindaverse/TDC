@@ -849,7 +849,13 @@ export function TechText({
     const onUp = (e: PointerEvent) => {
       if (dragging >= 0) {
         dragging = -1;
-        container.releasePointerCapture?.(e.pointerId);
+        try {
+          if (container.hasPointerCapture(e.pointerId)) {
+            container.releasePointerCapture(e.pointerId);
+          }
+        } catch {
+          // pointer capture may already be gone (e.g. pointercancel)
+        }
         const rect = container.getBoundingClientRect();
         pointer.inside =
           e.clientX >= rect.left &&
