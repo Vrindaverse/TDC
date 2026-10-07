@@ -16,6 +16,7 @@ import {
   registerSchema,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 type Values = {
   name: string;
@@ -62,6 +63,7 @@ export function RegisterForm({
   const [edited, setEdited] = useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const csrfToken = useCsrfToken();
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -121,7 +123,7 @@ export function RegisterForm({
       noValidate
       className="flex flex-col gap-5"
     >
-      <input type="hidden" name="_csrf" />
+      <input type="hidden" name="_csrf" value={csrfToken} />
       {state?.error ? (
         <div
           role="alert"

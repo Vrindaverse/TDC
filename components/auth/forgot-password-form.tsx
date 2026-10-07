@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { forgotPasswordSchema } from "@/lib/validation/auth";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 export function ForgotPasswordForm() {
   const [state, formAction, pending] = useActionState<
@@ -20,6 +21,7 @@ export function ForgotPasswordForm() {
   >(requestResetCodeAction, null);
   const [email, setEmail] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
+  const csrfToken = useCsrfToken();
 
   useEffect(() => {
     if (state?.fieldErrors?.email || state?.error) {
@@ -47,7 +49,7 @@ export function ForgotPasswordForm() {
       noValidate
       className="flex flex-col gap-5"
     >
-      <input type="hidden" name="_csrf" />
+      <input type="hidden" name="_csrf" value={csrfToken} />
       {state?.error ? (
         <div
           role="alert"

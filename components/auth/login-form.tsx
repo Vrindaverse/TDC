@@ -17,6 +17,7 @@ import {
   loginSchema,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 type Values = {
   email: string;
@@ -44,6 +45,7 @@ export function LoginForm() {
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = useState(false);
+  const csrfToken = useCsrfToken();
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -114,7 +116,7 @@ export function LoginForm() {
         noValidate
         className="flex flex-col gap-5"
       >
-        <input type="hidden" name="_csrf" />
+        <input type="hidden" name="_csrf" value={csrfToken} />
         <div className="flex flex-col gap-2">
           <Label htmlFor="login-email">Email</Label>
           <Input

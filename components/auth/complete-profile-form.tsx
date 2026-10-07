@@ -16,6 +16,7 @@ import {
   fieldErrorsFromZod,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 type Values = {
   mobile: string;
@@ -52,6 +53,7 @@ export function CompleteProfileForm({
   const [values, setValues] = useState<Values>(initialValues);
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
+  const csrfToken = useCsrfToken();
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -111,7 +113,7 @@ export function CompleteProfileForm({
       noValidate
       className="flex flex-col gap-5"
     >
-      <input type="hidden" name="_csrf" />
+      <input type="hidden" name="_csrf" value={csrfToken} />
       {state?.error ? (
         <div
           role="alert"

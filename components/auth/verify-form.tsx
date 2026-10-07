@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import type { FormEvent } from "react";
 
 import {
@@ -17,6 +17,7 @@ import {
   OtpExpiryNote,
   useOtpExpiry,
 } from "@/components/auth/otp-expiry";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 const OTP_PATTERN = /^\d{6}$/;
 
@@ -38,12 +39,7 @@ export function VerifyForm({ email }: { email: string }) {
     setResendCount((value) => value + 1);
   }
   const { expired, label } = useOtpExpiry(resendCount);
-
-  useEffect(() => {
-    if (state?.fieldErrors?.otp || state?.error) {
-      document.getElementById("verify-otp")?.focus();
-    }
-  }, [state]);
+  const csrfToken = useCsrfToken();
 
   const otpError = clientError ?? state?.fieldErrors?.otp;
   const disabled = pending || resendPending || expired;
@@ -73,7 +69,7 @@ export function VerifyForm({ email }: { email: string }) {
         noValidate
         className="flex flex-col gap-5"
       >
-        <input type="hidden" name="_csrf" />
+        <input type="hidden" name="_csrf" value={csrfToken} />
         <div className="flex flex-col gap-2">
           <Label htmlFor="verify-otp">Verification code</Label>
           <Input
@@ -128,7 +124,7 @@ export function VerifyForm({ email }: { email: string }) {
           minute — check your spam folder too.
         </p>
         <form action={resendFormAction}>
-          <input type="hidden" name="_csrf" />
+          <input type="hidden" name="_csrf" value={csrfToken} />
           <button
             type="submit"
             disabled={pending || resendPending}

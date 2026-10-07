@@ -55,7 +55,7 @@ export async function getUserEmails(userIds: string[]): Promise<Map<string, stri
   if (userIds.length === 0) return new Map();
   const placeholders = userIds.map((_, i) => `$${i + 1}`).join(", ");
   const query = `select id, email from neon_auth."user" where id in (${placeholders})`;
-  const rows = await sql`select id, email from neon_auth."user" where id in (${sql.raw(placeholders)})`;
+  const rows = await sql.query(query, userIds);
   const map = new Map<string, string>();
   for (const row of rows) {
     map.set(row.id, row.email);

@@ -17,6 +17,7 @@ import {
   useOtpExpiry,
 } from "@/components/auth/otp-expiry";
 import { resetPasswordSchema } from "@/lib/validation/auth";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 export function ResetPasswordForm({ email }: { email: string }) {
   const [state, formAction, pending] = useActionState<
@@ -28,6 +29,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
+  const csrfToken = useCsrfToken();
 
   const { expired: codeExpired, label: codeLabel } = useOtpExpiry(0);
 
@@ -69,7 +71,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
       noValidate
       className="flex flex-col gap-5"
     >
-      <input type="hidden" name="_csrf" />
+      <input type="hidden" name="_csrf" value={csrfToken} />
       <input type="hidden" name="email" value={email} />
 
       {state?.error ? (
@@ -184,7 +186,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
           className="w-full"
           disabled={pending}
         >
-          <input type="hidden" name="_csrf" />
+          <input type="hidden" name="_csrf" value={csrfToken} />
           <RotateCcw aria-hidden="true" className="size-4" />
           Resend code
         </Button>

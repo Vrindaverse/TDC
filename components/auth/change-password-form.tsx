@@ -16,6 +16,7 @@ import {
   fieldErrorsFromZod,
   type FieldErrors,
 } from "@/lib/validation/auth";
+import { useCsrfToken } from "@/hooks/use-csrf";
 
 type Values = {
   currentPassword: string;
@@ -48,6 +49,7 @@ export function ChangePasswordForm() {
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = useState(false);
+  const csrfToken = useCsrfToken();
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -108,7 +110,7 @@ export function ChangePasswordForm() {
       noValidate
       className="flex flex-col gap-4"
     >
-      <input type="hidden" name="_csrf" />
+      <input type="hidden" name="_csrf" value={csrfToken} />
       {state?.error ? (
         <div
           role="alert"
