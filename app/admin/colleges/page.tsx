@@ -1,3 +1,4 @@
+import { CsrfInput } from "@/components/csrf-input";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -265,6 +266,7 @@ export default async function AdminCollegesPage({
                             </Link>
                           </Button>
                           <form action={toggleCollegeAction}>
+                            <CsrfInput />
                             <input
                               type="hidden"
                               name="id"

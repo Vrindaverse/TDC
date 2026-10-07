@@ -1,3 +1,4 @@
+import { CsrfInput } from "@/components/csrf-input";
 import { count, desc, eq } from "drizzle-orm";
 import { CalendarDays, Mail, MessageSquareText, ShieldCheck, ShieldOff } from "lucide-react";
 import type { Metadata } from "next";
@@ -120,6 +121,7 @@ export default async function AdminUserDetailPage({
         <div className="flex items-center gap-2">
           {isSelf ? null : (
             <form action={setUserRoleAction}>
+              <CsrfInput />
               <input type="hidden" name="userId" value={profile.userId} />
               <input
                 type="hidden"

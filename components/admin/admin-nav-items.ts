@@ -1,5 +1,6 @@
 import {
   Bell,
+  Handshake,
   CalendarDays,
   GraduationCap,
   History,
@@ -17,6 +18,7 @@ export const ADMIN_NAV_ITEMS = [
   { label: "Messages", href: "/admin/messages", icon: Bell },
   { label: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { label: "Colleges", href: "/admin/colleges", icon: GraduationCap },
+  { label: "Team Finder", href: "/admin/team", icon: Handshake },
   { label: "Activity", href: "/admin/activity", icon: History },
 ];
 

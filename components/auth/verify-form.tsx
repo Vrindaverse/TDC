@@ -1,5 +1,6 @@
 "use client";
 
+import { CsrfInput } from "@/components/csrf-input";
 import { Loader2 } from "lucide-react";
 import { useActionState, useState } from "react";
 import type { FormEvent } from "react";
@@ -124,6 +125,7 @@ export function VerifyForm({ email }: { email: string }) {
           minute — check your spam folder too.
         </p>
         <form action={resendFormAction}>
+          <CsrfInput />
           <input type="hidden" name="_csrf" value={csrfToken} />
           <button
             type="submit"

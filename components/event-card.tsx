@@ -1,5 +1,6 @@
 "use client";
 
+import { CsrfInput } from "@/components/csrf-input";
 import {
   ArrowRight,
   CalendarDays,
@@ -110,6 +111,7 @@ export function EventCard({
 
       {formAction && !past ? (
         <form action={formActionResult} className="relative mt-auto pt-6">
+          <CsrfInput />
           <input type="hidden" name="eventId" value={event.id} />
           <Button type="submit" size="sm" className="group/button w-full shadow-sm" disabled={pending}>
             {pending ? (

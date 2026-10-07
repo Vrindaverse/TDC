@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 
 import { AdminNavbar } from "@/components/admin/admin-navbar";
 import { Footer } from "@/components/footer";
+import { MemberNavbar } from "@/components/member-navbar";
 import { Navbar } from "@/components/navbar";
 import { avatarPublicUrl } from "@/lib/avatar";
 import {
@@ -48,6 +49,16 @@ export async function AppChrome() {
         userName={profile?.name}
         userEmail={session?.user?.email}
         unreadMessages={unreadMessages}
+      />
+    );
+  }
+
+  if (session?.user && profile && !isAdmin) {
+    return (
+      <MemberNavbar
+        avatarUrl={avatarUrl}
+        userName={profile.name}
+        userEmail={session.user.email}
       />
     );
   }

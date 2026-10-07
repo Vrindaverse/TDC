@@ -1,5 +1,6 @@
 "use client";
 
+import { CsrfInput } from "@/components/csrf-input";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
@@ -232,7 +233,7 @@ export function EventForm({
       noValidate
       className="flex flex-col gap-5"
     >
-      <input type="hidden" name="_csrf" />
+      <CsrfInput />
       {event ? <input type="hidden" name="id" value={event.id} /> : null}
 
       {state?.error ? (

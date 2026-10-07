@@ -23,6 +23,9 @@ export const AUDIT_ACTIONS = [
   "college.update",
   "college.toggle",
   "college.delete",
+  "team_post.approve",
+  "team_post.reject",
+  "team_post.delete",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
@@ -31,7 +34,7 @@ export type AuditEntry = {
   actorId: string | null;
   actorName: string;
   action: AuditAction;
-  targetType: "user" | "event" | "registration" | "message" | "announcement" | "college";
+  targetType: "user" | "event" | "registration" | "message" | "announcement" | "college" | "team_post";
   targetId?: string | null;
   detail?: string | null;
 };

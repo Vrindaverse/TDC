@@ -1,3 +1,4 @@
+import { CsrfInput } from "@/components/csrf-input";
 import { count, eq } from "drizzle-orm";
 import {
   CheckCircle2,
@@ -289,6 +290,7 @@ export default async function AdminMessagesPage({
                       </div>
                       <div className="flex items-center gap-2">
                         <form action={setMessageStatusAction}>
+                        <CsrfInput />
                           <input type="hidden" name="id" value={row.id} />
                           <input
                             type="hidden"

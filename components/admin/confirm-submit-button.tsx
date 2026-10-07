@@ -1,5 +1,6 @@
 "use client";
 
+import { CsrfInput } from "@/components/csrf-input";
 import type { VariantProps } from "class-variance-authority";
 import { useState, type ReactNode } from "react";
 
@@ -32,6 +33,7 @@ export function ConfirmSubmitButton({
 
   return (
     <form action={action}>
+      <CsrfInput />
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />
       ))}

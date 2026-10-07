@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   updateProfileAction,
@@ -46,9 +46,6 @@ export function EditProfileForm({
   });
   const csrfToken = useCsrfToken();
 
-  useEffect(() => {
-    if (state?.success) setValues((v) => v);
-  }, [state]);
 
   const update = (field: keyof typeof values, value: string) =>
     setValues((previous) => ({ ...previous, [field]: value }));

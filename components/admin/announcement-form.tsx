@@ -1,5 +1,6 @@
 "use client";
 
+import { CsrfInput } from "@/components/csrf-input";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
@@ -92,6 +93,7 @@ export function AnnouncementForm({
       noValidate
       className="flex flex-col gap-4"
     >
+      <CsrfInput />
       {announcement ? (
         <input type="hidden" name="id" value={announcement.id} />
       ) : null}

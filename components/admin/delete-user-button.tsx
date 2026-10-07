@@ -1,5 +1,6 @@
 "use client";
 
+import { CsrfInput } from "@/components/csrf-input";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,7 +21,7 @@ export function DeleteUserButton({
   return (
     <form action={deleteUserAction}>
       <input type="hidden" name="userId" value={userId} />
-      <input type="hidden" name="_csrf" />
+      <CsrfInput />
       <Button
         type="submit"
         variant={confirming ? "destructive" : "outline"}

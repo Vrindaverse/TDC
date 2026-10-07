@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -28,6 +28,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { signOutAction } from "@/lib/auth/actions";
+import {
+  cancelRegistrationAction,
+  type SimpleActionState,
+} from "@/app/profile/actions";
+import { useCsrfToken } from "@/hooks/use-csrf";
 import { daysUntil, formatDate } from "@/lib/format";
 import {
   TeamPostsSection,
@@ -278,6 +283,35 @@ function OverviewSection({
               label="Member since"
               value={formatDate(profile.createdAt)}
             />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Bio
+              </span>
+              <span className="text-sm">
+                {profile.bio?.trim() ? profile.bio : "No bio yet — add one in Settings."}
+              </span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                Skills
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {profile.skills.length > 0 ? (
+                  profile.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs text-primary"
+                    >
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    No skills listed yet.
+                  </span>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -327,22 +361,7 @@ function OverviewSection({
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {announcements.map((announcement) => (
-              <div key={announcement.id} className="rounded-md border p-3">
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <h3 className="font-medium">{announcement.title}</h3>
-                  {announcement.pinned ? (
-                    <Badge variant="secondary">Pinned</Badge>
-                  ) : null}
-                </div>
-                <p className="mb-2 text-sm text-muted-foreground">
-                  {announcement.body}
-                </p>
-                <time className="text-xs text-muted-foreground">
-                  {formatDate(announcement.createdAt)}
-                </time>
-              </div>
-            ))}
+            <AnnouncementsFilter announcements={announcements} />
           </CardContent>
         </Card>
       ) : null}
@@ -446,6 +465,7 @@ function EventListCard({
                 <p className="text-xs">Ends {formatDate(event.endsAt)}</p>
               ) : null}
             </div>
+            <EventActions event={event} variant={variant} />
           </div>
         ))}
       </CardContent>
@@ -705,5 +725,119 @@ function MemberStatCard({
         <div className="text-2xl font-bold">{value}</div>
       </CardContent>
     </Card>
+  );
+}
+
+function AnnouncementsFilter({
+  announcements,
+}: {
+  announcements: Announcement[];
+}) {
+  const [filter, setFilter] = useState<"all" | "pinned">("all");
+  const visible =
+    filter === "pinned"
+      ? announcements.filter((a) => a.pinned)
+      : announcements;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        {(["all", "pinned"] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setFilter(value)}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              filter === value
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {value === "all" ? "All" : "Pinned"}
+          </button>
+        ))}
+      </div>
+      {visible.length === 0 ? (
+        <p className="py-4 text-center text-sm text-muted-foreground">
+          No pinned announcements.
+        </p>
+      ) : (
+        visible.map((announcement) => (
+          <div key={announcement.id} className="rounded-md border p-3">
+            <div className="mb-1 flex items-center justify-between gap-2">
+              <h3 className="font-medium">{announcement.title}</h3>
+              {announcement.pinned ? (
+                <Badge variant="secondary">Pinned</Badge>
+              ) : null}
+            </div>
+            <p className="mb-2 text-sm text-muted-foreground">
+              {announcement.body}
+            </p>
+            <time className="text-xs text-muted-foreground">
+              {formatDate(announcement.createdAt)}
+            </time>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function EventActions({
+  event,
+  variant,
+}: {
+  event: Registration;
+  variant: "upcoming" | "live" | "past";
+}) {
+  const [copied, setCopied] = useState(false);
+  const [state, formAction, pending] = useActionState<
+    SimpleActionState,
+    FormData
+  >(cancelRegistrationAction, null);
+  const csrfToken = useCsrfToken();
+
+  function share() {
+    const text = `${event.title} — ${formatDate(event.startsAt)}${
+      event.location ? ` @ ${event.location}` : ""
+    }`;
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="mt-3 flex items-center gap-2">
+      <button
+        type="button"
+        onClick={share}
+        className="rounded-md border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        {copied ? "Copied!" : "Copy details"}
+      </button>
+      {variant !== "past" ? (
+        <form action={formAction} className="inline">
+          <input type="hidden" name="_csrf" value={csrfToken} />
+          <input
+            type="hidden"
+            name="registrationId"
+            value={event.registrationId}
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded-md border border-destructive/40 px-2.5 py-1 text-xs text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+          >
+            {pending ? "Cancelling…" : "Cancel registration"}
+          </button>
+        </form>
+      ) : null}
+      {state?.error ? (
+        <span role="alert" className="text-xs text-destructive">
+          {state.error}
+        </span>
+      ) : null}
+    </div>
   );
 }

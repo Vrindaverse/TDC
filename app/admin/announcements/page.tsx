@@ -1,3 +1,4 @@
+import { CsrfInput } from "@/components/csrf-input";
 import { desc } from "drizzle-orm";
 import {
   CheckCircle2,
@@ -202,6 +203,7 @@ export default async function AdminAnnouncementsPage({
                     </div>
                     <div className="flex items-center gap-1.5">
                       <form action={toggleAnnouncementAction}>
+                        <CsrfInput />
                         <input type="hidden" name="id" value={announcement.id} />
                         <input
                           type="hidden"
@@ -226,6 +228,7 @@ export default async function AdminAnnouncementsPage({
                         </Button>
                       </form>
                       <form action={toggleAnnouncementAction}>
+                        <CsrfInput />
                         <input type="hidden" name="id" value={announcement.id} />
                         <input type="hidden" name="field" value="pinned" />
                         <input

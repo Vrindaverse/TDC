@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Users } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   createTeamPostAction,
@@ -56,13 +56,6 @@ export function TeamPostsSection({
   const [eventId, setEventId] = useState("");
   const csrfToken = useCsrfToken();
 
-  useEffect(() => {
-    if (state?.success) {
-      setTitle("");
-      setBody("");
-      setEventId("");
-    }
-  }, [state]);
 
   return (
     <div className="space-y-6">
