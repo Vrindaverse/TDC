@@ -7,6 +7,7 @@ import {
   AppFooter,
   ChromeSkeleton,
 } from "@/components/app-shell";
+import { TargetCursor } from "@/components/target-cursor";
 import { site } from "@/lib/navigation";
 import { validateEnv } from "@/lib/env";
 
@@ -55,6 +56,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <AppChrome />
         </Suspense>
         <main className="flex-1">{children}</main>
+        <TargetCursor
+          targetSelector=".cursor-target, input, select, textarea, button, a, label, [role='button'], [role='switch']"
+        />
         <Suspense fallback={null}>
           <AppFooter />
         </Suspense>
