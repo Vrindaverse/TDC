@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowRight,
   CalendarDays,
@@ -47,7 +49,7 @@ export function EventCard({
   showRegistration = false,
   past = false,
   formAction,
-  action,
+  action: actionLink,
 }: EventCardProps) {
   const status = statusMeta[event.registrationStatus];
   const StatusIcon = past ? UserCheck : status.icon;
@@ -55,13 +57,13 @@ export function EventCard({
   const statusVariant = past ? "outline" : status.variant;
   const showBadge = showRegistration || past;
 
-  const [state, action, pending] = useActionState(formAction ?? (() => {}), null);
+  const [state, formActionResult, pending] = useActionState(formAction ?? (() => {}), null);
 
   return (
-    <article className="group relative flex cursor-target flex-col overflow-hidden rounded-2xl border bg-card/80 p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <article className="group relative flex cursor-target flex-col overflow-hidden rounded-2xl border bg-card/80 p-6 shadow-sm">
       {event.poster && (
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 grayscale transition-all duration-500 group-hover:opacity-10 group-hover:grayscale-0"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 grayscale-0"
           style={{ backgroundImage: `url(${event.poster})` }}
         />
       )}
@@ -107,7 +109,7 @@ export function EventCard({
       </p>
 
       {formAction && !past ? (
-        <form action={action} className="relative mt-auto pt-6">
+        <form action={formActionResult} className="relative mt-auto pt-6">
           <input type="hidden" name="eventId" value={event.id} />
           <Button type="submit" size="sm" className="group/button w-full shadow-sm" disabled={pending}>
             {pending ? (
@@ -126,11 +128,11 @@ export function EventCard({
             </p>
           )}
         </form>
-      ) : action && !past ? (
+      ) : actionLink && !past ? (
         <div className="relative mt-auto pt-6">
           <Button asChild size="sm" className="group/button w-full shadow-sm">
-            <a href={action.href}>
-              {action.label}
+            <a href={actionLink.href}>
+              {actionLink.label}
               <ArrowRight aria-hidden="true" className="transition-transform group-hover/button:translate-x-0.5" />
             </a>
           </Button>

@@ -311,7 +311,7 @@ function MemberStatCard({
   label: string;
   value: string;
   description: string;
-  icon: React.ComponentType<{ className?: string; aria-hidden?: boolean }>;
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 }) {
   const Icon = icon;
   
