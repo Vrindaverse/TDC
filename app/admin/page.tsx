@@ -7,7 +7,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { unstable_noStore } from "next/cache";
+import { connection } from "next/server";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,7 +39,7 @@ function formatDate(value: Date | string | null | undefined) {
 }
 
 export default async function AdminOverviewPage() {
-  unstable_noStore();
+  await connection();
   
   async function safeQuery<T>(query: Promise<T>, fallback: T, label: string): Promise<T> {
     try {
