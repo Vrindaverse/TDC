@@ -562,3 +562,39 @@
     opacity: 0.5;
   }
 }
+
+/* ---------- Theme-burn transition (Ember-Reveal style) ---------- */
+
+.tdc-burn-rim {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1.5px rgba(255, 154, 60, 0.95),
+    0 0 16px 4px rgba(255, 122, 31, 0.55),
+    0 0 60px 22px rgba(255, 122, 31, 0.3),
+    0 0 150px 80px rgba(255, 70, 0, 0.14),
+    inset 0 0 26px 10px rgba(12, 7, 4, 0.92);
+  animation: tdc-burn-flicker 0.16s linear infinite;
+}
+
+@keyframes tdc-burn-flicker {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.014);
+  }
+}
+
+.tdc-burn-spark,
+.tdc-burn-smoke {
+  position: fixed;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 61;
+}
+
+.tdc-burn-smoke {
+  filter: blur(6px);
+}

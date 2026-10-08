@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { burnThemeTransition } from "@/lib/theme-burn";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
@@ -33,7 +34,15 @@ export function ThemeToggle() {
       aria-label={label}
       title={label}
       className="relative"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={(event) => {
+        const next = isDark ? "light" : "dark";
+        const rect = event.currentTarget.getBoundingClientRect();
+        burnThemeTransition({
+          x: event.clientX || rect.left + rect.width / 2,
+          y: event.clientY || rect.top + rect.height / 2,
+          onFlip: () => setTheme(next),
+        });
+      }}
     >
       <Sun
         aria-hidden="true"
