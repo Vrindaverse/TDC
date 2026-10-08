@@ -27,7 +27,7 @@ export function DomainMarquee({ items }: { items: readonly string[] }) {
     <div className="overflow-hidden">
       <div className="tdc-marquee" style={{ animationDuration: "28s" }}>
         {track}
-        <div className="tdc-marquee-track" aria-hidden="true" style={{ gap: "3rem", paddingRight: "3rem" }}>
+        <div className="tdc-marquee-track" data-tdc-duplicate aria-hidden="true" style={{ gap: "3rem", paddingRight: "3rem" }}>
           {items.map((item, index) => (
             <span key={item} className="flex items-center gap-12">
               <span
