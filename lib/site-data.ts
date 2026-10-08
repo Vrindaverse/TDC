@@ -4,7 +4,6 @@ import {
   Bot,
   Boxes,
   Braces,
-  Cloud,
   Cpu,
   Globe,
   Shield,
@@ -94,32 +93,11 @@ export const domains: Domain[] = [
     icon: Shield,
   },
   {
-    slug: "iot",
-    title: "IoT",
+    slug: "dsa",
+    title: "DSA & Placements",
     description:
-      "Connect sensors, microcontrollers and embedded systems to build hardware that does something useful.",
-    icon: Cpu,
-  },
-  {
-    slug: "cloud",
-    title: "Cloud",
-    description:
-      "Deploy, scale and observe applications using containers, CI/CD pipelines and managed services.",
-    icon: Cloud,
-  },
-  {
-    slug: "competitive-programming",
-    title: "Competitive Programming",
-    description:
-      "Sharpen data structures and algorithms through weekly contests, editorials and peer review.",
+      "Crack coding interviews with guided DSA practice and placement preparation.",
     icon: Swords,
-  },
-  {
-    slug: "open-source",
-    title: "Open Source",
-    description:
-      "Read unfamiliar codebases, fix issues and ship contributions that outlive the semester.",
-    icon: Braces,
   },
 ];
 
@@ -135,8 +113,8 @@ export const communityStats: CommunityStat[] = [
   {
     id: "domains",
     label: "Tech tracks",
-    value: "08",
-    description: "From web and apps to AI, cloud and security.",
+    value: "05",
+    description: "Web, apps, AI/ML, cybersecurity and DSA.",
     icon: Cpu,
   },
   {

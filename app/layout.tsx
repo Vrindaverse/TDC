@@ -40,7 +40,6 @@ export const metadata: Metadata = {
     "Web Development",
     "AI/ML",
     "Cybersecurity",
-    "Open Source",
   ],
 };
 

@@ -8,6 +8,7 @@ import { cacheLife } from "next/cache";
 import { Hero } from "@/components/hero";
 import { DomainMarquee } from "@/components/domain-marquee";
 import { Section } from "@/components/section";
+import { TerminalPanel } from "@/components/terminal-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProfile, getSession } from "@/lib/auth/guards";
@@ -107,7 +108,7 @@ const entrySteps = [
   {
     id: "track",
     title: "Pick a track",
-    description: "Eight domains, from web and apps to AI, cloud and security.",
+    description: "Five tracks: web, apps, AI/ML, cybersecurity and DSA.",
     href: "/events",
     command: "tdc domains --list",
   },
@@ -142,11 +143,16 @@ export default async function Home({
 
       {/* Domain stream */}
       <div className="tdc-reveal border-b bg-muted/40 py-6">
-        <DomainMarquee items={tickerItems} />
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <TerminalPanel title="~/tdc/tracks" badge="marquee">
+            <DomainMarquee items={tickerItems} />
+          </TerminalPanel>
+        </div>
       </div>
 
       {/* Story */}
       <Section>
+        <TerminalPanel title="~/tdc — story" badge="readme" scanlines>
         <div className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <p className="tdc-mono-label">tdc / story</p>
@@ -174,11 +180,13 @@ export default async function Home({
             </Button>
           </div>
         </div>
+        </TerminalPanel>
       </Section>
 
       {/* Tracks */}
       <section className="border-t">
         <Section>
+          <TerminalPanel title="~/tdc/domains --list" badge="05 tracks" scanlines>
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Tracks we teach
@@ -220,11 +228,13 @@ export default async function Home({
               );
             })}
           </ol>
+          </TerminalPanel>
         </Section>
       </section>
 
       {/* How it works */}
       <Section>
+        <TerminalPanel title="~/tdc/how-it-works" badge="3 steps" scanlines>
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           How it works
         </h2>
@@ -253,11 +263,13 @@ export default async function Home({
             </div>
           ))}
         </div>
+        </TerminalPanel>
       </Section>
 
       {/* Upcoming */}
       <section className="border-t bg-muted/20">
         <Section>
+          <TerminalPanel title="~/tdc/events --upcoming" badge="live" scanlines>
           <div className="flex items-end justify-between gap-4">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Upcoming
@@ -309,6 +321,7 @@ export default async function Home({
               ))
             )}
           </div>
+          </TerminalPanel>
         </Section>
       </section>
 

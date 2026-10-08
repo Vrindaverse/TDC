@@ -59,10 +59,7 @@ export const EVENT_DOMAINS = [
   "App Development",
   "AI / ML",
   "Cybersecurity",
-  "IoT",
-  "Cloud",
-  "Competitive Programming",
-  "Open Source",
+  "DSA & Placements",
   "Multi-domain",
 ];
 
