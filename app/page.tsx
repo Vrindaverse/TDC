@@ -14,7 +14,7 @@ import { getProfile, getSession } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { announcements, events } from "@/lib/db/schema";
 import { dbEventToItem } from "@/lib/events";
-import { communityStats, domains } from "@/lib/site-data";
+import { domains } from "@/lib/site-data";
 
 const tickerItems = domains.map((domain) => domain.title.toUpperCase());
 
