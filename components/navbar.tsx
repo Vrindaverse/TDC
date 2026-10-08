@@ -95,8 +95,8 @@ export function Navbar({
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="hidden md:flex items-center gap-2">
-            <ThemeToggle />
+          <ThemeToggle />
+          <div className="hidden items-center gap-2 md:flex">
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -189,7 +189,6 @@ export function Navbar({
               </DropdownMenu>
             ) : (
               <>
-                <ThemeToggle />
                 <Link
                   href="/login"
                   className={cn(

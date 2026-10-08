@@ -42,7 +42,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   displaySocials = true,
   displayItemNumbering = true,
   className,
-  menuButtonColor = '#fff',
+  menuButtonColor,
   openMenuButtonColor = '#fff',
   accentColor = '#5227FF',
   changeMenuColorOnOpen = true,
@@ -97,7 +97,13 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
       gsap.set(plusV, { transformOrigin: '50% 50%', rotate: 90 });
       gsap.set(icon, { rotate: 0, transformOrigin: '50% 50%' });
       gsap.set(textInner, { yPercent: 0 });
-      if (toggleBtnRef.current) gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+      if (toggleBtnRef.current) {
+        if (menuButtonColor) {
+          gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+        } else {
+          gsap.set(toggleBtnRef.current, { clearProps: 'color' });
+        }
+      }
     });
     return () => ctx.revert();
   }, [menuButtonColor, position]);
@@ -278,29 +284,42 @@ gsap.set(numberEls, { '--sm-num-opacity': 0 } as gsap.TweenVars);
       const btn = toggleBtnRef.current;
       if (!btn) return;
       colorTweenRef.current?.kill();
-      if (changeMenuColorOnOpen) {
-        const targetColor = opening ? openMenuButtonColor : menuButtonColor;
-        colorTweenRef.current = gsap.to(btn, {
-          color: targetColor,
-          delay: 0.18,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      } else {
+      if (changeMenuColorOnOpen && openMenuButtonColor) {
+        if (opening) {
+          colorTweenRef.current = gsap.to(btn, {
+            color: openMenuButtonColor,
+            delay: 0.18,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else if (menuButtonColor) {
+          colorTweenRef.current = gsap.to(btn, {
+            color: menuButtonColor,
+            delay: 0.18,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          gsap.set(btn, { clearProps: 'color' });
+        }
+      } else if (menuButtonColor) {
         gsap.set(btn, { color: menuButtonColor });
+      } else {
+        gsap.set(btn, { clearProps: 'color' });
       }
     },
     [openMenuButtonColor, menuButtonColor, changeMenuColorOnOpen]
   );
 
   React.useEffect(() => {
-    if (toggleBtnRef.current) {
-      if (changeMenuColorOnOpen) {
-        const targetColor = openRef.current ? openMenuButtonColor : menuButtonColor;
-        gsap.set(toggleBtnRef.current, { color: targetColor });
-      } else {
-        gsap.set(toggleBtnRef.current, { color: menuButtonColor });
-      }
+    const btn = toggleBtnRef.current;
+    if (!btn) return;
+    if (changeMenuColorOnOpen && openRef.current) {
+      gsap.set(btn, { color: openMenuButtonColor });
+    } else if (menuButtonColor) {
+      gsap.set(btn, { color: menuButtonColor });
+    } else {
+      gsap.set(btn, { clearProps: 'color' });
     }
   }, [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor]);
 

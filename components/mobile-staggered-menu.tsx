@@ -53,14 +53,13 @@ export function MobileStaggeredMenu({
   })), ...authItems];
 
   return (
-    <div className="block md:hidden">
+    <div className="block text-foreground md:hidden">
       <StaggeredMenu
         position="right"
         items={menuItems}
         socialItems={socialItems}
         displaySocials={true}
         displayItemNumbering={true}
-        menuButtonColor="#000"
         openMenuButtonColor="#fff"
         changeMenuColorOnOpen={true}
         colors={['#666666', '#1a1a1a']}

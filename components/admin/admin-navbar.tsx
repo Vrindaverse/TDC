@@ -6,6 +6,7 @@ import { ChevronDown, ExternalLink, LayoutDashboard, LogOut, Menu, User } from "
 import { useState } from "react";
 
 import { AdminMobileSidebar } from "@/components/admin/admin-mobile-sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { VISIT_SITE_HREF } from "@/components/admin/admin-nav-items";
 import {
   DropdownMenu,
@@ -76,6 +77,7 @@ export function AdminNavbar({
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link
             href={VISIT_SITE_HREF}
             target="_blank"

@@ -55,14 +55,14 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #e9e9ef;
+  color: currentColor;
   font-weight: 500;
   line-height: 1;
   overflow: visible;
 }
 
 .sm-toggle:focus-visible {
-  outline: 2px solid #ffffffaa;
+  outline: 2px solid color-mix(in srgb, currentColor 45%, transparent);
   outline-offset: 4px;
   border-radius: 4px;
 }
