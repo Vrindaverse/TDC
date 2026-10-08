@@ -7,17 +7,15 @@ import { cacheLife } from "next/cache";
 
 import { Hero } from "@/components/hero";
 import { DomainMarquee } from "@/components/domain-marquee";
-import { JoinCta } from "@/components/join-cta";
+import ImageSlider3D from "@/components/lightswind/3d-image-slider";
 import { Section } from "@/components/section";
 import { TerminalPanel } from "@/components/terminal-panel";
-import { VerticalMarquee } from "@/components/vertical-marquee";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProfile, getSession } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { announcements, events } from "@/lib/db/schema";
 import { dbEventToItem } from "@/lib/events";
-import { formatDate } from "@/lib/format";
 import { domains } from "@/lib/site-data";
 
 const tickerItems = domains.map((domain) => domain.title.toUpperCase());
@@ -36,62 +34,61 @@ async function getFeaturedEvents() {
   return rows.map(dbEventToItem);
 }
 
-async function PublicAnnouncements() {
+async function PublicAnnouncementNotice() {
   const items = await getPublicAnnouncements();
   if (items.length === 0) return null;
 
-  return (
-    <section className="tdc-reveal border-b bg-muted/10">
-      <div className="mx-auto flex w-full max-w-5xl flex-col px-4 py-14 sm:px-6">
-        <TerminalPanel title="~/tdc/announcements" badge="feed" scanlines>
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="tdc-mono-label">tdc / announcements</p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-                What the community should know
-              </h2>
-            </div>
-            <span className="tdc-mono hidden text-xs text-muted-foreground sm:block">
-              $ cat --recent
-            </span>
-          </div>
+  const latest = items[0];
+  const extra = items.length - 1;
 
-          <ul className="tdc-stagger mt-8 divide-y divide-dashed border-y">
-            {items.map((item) => (
-              <li
-                key={item.id}
-                className="flex flex-col gap-2 py-4 sm:flex-row sm:items-baseline sm:gap-5"
-              >
-                <span className="tdc-mono w-28 shrink-0 pt-1 text-xs text-muted-foreground">
-                  {formatDate(item.createdAt)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {item.pinned ? (
-                      <span className="tdc-mono inline-flex items-center rounded-[3px] border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary">
-                        pinned
-                      </span>
-                    ) : null}
-                    <h3 className="text-sm font-semibold tracking-tight">
-                      {item.title}
-                    </h3>
-                  </div>
-                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground line-clamp-2">
-                    {item.body}
-                  </p>
-                </div>
-                <span
-                  aria-hidden="true"
-                  className="tdc-mono hidden self-center text-primary sm:block"
-                >
-                  ❯
-                </span>
-              </li>
-            ))}
-          </ul>
+  return (
+    <div className="tdc-reveal border-b bg-muted/30">
+      <div className="mx-auto flex w-full max-w-6xl items-stretch gap-3 px-4 py-4 sm:px-6 lg:px-8">
+        <span
+          aria-hidden="true"
+          className="hidden shrink-0 pt-3 font-mono text-sm text-primary md:block"
+        >
+          ❯
+        </span>
+        <TerminalPanel title="~/tdc/notify" badge="unread" className="w-full">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+            <span
+              aria-hidden="true"
+              className="flex size-9 shrink-0 items-center justify-center rounded-[4px] border border-primary/40 bg-primary/10 text-sm font-bold text-primary"
+            >
+              !
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <p className="tdc-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  $ notify-send --app=tdc &quot;{latest.title}&quot;
+                </p>
+                {latest.pinned ? (
+                  <span className="tdc-mono inline-flex items-center rounded-[3px] border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary">
+                    pinned
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-2 text-sm font-semibold tracking-tight text-foreground">
+                {latest.title}
+              </p>
+              <p className="mt-1 line-clamp-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                {latest.body}
+              </p>
+              {extra > 0 ? (
+                <p className="tdc-mono mt-2 text-xs text-muted-foreground/80">
+                  [{extra} more announcement{extra > 1 ? "s" : ""} in the queue]
+                </p>
+              ) : null}
+            </div>
+            <span
+              aria-hidden="true"
+              className="tdc-caret hidden shrink-0 self-center text-primary sm:block sm:mt-2"
+            />
+          </div>
         </TerminalPanel>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -173,25 +170,15 @@ export default async function Home({
       <Hero />
 
       <Suspense>
-        <PublicAnnouncements />
+        <PublicAnnouncementNotice />
       </Suspense>
 
       {/* Domain stream */}
-      <div className="tdc-reveal border-b bg-muted/40 py-6 lg:py-10">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 lg:hidden">
+      <div className="tdc-reveal border-b bg-muted/40 py-6">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
           <TerminalPanel title="~/tdc/tracks" badge="marquee">
             <DomainMarquee items={tickerItems} />
           </TerminalPanel>
-        </div>
-
-        <div className="hidden items-center lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,76rem)_minmax(0,1fr)]">
-          <VerticalMarquee text="TDC" className="justify-self-center" />
-          <div className="w-full px-8">
-            <TerminalPanel title="~/tdc/tracks" badge="marquee">
-              <DomainMarquee items={tickerItems} />
-            </TerminalPanel>
-          </div>
-          <VerticalMarquee text="TDC" reverse className="justify-self-center" />
         </div>
       </div>
 
@@ -378,8 +365,32 @@ export default async function Home({
         </Section>
       </section>
 
-      {/* Join */}
-      <JoinCta />
+      {/* 3D image slider */}
+      <section className="tdc-reveal border-t bg-muted/10">
+        <Section>
+          <TerminalPanel title="~/tdc/view --gallery" badge="rotate" scanlines>
+            <div className="flex flex-col items-center gap-8">
+              <div className="w-full max-w-xl text-center">
+                <p className="tdc-mono-label">tdc / gallery</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+                  One community, five tracks
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Spin the gallery — web, apps, AI/ML, security and DSA. Pick
+                  one, then show up and build.
+                </p>
+              </div>
+              <ImageSlider3D
+                duration={36}
+                cardWidth="11.5em"
+                cardAspectRatio="3/4"
+                rotationDirection="left"
+                imageClassName="rounded-[0.9em] border border-border/60 bg-muted shadow-[0_0.4em_2.5em_rgba(0,0,0,0.28)]"
+              />
+            </div>
+          </TerminalPanel>
+        </Section>
+      </section>
     </>
   );
 }
