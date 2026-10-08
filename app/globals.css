@@ -222,6 +222,17 @@
   animation-play-state: paused;
 }
 
+/* Vertical edge rails. Two identical copies are stacked so the track only
+   needs one -50% translate for a seamless loop. */
+@keyframes tdc-vertical-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
 @keyframes tdc-marquee-scroll {
   from {
     transform: translate3d(0, 0, 0);

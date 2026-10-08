@@ -7,14 +7,17 @@ import { cacheLife } from "next/cache";
 
 import { Hero } from "@/components/hero";
 import { DomainMarquee } from "@/components/domain-marquee";
+import { JoinCta } from "@/components/join-cta";
 import { Section } from "@/components/section";
 import { TerminalPanel } from "@/components/terminal-panel";
+import { VerticalMarquee } from "@/components/vertical-marquee";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProfile, getSession } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { announcements, events } from "@/lib/db/schema";
 import { dbEventToItem } from "@/lib/events";
+import { formatDate } from "@/lib/format";
 import { domains } from "@/lib/site-data";
 
 const tickerItems = domains.map((domain) => domain.title.toUpperCase());
@@ -39,28 +42,54 @@ async function PublicAnnouncements() {
 
   return (
     <section className="tdc-reveal border-b bg-muted/10">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-10 sm:px-6">
-        <p className="tdc-mono text-xs uppercase tracking-wider text-muted-foreground">
-          tdc / announcements
-        </p>
-        <div className="tdc-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <article
-              key={item.id}
-              className="tdc-card-hover rounded-xl border bg-card/60 p-4 text-sm shadow-sm"
-            >
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <h3 className="font-semibold tracking-tight">{item.title}</h3>
-                {item.pinned ? (
-                  <Badge variant="secondary">Pinned</Badge>
-                ) : null}
-              </div>
-              <p className="line-clamp-4 whitespace-pre-wrap text-muted-foreground">
-                {item.body}
-              </p>
-            </article>
-          ))}
-        </div>
+      <div className="mx-auto flex w-full max-w-5xl flex-col px-4 py-14 sm:px-6">
+        <TerminalPanel title="~/tdc/announcements" badge="feed" scanlines>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="tdc-mono-label">tdc / announcements</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+                What the community should know
+              </h2>
+            </div>
+            <span className="tdc-mono hidden text-xs text-muted-foreground sm:block">
+              $ cat --recent
+            </span>
+          </div>
+
+          <ul className="tdc-stagger mt-8 divide-y divide-dashed border-y">
+            {items.map((item) => (
+              <li
+                key={item.id}
+                className="flex flex-col gap-2 py-4 sm:flex-row sm:items-baseline sm:gap-5"
+              >
+                <span className="tdc-mono w-28 shrink-0 pt-1 text-xs text-muted-foreground">
+                  {formatDate(item.createdAt)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.pinned ? (
+                      <span className="tdc-mono inline-flex items-center rounded-[3px] border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-primary">
+                        pinned
+                      </span>
+                    ) : null}
+                    <h3 className="text-sm font-semibold tracking-tight">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                    {item.body}
+                  </p>
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="tdc-mono hidden self-center text-primary sm:block"
+                >
+                  ❯
+                </span>
+              </li>
+            ))}
+          </ul>
+        </TerminalPanel>
       </div>
     </section>
   );
@@ -148,11 +177,21 @@ export default async function Home({
       </Suspense>
 
       {/* Domain stream */}
-      <div className="tdc-reveal border-b bg-muted/40 py-6">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+      <div className="tdc-reveal border-b bg-muted/40 py-6 lg:py-10">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 lg:hidden">
           <TerminalPanel title="~/tdc/tracks" badge="marquee">
             <DomainMarquee items={tickerItems} />
           </TerminalPanel>
+        </div>
+
+        <div className="hidden items-center lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,76rem)_minmax(0,1fr)]">
+          <VerticalMarquee text="TDC" className="justify-self-center" />
+          <div className="w-full px-8">
+            <TerminalPanel title="~/tdc/tracks" badge="marquee">
+              <DomainMarquee items={tickerItems} />
+            </TerminalPanel>
+          </div>
+          <VerticalMarquee text="TDC" reverse className="justify-self-center" />
         </div>
       </div>
 
@@ -339,69 +378,8 @@ export default async function Home({
         </Section>
       </section>
 
-      {/* Inverted terminal call to action */}
-      <section className="tdc-reveal px-4 sm:px-6">
-        <div className="tdc-scanlines mx-auto w-full max-w-6xl overflow-hidden rounded-[4px] border border-foreground bg-foreground text-background shadow-2xl">
-          <div
-            aria-hidden="true"
-            className="flex items-center gap-2 border-b border-background/20 px-4 py-2.5"
-          >
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-full bg-background/25" />
-              <span className="size-2.5 rounded-full bg-background/25" />
-              <span className="size-2.5 rounded-full bg-background/25" />
-            </span>
-            <span className="tdc-mono-label ml-1.5 truncate !text-background/60">
-              ~/tdc/join
-            </span>
-            <span className="tdc-mono-label ml-auto hidden shrink-0 sm:inline !text-background/60">
-              recruiting
-            </span>
-          </div>
-
-          <div className="px-6 py-14 sm:px-12 sm:py-16">
-            <p className="tdc-mono text-xs tracking-wide text-background/60 uppercase">
-              $ tdc join --apply
-            </p>
-            <h2 className="mt-5 max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-              Bring a laptop and an idea. We&apos;ll give you people to build
-              with.
-            </h2>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-background/70">
-              Problems worth solving, mentors on hand and enough support to
-              finish what you start. New to any of it? That is the point.
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Button
-                asChild
-                size="lg"
-                className="tdc-mono cursor-target border bg-background text-foreground shadow-none hover:bg-background/90"
-              >
-                <Link href="/join">join tdc</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="tdc-mono cursor-target border-background/40 bg-transparent text-background shadow-none hover:bg-background hover:text-foreground"
-              >
-                <Link href="/about">what we do</Link>
-              </Button>
-            </div>
-            <p className="tdc-mono mt-10 text-xs text-background/60">
-              <span
-                aria-hidden="true"
-                className="text-background"
-              >
-                $ git log --oneline
-              </span>{" "}
-              <span className="tdc-caret text-background">
-                status: accepting new members
-              </span>
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Join */}
+      <JoinCta />
     </>
   );
 }

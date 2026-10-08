@@ -35,10 +35,9 @@ export function MemberNavbar({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full px-4 pt-4 pb-2 sm:px-6">
-      <div className="mx-auto w-full max-w-7xl rounded-[4px] border border-border/60 bg-card/80 shadow-lg shadow-black/5 backdrop-blur-md">
-        <div className="flex h-16 items-center justify-between px-4 sm:px-5">
-          <div className="flex items-center gap-2.5">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
@@ -122,7 +121,6 @@ export function MemberNavbar({
           </div>
         </nav>
       ) : null}
-      </div>
     </header>
   );
 }

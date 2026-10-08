@@ -30,6 +30,7 @@ function Logo({ className }: { className?: string }) {
         $
       </span>
       <span className="tdc-mono">{site.name}</span>
+      <span aria-hidden="true" className="tdc-caret text-primary" />
     </Link>
   );
 }
@@ -50,8 +51,8 @@ export function Navbar({
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 w-full px-4 pt-4 pb-2 sm:px-6">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between rounded-[4px] border border-border/60 bg-card/80 px-4 shadow-lg shadow-black/5 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
 
         <nav aria-label="Main" className="tdc-nav-enter hidden items-center gap-1 md:flex">
