@@ -5,51 +5,59 @@
 :root {
   --radius: 0.5rem;
 
-  /* Monochrome palette: every neutral is fully desaturated. */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  /* Soft pastel lavender palette. Light theme keeps a warm, muted tint and a
+     periwinkle accent; dark mode inverts the same hue family (lower L, same
+     chroma axis) so every surface flips cleanly on theme switch. */
+  --background: oklch(0.986 0.012 280);
+  --foreground: oklch(0.31 0.045 285);
+  --card: oklch(0.999 0.006 280);
+  --card-foreground: oklch(0.31 0.045 285);
+  --popover: oklch(0.999 0.006 280);
+  --popover-foreground: oklch(0.31 0.045 285);
 
-  /* The accent is black, so solid buttons read as pure black. */
-  --primary: oklch(0.145 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.56 0.13 278);
+  --primary-foreground: oklch(0.99 0.015 285);
 
-  --secondary: oklch(0.967 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.967 0 0);
-  --muted-foreground: oklch(0.505 0 0);
-  --accent: oklch(0.945 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.94 0.02 280);
+  --secondary-foreground: oklch(0.36 0.05 285);
+  --muted: oklch(0.95 0.016 280);
+  --muted-foreground: oklch(0.56 0.035 285);
+  --accent: oklch(0.92 0.024 280);
+  --accent-foreground: oklch(0.36 0.05 285);
 
-  /* Kept red: errors still need to read as errors in a monochrome theme. */
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.917 0 0);
-  --input: oklch(0.917 0 0);
-  --ring: oklch(0.145 0 0);
+  --destructive: oklch(0.6 0.15 20);
+  --border: oklch(0.905 0.02 280);
+  --input: oklch(0.895 0.02 280);
+  --ring: oklch(0.56 0.13 278);
+
+  /* Traffic-light dots drawn on terminal frames. */
+  --tdc-dot: oklch(0.7 0.06 285);
 }
 
 .dark {
-  --background: oklch(0.16 0 0);
-  --foreground: oklch(0.96 0 0);
-  --card: oklch(0.21 0 0);
-  --card-foreground: oklch(0.96 0 0);
-  --popover: oklch(0.21 0 0);
-  --popover-foreground: oklch(0.96 0 0);
-  --primary: oklch(0.96 0 0);
-  --primary-foreground: oklch(0.16 0 0);
-  --secondary: oklch(0.27 0 0);
-  --secondary-foreground: oklch(0.96 0 0);
-  --muted: oklch(0.27 0 0);
-  --muted-foreground: oklch(0.7 0 0);
-  --accent: oklch(0.3 0 0);
-  --accent-foreground: oklch(0.96 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.32 0 0);
-  --input: oklch(0.34 0 0);
-  --ring: oklch(0.96 0 0);
+  --background: oklch(0.215 0.03 290);
+  --foreground: oklch(0.93 0.025 285);
+  --card: oklch(0.265 0.035 290);
+  --card-foreground: oklch(0.93 0.025 285);
+  --popover: oklch(0.265 0.035 290);
+  --popover-foreground: oklch(0.93 0.025 285);
+
+  --primary: oklch(0.76 0.09 285);
+  --primary-foreground: oklch(0.22 0.04 290);
+
+  --secondary: oklch(0.305 0.03 290);
+  --secondary-foreground: oklch(0.93 0.025 285);
+  --muted: oklch(0.305 0.03 290);
+  --muted-foreground: oklch(0.7 0.03 285);
+  --accent: oklch(0.34 0.03 290);
+  --accent-foreground: oklch(0.93 0.025 285);
+
+  --destructive: oklch(0.72 0.12 25);
+  --border: oklch(0.345 0.035 290);
+  --input: oklch(0.37 0.035 290);
+  --ring: oklch(0.76 0.09 285);
+
+  --tdc-dot: oklch(0.62 0.07 285);
 }
 
 @theme inline {
@@ -103,6 +111,38 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted-foreground);
+}
+
+/* Terminal window chrome: three traffic-light dots top-left. Apply to any
+   bordered container (cards, auth panels) so it reads as a faux terminal. */
+.tdc-frame {
+  position: relative;
+}
+
+.tdc-frame::before {
+  content: "";
+  position: absolute;
+  top: 0.7rem;
+  left: 1.1rem;
+  width: 2.4rem;
+  height: 0.5rem;
+  pointer-events: none;
+  background-image: radial-gradient(
+      circle at 0.25rem 0.25rem,
+      var(--tdc-dot) 0 0.13rem,
+      transparent 0.15rem
+    ),
+    radial-gradient(
+      circle at 0.95rem 0.25rem,
+      var(--tdc-dot) 0 0.13rem,
+      transparent 0.15rem
+    ),
+    radial-gradient(
+      circle at 1.65rem 0.25rem,
+      var(--tdc-dot) 0 0.13rem,
+      transparent 0.15rem
+    );
+  background-repeat: no-repeat;
 }
 
 /* Blinking block cursor that trails the last terminal line. */
@@ -196,7 +236,7 @@
   pointer-events: none;
   background-image: repeating-linear-gradient(
     to bottom,
-    rgb(10 10 10 / 0.035) 0 1px,
+    color-mix(in srgb, var(--foreground) 5%, transparent) 0 1px,
     transparent 1px 3px
   );
 }
@@ -354,15 +394,21 @@
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+
+  input,
+  textarea,
+  select {
+    caret-color: var(--ring);
+  }
 }
 
 /* Admin console specific styles */
 .admin-gradient-bg {
-  background: linear-gradient(135deg, oklch(0.985 0 0) 0%, oklch(0.967 0 0) 100%);
-}
-
-.dark .admin-gradient-bg {
-  background: linear-gradient(135deg, oklch(0.16 0 0) 0%, oklch(0.21 0 0) 100%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--background) 45%, var(--card)) 0%,
+    color-mix(in srgb, var(--muted) 55%, var(--card)) 100%
+  );
 }
 
 .admin-card-hover {
@@ -371,11 +417,8 @@
 
 .admin-card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.dark .admin-card-hover:hover {
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--foreground) 12%, transparent),
+    0 4px 6px -4px color-mix(in srgb, var(--foreground) 10%, transparent);
 }
 
 .admin-table-row {
@@ -383,11 +426,7 @@
 }
 
 .admin-table-row:hover {
-  background-color: oklch(0.967 0 0 / 0.5);
-}
-
-.dark .admin-table-row:hover {
-  background-color: oklch(0.27 0 0 / 0.5);
+  background-color: color-mix(in srgb, var(--muted) 70%, transparent);
 }
 
 .admin-stat-icon {

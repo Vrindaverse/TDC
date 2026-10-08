@@ -16,7 +16,7 @@ export function AuthCard({
 }) {
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-10 md:py-14">
-      <div className="rounded-lg border bg-card p-6 md:p-8">
+      <div className="tdc-frame overflow-hidden rounded-md border bg-card p-6 font-mono md:p-8">
         <p className="tdc-mono-label">tdc / {label}</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h1>
         {description ? (

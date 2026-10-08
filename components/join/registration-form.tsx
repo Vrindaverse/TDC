@@ -28,7 +28,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_PATTERN = /^\d{6}$/;
 
 const selectClassName =
-  "mt-2 h-10 w-full appearance-none rounded-md border border-input bg-transparent px-3 text-sm shadow-xs transition-[color,box-shadow] outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50 dark:bg-input/30";
+  "mt-2 h-10 w-full appearance-none rounded-[3px] border border-input bg-transparent px-3 font-mono text-sm shadow-xs transition-[color,box-shadow] outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/50 dark:bg-input/30";
 
 function PendingSubmitButton({
   children,
