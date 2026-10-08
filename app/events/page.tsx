@@ -9,7 +9,7 @@ import { getSession, getProfile } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 import { dbEventToItem } from "@/lib/events";
-import { registerForEventAction } from "@/app/events/actions";
+import { registerForEventAction, type RegisterEventState } from "@/app/events/actions";
 
 export const metadata: Metadata = {
   title: "Events",
@@ -85,27 +85,17 @@ export default async function EventsPage() {
                   event={event}
                   showTime
                   showRegistration={true}
-                  action={
+                  formAction={
                     canRegister &&
-                    event.registrationStatus === "open" &&
-                    new Date(`${event.date}T${event.time}`) > new Date()
-                      ? {
-                          label: "Register",
-                          href: "#",
-                          onClick: (e: React.MouseEvent) => {
-                            e.preventDefault();
-                            const form = document.createElement("form");
-                            form.method = "POST";
-                            form.action = "/api/events/register";
-                            const input = document.createElement("input");
-                            input.type = "hidden";
-                            input.name = "eventId";
-                            input.value = event.id;
-                            form.appendChild(input);
-                            document.body.appendChild(form);
-                            form.submit();
-                          },
-                        }
+                    (event.registrationStatus === "open" ||
+                      event.registrationStatus === "closing") &&
+                    new Date(event.startsAt) > new Date()
+                      ? (registerForEventAction as (prev: RegisterEventState, formData: FormData) => Promise<RegisterEventState>)
+                      : undefined
+                  }
+                  action={
+                    !canRegister
+                      ? { label: "Register your details", href: "/join" }
                       : null
                   }
                 />

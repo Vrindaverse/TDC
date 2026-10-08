@@ -42,6 +42,7 @@ export interface EventItem {
   description: string;
   domain: string;
   registrationStatus: RegistrationStatus;
+  startsAt: string;
 }
 
 export interface TeamMember {
