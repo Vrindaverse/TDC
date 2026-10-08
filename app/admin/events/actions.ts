@@ -209,6 +209,7 @@ async function deleteEventActionInternal(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/events");
+  revalidatePath("/admin/events");
   redirect("/admin/events");
 }
 

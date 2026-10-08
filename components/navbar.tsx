@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, LayoutDashboard, LogOut, User } from "lucide-react";
 
 import { MobileStaggeredMenu } from "@/components/mobile-staggered-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,6 +96,7 @@ export function Navbar({
 
         <div className="flex items-center gap-2">
           <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -187,6 +189,7 @@ export function Navbar({
               </DropdownMenu>
             ) : (
               <>
+                <ThemeToggle />
                 <Link
                   href="/login"
                   className={cn(

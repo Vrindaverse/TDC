@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, LogOut, Menu, User, X } from "lucide-react";
 import { useState } from "react";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,35 +108,37 @@ export function MemberNavbar({
           })}
         </nav>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label="Account menu"
-              title={userName || "Account"}
-              className="group flex items-center gap-1.5 rounded-full p-0.5 outline-none transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt="" className="size-full object-cover" />
-                ) : avatarInitials(userName, userEmail) ? (
-                  <span
-                    aria-hidden="true"
-                    className="flex size-full items-center justify-center bg-primary text-xs font-semibold text-primary-foreground"
-                  >
-                    {avatarInitials(userName, userEmail)}
-                  </span>
-                ) : (
-                  <User aria-hidden="true" className="size-5 text-muted-foreground" />
-                )}
-              </span>
-              <ChevronDown
-                aria-hidden="true"
-                className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180"
-              />
-            </button>
-          </DropdownMenuTrigger>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Account menu"
+                title={userName || "Account"}
+                className="group flex items-center gap-1.5 rounded-full p-0.5 outline-none transition-colors hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="relative flex size-9 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="" className="size-full object-cover" />
+                  ) : avatarInitials(userName, userEmail) ? (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-full items-center justify-center bg-primary text-xs font-semibold text-primary-foreground"
+                    >
+                      {avatarInitials(userName, userEmail)}
+                    </span>
+                  ) : (
+                    <User aria-hidden="true" className="size-5 text-muted-foreground" />
+                  )}
+                </span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180"
+                />
+              </button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent side="bottom" align="end" sideOffset={8} className="w-60">
             <DropdownMenuLabel className="flex flex-col gap-1">
               <span className="truncate text-sm font-semibold">
@@ -168,6 +171,7 @@ export function MemberNavbar({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
       </div>
 
       {mobileOpen ? (

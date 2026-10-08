@@ -216,5 +216,6 @@ export async function registerForEventAction(formData: FormData) {
   }
 
   await clearJoinVerifiedCookie();
+  await clearJoinShadowCookie();
   redirect("/join?registered=1");
 }
