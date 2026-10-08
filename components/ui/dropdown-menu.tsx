@@ -36,7 +36,7 @@ function DropdownMenuPortal({
 
 function DropdownMenuContent({
   className,
-  sideOffset = 6,
+  sideOffset = 8,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
   return (
@@ -45,7 +45,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[13rem] overflow-hidden rounded-lg border bg-popover p-1.5 text-popover-foreground shadow-lg outline-none",
+          "tdc-dropdown-animate z-50 min-w-[14rem] overflow-hidden rounded-[4px] border bg-popover/95 p-1 text-popover-foreground shadow-xl outline-none backdrop-blur-md",
           className
         )}
         {...props}
@@ -77,8 +77,9 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-        variant === "destructive" && "text-destructive focus:text-destructive",
+        "tdc-mono group relative flex cursor-pointer select-none items-center gap-2 rounded-[3px] px-2 py-1.5 text-xs outline-none transition-colors duration-150 focus:outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0",
+        variant === "destructive" &&
+          "text-destructive data-[highlighted]:bg-destructive data-[highlighted]:text-destructive-foreground",
         className
       )}
       {...props}
@@ -106,7 +107,7 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1 my-1 h-px bg-border", className)}
+      className={cn("-mx-1 my-1 border-t border-dashed border-border bg-transparent", className)}
       {...props}
     />
   )

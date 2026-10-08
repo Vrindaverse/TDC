@@ -1,20 +1,34 @@
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Briefcase, Code2, Mail, MessageCircle, Phone } from "lucide-react";
 
 import { navLinks, site } from "@/lib/navigation";
-import { contactDetails } from "@/lib/site-data";
+import { contactDetails, socialLinks } from "@/lib/site-data";
+
+const SOCIAL_ICONS = {
+  GitHub: Code2,
+  LinkedIn: Briefcase,
+  Discord: MessageCircle,
+} as const;
+
+function socialIcon(label: string) {
+  return SOCIAL_ICONS[label as keyof typeof SOCIAL_ICONS] ?? Mail;
+}
 
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
     <footer className="mt-auto bg-muted/20">
+      <div
+        aria-hidden="true"
+        className="h-px bg-gradient-to-r from-transparent via-border to-transparent"
+      />
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="tdc-mono">
           {/* Faux terminal title bar */}
           <div
             aria-hidden="true"
-            className="flex items-center gap-2 border-b px-1 pt-4 pb-3"
+            className="tdc-rise flex items-center gap-2 border-b px-1 pt-4 pb-3"
           >
             <span className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-full bg-muted-foreground/30" />
@@ -25,13 +39,13 @@ export function Footer() {
               ~/community/footer
             </span>
             <span className="tdc-mono-label ml-auto hidden shrink-0 sm:inline">
-              exit: 0
+              git: main
             </span>
           </div>
 
           {/* Body */}
           <div className="grid gap-8 py-8 md:grid-cols-3">
-            <div className="max-w-md">
+            <div className="tdc-rise tdc-rise-1 max-w-md">
               <p className="text-sm leading-relaxed text-muted-foreground">
                 <span className="font-semibold text-foreground">
                   {site.fullName}
@@ -42,7 +56,7 @@ export function Footer() {
               </p>
             </div>
 
-            <div>
+            <div className="tdc-rise tdc-rise-2">
               <p className="tdc-mono-label">find your way</p>
               <ul className="mt-3 space-y-1">
                 {navLinks.map((link) => (
@@ -64,7 +78,7 @@ export function Footer() {
               </ul>
             </div>
 
-            <div>
+            <div className="tdc-rise tdc-rise-3">
               <p className="tdc-mono-label">say hello</p>
               <ul className="mt-3 space-y-1.5">
                 <li>
@@ -76,7 +90,31 @@ export function Footer() {
                     {contactDetails.email}
                   </a>
                 </li>
+                <li>
+                  <a
+                    href={`tel:${contactDetails.phone.replace(/[^+\d]/g, "")}`}
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground cursor-target"
+                  >
+                    <Phone aria-hidden="true" className="size-3.5" />
+                    {contactDetails.phone}
+                  </a>
+                </li>
               </ul>
+              <div className="mt-4 flex items-center gap-2 border-t border-dashed pt-3">
+                {socialLinks.map((social) => {
+                  const Icon = socialIcon(social.label);
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      aria-label={social.label}
+                      className="flex size-8 items-center justify-center rounded-[4px] border border-border text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground cursor-target"
+                    >
+                      <Icon aria-hidden="true" className="size-4" />
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

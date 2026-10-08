@@ -47,7 +47,7 @@ async function PublicAnnouncements() {
           {items.map((item) => (
             <article
               key={item.id}
-              className="rounded-xl border bg-card/60 p-4 text-sm shadow-sm"
+              className="tdc-card-hover rounded-xl border bg-card/60 p-4 text-sm shadow-sm"
             >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <h3 className="font-semibold tracking-tight">{item.title}</h3>
@@ -248,7 +248,7 @@ export default async function Home({
           {entrySteps.map((step, index) => (
             <div
               key={step.id}
-              className="rounded-xl border bg-card/50 p-5 shadow-sm"
+              className="tdc-card-hover rounded-xl border bg-card/50 p-5 shadow-sm"
             >
               <p className="tdc-mono text-3xl font-bold text-primary">
                 0{index + 1}
@@ -297,7 +297,7 @@ export default async function Home({
               featuredEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex flex-col gap-3 rounded-xl border bg-card/50 p-5 shadow-sm"
+                  className="tdc-card-hover flex flex-col gap-3 rounded-xl border bg-card/50 p-5 shadow-sm"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="tdc-mono text-xs text-muted-foreground">

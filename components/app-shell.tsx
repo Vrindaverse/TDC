@@ -84,12 +84,12 @@ export function ChromeSkeleton() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight text-foreground">
+        <Link href="/" className="tdc-mono flex items-center gap-2.5 font-semibold tracking-tight text-foreground">
           <span
             aria-hidden="true"
-            className="flex size-7 items-center justify-center rounded-[6px] bg-primary text-[0.7rem] font-bold tracking-tight text-primary-foreground"
+            className="flex size-7 items-center justify-center rounded-[4px] border border-border bg-background text-sm font-bold text-primary"
           >
-            TD
+            $
           </span>
           <span className="text-base">{site.name}</span>
         </Link>
