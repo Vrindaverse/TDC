@@ -5,59 +5,59 @@
 :root {
   --radius: 0.5rem;
 
-  /* Soft pastel lavender palette. Light theme keeps a warm, muted tint and a
-     periwinkle accent; dark mode inverts the same hue family (lower L, same
-     chroma axis) so every surface flips cleanly on theme switch. */
-  --background: oklch(0.986 0.012 280);
-  --foreground: oklch(0.31 0.045 285);
-  --card: oklch(0.999 0.006 280);
-  --card-foreground: oklch(0.31 0.045 285);
-  --popover: oklch(0.999 0.006 280);
-  --popover-foreground: oklch(0.31 0.045 285);
+  /* Original monochrome light theme: fully desaturated neutrals, black accent. */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
 
-  --primary: oklch(0.56 0.13 278);
-  --primary-foreground: oklch(0.99 0.015 285);
+  --primary: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
 
-  --secondary: oklch(0.94 0.02 280);
-  --secondary-foreground: oklch(0.36 0.05 285);
-  --muted: oklch(0.95 0.016 280);
-  --muted-foreground: oklch(0.56 0.035 285);
-  --accent: oklch(0.92 0.024 280);
-  --accent-foreground: oklch(0.36 0.05 285);
+  --secondary: oklch(0.967 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.967 0 0);
+  --muted-foreground: oklch(0.505 0 0);
+  --accent: oklch(0.945 0 0);
+  --accent-foreground: oklch(0.205 0 0);
 
-  --destructive: oklch(0.6 0.15 20);
-  --border: oklch(0.905 0.02 280);
-  --input: oklch(0.895 0.02 280);
-  --ring: oklch(0.56 0.13 278);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.917 0 0);
+  --input: oklch(0.917 0 0);
+  --ring: oklch(0.145 0 0);
 
   /* Traffic-light dots drawn on terminal frames. */
-  --tdc-dot: oklch(0.7 0.06 285);
+  --tdc-dot: oklch(0.6 0 0);
 }
 
 .dark {
-  --background: oklch(0.215 0.03 290);
-  --foreground: oklch(0.93 0.025 285);
-  --card: oklch(0.265 0.035 290);
-  --card-foreground: oklch(0.93 0.025 285);
-  --popover: oklch(0.265 0.035 290);
-  --popover-foreground: oklch(0.93 0.025 285);
+  /* Soft charcoal-slate dark theme: a whisper of cool blue, muted accent,
+     gentle contrast so it is calm rather than straining on the eyes. */
+  --background: oklch(0.21 0.012 265);
+  --foreground: oklch(0.91 0.008 260);
+  --card: oklch(0.255 0.014 265);
+  --card-foreground: oklch(0.91 0.008 260);
+  --popover: oklch(0.255 0.014 265);
+  --popover-foreground: oklch(0.91 0.008 260);
 
-  --primary: oklch(0.76 0.09 285);
-  --primary-foreground: oklch(0.22 0.04 290);
+  --primary: oklch(0.72 0.06 280);
+  --primary-foreground: oklch(0.2 0.02 285);
 
-  --secondary: oklch(0.305 0.03 290);
-  --secondary-foreground: oklch(0.93 0.025 285);
-  --muted: oklch(0.305 0.03 290);
-  --muted-foreground: oklch(0.7 0.03 285);
-  --accent: oklch(0.34 0.03 290);
-  --accent-foreground: oklch(0.93 0.025 285);
+  --secondary: oklch(0.29 0.015 265);
+  --secondary-foreground: oklch(0.91 0.008 260);
+  --muted: oklch(0.29 0.015 265);
+  --muted-foreground: oklch(0.68 0.015 265);
+  --accent: oklch(0.32 0.016 265);
+  --accent-foreground: oklch(0.91 0.008 260);
 
-  --destructive: oklch(0.72 0.12 25);
-  --border: oklch(0.345 0.035 290);
-  --input: oklch(0.37 0.035 290);
-  --ring: oklch(0.76 0.09 285);
+  --destructive: oklch(0.7 0.11 25);
+  --border: oklch(0.34 0.018 265);
+  --input: oklch(0.37 0.02 265);
+  --ring: oklch(0.64 0.07 280);
 
-  --tdc-dot: oklch(0.62 0.07 285);
+  --tdc-dot: oklch(0.62 0.03 270);
 }
 
 @theme inline {
