@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { DeleteEventButton } from "@/components/admin/delete-event-button";
 import { setEventRegistrationStatusAction } from "@/app/admin/events/actions";
+import { CsrfInput } from "@/components/csrf-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -126,6 +127,26 @@ export default async function AdminEventsPage({
               That event no longer exists.
             </div>
           ) : null}
+          {error === "csrf" ? (
+            <div
+              role="alert"
+              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              Your session expired. Refresh the page and try again.
+            </div>
+          ) : null}
+          {error &&
+          error !== "delete" &&
+          error !== "status" &&
+          error !== "not_found" &&
+          error !== "csrf" ? (
+            <div
+              role="alert"
+              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
+              Something went wrong. Please try again.
+            </div>
+          ) : null}
 
           {rows.length === 0 ? (
             <p className="py-8 text-sm text-muted-foreground">
@@ -178,6 +199,7 @@ export default async function AdminEventsPage({
                             key={candidate}
                             action={setEventRegistrationStatusAction}
                           >
+                            <CsrfInput />
                             <input type="hidden" name="id" value={event.id} />
                             <input
                               type="hidden"

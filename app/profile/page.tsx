@@ -28,9 +28,13 @@ export const instant = false;
 export default async function ProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{
+    registered?: string;
+    cancelled?: string;
+    error?: string;
+  }>;
 }) {
-  const { registered } = await searchParams;
+  const { registered, cancelled, error } = await searchParams;
   const { session, profile } = await requireProfile();
 
   if (profile.status === "pending") {
@@ -180,6 +184,8 @@ export default async function ProfilePage({
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <ProfileClient
         registered={registered}
+        cancelled={cancelled}
+        error={error}
         profile={profile}
         avatarUrl={avatarUrl}
         profileCompletion={profileCompletion}

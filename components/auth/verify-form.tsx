@@ -34,9 +34,9 @@ export function VerifyForm({ email }: { email: string }) {
   const [otp, setOtp] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
   const [resendCount, setResendCount] = useState(0);
-  const [resendSeen, setResendSeen] = useState(false);
-  if (Boolean(resendState?.sent) && !resendSeen) {
-    setResendSeen(true);
+  const [prevResend, setPrevResend] = useState<ResendFormState | null>(null);
+  if (resendState?.sent && resendState !== prevResend) {
+    setPrevResend(resendState);
     setResendCount((value) => value + 1);
   }
   const { expired, label } = useOtpExpiry(resendCount);

@@ -6,6 +6,7 @@ import {
   Pencil,
   Pin,
   PinOff,
+  Trash2,
   TriangleAlert,
 } from "lucide-react";
 import Link from "next/link";
@@ -46,6 +47,7 @@ const errorMessages: Record<string, string> = {
   delete: "We couldn't delete that announcement. Please try again.",
   update: "We couldn't update that announcement. Please try again.",
   not_found: "That announcement no longer exists.",
+  csrf: "Your session expired. Refresh the page and try again.",
 };
 
 export default async function AdminAnnouncementsPage({
@@ -168,6 +170,15 @@ export default async function AdminAnnouncementsPage({
               <p>{errorMessages[error]}</p>
             </div>
           ) : null}
+          {error && !errorMessages[error] ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>Something went wrong. Please try again.</p>
+            </div>
+          ) : null}
 
           {rows.length === 0 ? (
             <p className="py-8 text-sm text-muted-foreground">
@@ -283,6 +294,10 @@ export default async function AdminAnnouncementsPage({
                         variant="ghost"
                         className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         ariaLabel="Delete announcement"
+                        icon={
+                          <Trash2 aria-hidden="true" className="size-4" />
+                        }
+                        iconOnly
                       />
                     </div>
                   </div>

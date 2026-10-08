@@ -8,6 +8,7 @@ import {
   resendResetCodeAction,
   resetPasswordAction,
   type ResetPasswordState,
+  type ResendResetCodeState,
 } from "@/app/reset-password/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,18 @@ export function ResetPasswordForm({ email }: { email: string }) {
     ResetPasswordState,
     FormData
   >(resetPasswordAction, null);
+  const [resendState, resendFormAction, resendPending] = useActionState<
+    ResendResetCodeState,
+    FormData
+  >(resendResetCodeAction, null);
+  const [resendKey, setResendKey] = useState(0);
+  const [prevResend, setPrevResend] = useState<ResendResetCodeState | null>(
+    null
+  );
+  if (resendState?.sent && resendState !== prevResend) {
+    setPrevResend(resendState);
+    setResendKey((value) => value + 1);
+  }
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,7 +44,7 @@ export function ResetPasswordForm({ email }: { email: string }) {
   const [clientError, setClientError] = useState<string | null>(null);
   const csrfToken = useCsrfToken();
 
-  const { expired: codeExpired, label: codeLabel } = useOtpExpiry(0);
+  const { expired: codeExpired, label: codeLabel } = useOtpExpiry(resendKey);
 
   const otpError = clientError ?? state?.fieldErrors?.otp;
   const passwordError = state?.fieldErrors?.password;
@@ -44,11 +57,6 @@ export function ResetPasswordForm({ email }: { email: string }) {
   }, [state]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    const submitter = (event.nativeEvent as SubmitEvent).submitter as
-      | HTMLButtonElement
-      | null;
-    if (submitter?.dataset.action === "resend") return;
-
     const parsed = resetPasswordSchema.safeParse({
       otp,
       password,
@@ -177,19 +185,38 @@ export function ResetPasswordForm({ email }: { email: string }) {
             "Reset password"
           )}
         </Button>
-        <Button
-          type="submit"
-          variant="ghost"
-          size="sm"
-          data-action="resend"
-          formAction={resendResetCodeAction}
-          className="w-full"
-          disabled={pending}
-        >
+      </div>
+
+      <div className="flex flex-col gap-2 border-t pt-4 text-sm text-muted-foreground">
+        <p>
+          The code was sent to{" "}
+          <span className="text-foreground">{email}</span>. It may take a
+          minute — check your spam folder too.
+        </p>
+        <form action={resendFormAction}>
           <input type="hidden" name="_csrf" value={csrfToken} />
-          <RotateCcw aria-hidden="true" className="size-4" />
-          Resend code
-        </Button>
+          <input type="hidden" name="email" value={email} />
+          <Button
+            type="submit"
+            variant="ghost"
+            size="sm"
+            className="w-full"
+            disabled={pending || resendPending}
+          >
+            <RotateCcw aria-hidden="true" className="size-4" />
+            {resendPending ? "Sending…" : "Resend code"}
+          </Button>
+        </form>
+        {resendState?.sent ? (
+          <p role="status" className="text-sm text-foreground">
+            A new code is on its way.
+          </p>
+        ) : null}
+        {resendState?.error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {resendState.error}
+          </p>
+        ) : null}
       </div>
     </form>
   );

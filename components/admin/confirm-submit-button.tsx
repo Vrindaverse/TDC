@@ -19,6 +19,8 @@ export function ConfirmSubmitButton({
   size = "sm",
   className,
   ariaLabel,
+  icon,
+  iconOnly = false,
 }: {
   action: (formData: FormData) => void | Promise<void>;
   fields?: Record<string, string>;
@@ -28,6 +30,8 @@ export function ConfirmSubmitButton({
   size?: VariantProps<typeof buttonVariants>["size"];
   className?: string;
   ariaLabel?: string;
+  icon?: ReactNode;
+  iconOnly?: boolean;
 }) {
   const [confirming, setConfirming] = useState(false);
 
@@ -51,7 +55,12 @@ export function ConfirmSubmitButton({
           }
         }}
       >
-        {confirming ? confirmLabel : label}
+        {icon ?? null}
+        {iconOnly ? (
+          <span className="sr-only">{confirming ? confirmLabel : label}</span>
+        ) : (
+          (confirming ? confirmLabel : label)
+        )}
       </Button>
     </form>
   );

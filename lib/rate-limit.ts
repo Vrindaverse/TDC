@@ -14,6 +14,8 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
   "auth:forgot-password": { windowMs: 60 * 60 * 1000, maxRequests: 3, keyPrefix: "ratelimit:forgot" },
   "auth:reset-password": { windowMs: 15 * 60 * 1000, maxRequests: 5, keyPrefix: "ratelimit:reset" },
   "auth:resend": { windowMs: 60 * 60 * 1000, maxRequests: 3, keyPrefix: "ratelimit:resend" },
+  "auth:join-send": { windowMs: 60 * 60 * 1000, maxRequests: 5, keyPrefix: "ratelimit:join-send" },
+  "auth:join-verify": { windowMs: 15 * 60 * 1000, maxRequests: 5, keyPrefix: "ratelimit:join-verify" },
 };
 
 export interface RateLimitResult {

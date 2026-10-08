@@ -217,6 +217,46 @@ export default async function AdminUsersPage({
             </div>
           ) : null}
 
+          {error === "csrf" ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>Your session expired. Refresh the page and try again.</p>
+            </div>
+          ) : null}
+
+          {error === "bad_status" ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>That status change wasn&apos;t valid.</p>
+            </div>
+          ) : null}
+
+          {error === "admin_status" ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>You can&apos;t deactivate an admin account.</p>
+            </div>
+          ) : null}
+
+          {error && error !== "self" && error !== "self_role" && error !== "last_admin" && error !== "bad_role" && error !== "not_found" && error !== "csrf" && error !== "bad_status" && error !== "admin_status" ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>Something went wrong. Please try again.</p>
+            </div>
+          ) : null}
+
           {rows.length === 0 ? (
             <p className="py-8 text-sm text-muted-foreground">
               {query || roleFilter ? "No members match your filters." : "No members yet."}

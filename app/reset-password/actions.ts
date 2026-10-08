@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { friendlyAuthError } from "@/lib/auth/errors";
@@ -23,17 +22,24 @@ export type ResetPasswordState = {
   fieldErrors?: FieldErrors;
 } | null;
 
-async function resendResetCodeActionInternal(formData: FormData) {
+export type ResendResetCodeState = { sent?: boolean; error?: string } | null;
+
+async function resendResetCodeActionInternal(
+  _prev: ResendResetCodeState,
+  formData: FormData
+): Promise<ResendResetCodeState> {
   const clientToken = formData.get("_csrf") as string | null;
   const valid = await validateCsrfToken(clientToken ?? "");
   if (!valid) {
-    redirect("/forgot-password");
+    return { error: "Your session expired. Refresh the page and try again." };
   }
 
   const rateLimit = await checkRateLimit("auth:resend");
   if (!rateLimit.success) {
-    redirect("/reset-password?error=resend");
-    return;
+    return {
+      error:
+        rateLimit.error ?? "Too many requests. Please try again later.",
+    };
   }
 
   const email = String(formData.get("email") ?? "")
@@ -41,7 +47,7 @@ async function resendResetCodeActionInternal(formData: FormData) {
     .toLowerCase();
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    redirect("/forgot-password");
+    return { error: "Enter a valid email address." };
   }
 
   try {
@@ -54,18 +60,17 @@ async function resendResetCodeActionInternal(formData: FormData) {
         "[reset-password] resend failed:",
         result.error.code ?? result.error.message
       );
-      redirect("/reset-password?error=resend");
-      return;
+      return { error: "We couldn't send a new code. Please try again." };
     }
     await setResetEmailCookie(email);
   } catch (err) {
     console.error("[reset-password] resend unexpected error:", err);
-    redirect("/reset-password?error=resend");
-    return;
+    return {
+      error: "Something went wrong. Please try again.",
+    };
   }
 
-  revalidatePath("/reset-password");
-  redirect("/reset-password?resent=1");
+  return { sent: true };
 }
 
 export { resendResetCodeActionInternal as resendResetCodeAction };

@@ -76,6 +76,7 @@ const errorMessages: Record<string, string> = {
   update: "We couldn't update that message. Please try again.",
   delete: "We couldn't delete that message. Please try again.",
   not_found: "That message no longer exists.",
+  csrf: "Your session expired. Refresh the page and try again.",
 };
 
 export const instant = false;
@@ -236,6 +237,15 @@ export default async function AdminMessagesPage({
                 className="mt-0.5 size-4 shrink-0 text-destructive"
               />
               <p>{errorMessages[error]}</p>
+            </div>
+          ) : null}
+          {error && !errorMessages[error] ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>Something went wrong. Please try again.</p>
             </div>
           ) : null}
 

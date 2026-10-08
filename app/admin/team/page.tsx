@@ -1,4 +1,5 @@
 import { CsrfInput } from "@/components/csrf-input";
+import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { desc, eq } from "drizzle-orm";
 import { Users } from "lucide-react";
 
@@ -129,13 +130,15 @@ export default async function AdminTeamPage({
                       </Button>
                     </form>
                   ) : null}
-                  <form action={deleteTeamPostAction}>
-                    <CsrfInput />
-                    <input type="hidden" name="id" value={post.id} />
-                    <Button type="submit" size="sm" variant="ghost" className="text-destructive">
-                      Delete
-                    </Button>
-                  </form>
+                  <ConfirmSubmitButton
+                    action={deleteTeamPostAction}
+                    fields={{ id: post.id }}
+                    label="Delete"
+                    confirmLabel="Confirm delete"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
+                    ariaLabel={`Delete post "${post.title}"`}
+                  />
                 </div>
               </div>
             ))

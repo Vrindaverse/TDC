@@ -54,7 +54,9 @@ export function ContactForm({
   const [values, setValues] = useState<Values>(EMPTY_VALUES);
   const [clientErrors, setClientErrors] = useState<Errors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
-  const sent = state && !state.error && !state.fieldErrors;
+  const [dismissedSuccess, setDismissedSuccess] = useState(false);
+  const sent =
+    !dismissedSuccess && state && !state.error && !state.fieldErrors;
 
   useEffect(() => {
     const first = (["category", "subject", "message"] as FieldName[]).find(
@@ -86,6 +88,7 @@ export function ContactForm({
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    setDismissedSuccess(false);
     const nextErrors = validate(values);
     setClientErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -114,6 +117,7 @@ export function ContactForm({
             setValues(EMPTY_VALUES);
             setEdited({});
             setClientErrors({});
+            setDismissedSuccess(true);
           }}
         >
           Send another message

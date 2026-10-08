@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useActionState } from "react";
+import type { RegisterEventState } from "@/app/events/actions";
 import type { EventItem, RegistrationStatus } from "@/lib/site-data";
 
 const statusMeta: Record<
@@ -39,7 +40,10 @@ interface EventCardProps {
   /** Marks the event as already finished: no action button, "Completed" badge. */
   past?: boolean;
   /** Server action for registration (overrides action link). */
-  formAction?: (prev: unknown, formData: FormData) => Promise<unknown>;
+  formAction?: (
+    prev: RegisterEventState,
+    formData: FormData
+  ) => Promise<RegisterEventState>;
   /** Fallback link action for non-registration cases. */
   action?: { label: string; href: string; onClick?: (e: React.MouseEvent) => void } | null;
 }
@@ -58,7 +62,10 @@ export function EventCard({
   const statusVariant = past ? "outline" : status.variant;
   const showBadge = showRegistration || past;
 
-  const [state, formActionResult, pending] = useActionState(formAction ?? (() => {}), null);
+  const [state, formActionResult, pending] = useActionState(
+    formAction ?? (async () => null),
+    null
+  );
 
   return (
     <article className="group relative flex cursor-target flex-col overflow-hidden rounded-2xl border bg-card/80 p-6 shadow-sm">
@@ -124,11 +131,11 @@ export function EventCard({
             )}
             <ArrowRight aria-hidden="true" className="transition-transform group-hover/button:translate-x-0.5" />
           </Button>
-          {state !== null && state !== undefined && (
+          {state?.error ? (
             <p className="mt-2 text-sm text-destructive" role="alert">
-              {String(state)}
+              {state.error}
             </p>
-          )}
+          ) : null}
         </form>
       ) : actionLink && !past ? (
         <div className="relative mt-auto pt-6">

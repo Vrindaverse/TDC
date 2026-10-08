@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Trash2,
   TriangleAlert,
 } from "lucide-react";
 import Link from "next/link";
@@ -189,6 +190,27 @@ export default async function AdminRegistrationsPage({
               <p>We couldn&apos;t remove that registration. Please try again.</p>
             </div>
           ) : null}
+          {error === "csrf" ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>Your session expired. Refresh the page and try again.</p>
+            </div>
+          ) : null}
+          {error &&
+          error !== "not_found" &&
+          error !== "delete" &&
+          error !== "csrf" ? (
+            <div role="alert" className={errorBanner}>
+              <TriangleAlert
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-destructive"
+              />
+              <p>Something went wrong. Please try again.</p>
+            </div>
+          ) : null}
 
           {rows.length === 0 ? (
             <p className="py-8 text-sm text-muted-foreground">
@@ -262,6 +284,10 @@ export default async function AdminRegistrationsPage({
                               variant="ghost"
                               className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                               ariaLabel={`Remove ${row.name} from ${row.title}`}
+                              icon={
+                                <Trash2 aria-hidden="true" className="size-4" />
+                              }
+                              iconOnly
                             />
                           </div>
                         </td>

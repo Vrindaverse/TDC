@@ -97,12 +97,18 @@ async function AdminGate({
   return null;
 }
 
+const REGISTRATION_STATUS_LABELS: Record<string, string> = {
+  open: "Registration open",
+  closing: "Closing soon",
+  closed: "Registration closed",
+};
+
 const entrySteps = [
   {
     id: "hello",
     title: "Say hello",
     description: "One form, no application essay. Tell us what you want to build.",
-    href: "/contact",
+    href: "/join",
     command: "tdc contact --new",
   },
   {
@@ -301,7 +307,8 @@ export default async function Home({
                       variant="outline"
                       className="tdc-mono rounded-none text-[10px] uppercase tracking-wide"
                     >
-                      {event.registrationStatus}
+                      {REGISTRATION_STATUS_LABELS[event.registrationStatus] ??
+                        event.registrationStatus}
                     </Badge>
                   </div>
                   <h3 className="text-base font-semibold tracking-tight">
@@ -310,6 +317,8 @@ export default async function Home({
                   <p className="text-sm text-muted-foreground">
                     {event.location || "TDC Campus"} · {event.time}
                   </p>
+                  {event.registrationStatus === "open" ||
+                  event.registrationStatus === "closing" ? (
                   <Link
                     href={`/join?event=${event.id}`}
                     className="tdc-mono tdc-underline mt-auto inline-flex items-center gap-1.5 text-xs text-foreground"
@@ -317,6 +326,11 @@ export default async function Home({
                     register
                     <ArrowUpRight aria-hidden="true" className="size-3.5" />
                   </Link>
+                ) : (
+                  <span className="tdc-mono mt-auto text-xs text-muted-foreground">
+                    registration closed
+                  </span>
+                )}
                 </div>
               ))
             )}
@@ -345,7 +359,7 @@ export default async function Home({
               size="lg"
               className="tdc-mono cursor-target border bg-background text-foreground shadow-none hover:bg-background/90"
             >
-              <Link href="/contact">join tdc</Link>
+              <Link href="/join">join tdc</Link>
             </Button>
             <Button
               asChild

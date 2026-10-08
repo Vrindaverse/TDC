@@ -90,7 +90,11 @@ export default async function EventsPage() {
                     (event.registrationStatus === "open" ||
                       event.registrationStatus === "closing") &&
                     new Date(event.startsAt) > new Date()
-                      ? (registerForEventAction as (prev: RegisterEventState, formData: FormData) => Promise<RegisterEventState>)
+                      ? (prev, formData) =>
+                          registerForEventAction(
+                            prev as RegisterEventState,
+                            formData,
+                          )
                       : undefined
                   }
                   action={

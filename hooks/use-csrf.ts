@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from "react";
 
+let tokenRequest: Promise<string | null> | null = null;
+
 export function useCsrfToken() {
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    fetch("/api/csrf")
+    tokenRequest ??= fetch("/api/csrf")
       .then((res) => res.json())
-      .then((data) => setToken(data.token))
-      .catch(() => {});
+      .then((data) => String(data.token ?? ""))
+      .catch(() => null);
+
+    tokenRequest.then((value) => {
+      if (value !== null) {
+        setToken(value);
+      }
+    });
   }, []);
 
   return token;

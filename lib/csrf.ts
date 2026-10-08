@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 
 const CSRF_COOKIE_NAME = "tdc_csrf_v2";
-const CSRF_HEADER_NAME = "x-csrf-token";
 const CSRF_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
 function generateToken(): string {

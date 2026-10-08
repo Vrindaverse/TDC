@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { and, asc, gt, inArray } from "drizzle-orm";
-import { CalendarDays, TriangleAlert } from "lucide-react";
+import { CalendarDays, CheckCircle2, TriangleAlert } from "lucide-react";
 
 import {
   GuestRegistrationForm,
@@ -10,6 +10,7 @@ import {
 import { RegistrationSuccessDialog } from "@/components/registration-success-dialog";
 import { SectionHeading } from "@/components/section-heading";
 import { Section } from "@/components/section";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,7 +18,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getProfile, getSession } from "@/lib/auth/guards";
+import {
+  getJoinVerifiedEmail,
+  getProfile,
+  getSession,
+} from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 
@@ -39,6 +44,21 @@ function formatEventDate(date: Date) {
   }).format(date);
 }
 
+const REGISTRATION_STATUS_LABELS: Record<string, string> = {
+  open: "Registration open",
+  closing: "Closing soon",
+};
+
+const JOIN_ERROR_MESSAGES: Record<string, string> = {
+  details:
+    "Please fill in your name, email, mobile and enrollment numbers to register.",
+  verify:
+    "Please verify your email before registering. Request a code below and enter it to confirm.",
+  semester: "Please choose your current semester.",
+  closed:
+    "Registration for that event just closed. Pick another upcoming event below.",
+};
+
 export default async function JoinPage({
   searchParams,
 }: {
@@ -51,6 +71,7 @@ export default async function JoinPage({
   const { registered, event: eventParam, error } = await searchParams;
   const session = await getSession();
   const profile = session?.user ? await getProfile(session.user.id) : null;
+  const verifiedEmail = await getJoinVerifiedEmail();
 
   const openEvents = await db
     .select({
@@ -78,7 +99,10 @@ export default async function JoinPage({
     id: event.id,
     label: `${event.title} · ${formatEventDate(event.startsAt)}${
       event.location ? ` · ${event.location}` : ""
-    } · ${event.registrationStatus}`,
+    } · ${
+      REGISTRATION_STATUS_LABELS[event.registrationStatus] ??
+      event.registrationStatus
+    }`,
   }));
 
   return (
@@ -99,51 +123,15 @@ export default async function JoinPage({
 
       <Section className="pb-16">
         <div className="mx-auto w-full max-w-2xl">
-          {error === "details" ? (
+          {error ? (
             <div className="mb-6 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
               <TriangleAlert
                 aria-hidden="true"
                 className="mt-0.5 size-4 shrink-0 text-destructive"
               />
               <p>
-                Please fill in your name, email, mobile and enrollment numbers
-                to register.
-              </p>
-            </div>
-          ) : null}
-
-          {error === "verify" ? (
-            <div className="mb-6 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
-              <TriangleAlert
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-destructive"
-              />
-              <p>
-                Please verify your email before registering. Request a code
-                below and enter it to confirm.
-              </p>
-            </div>
-          ) : null}
-
-          {error === "semester" ? (
-            <div className="mb-6 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
-              <TriangleAlert
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-destructive"
-              />
-              <p>Please choose your current semester.</p>
-            </div>
-          ) : null}
-
-          {error === "closed" ? (
-            <div className="mb-6 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
-              <TriangleAlert
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-destructive"
-              />
-              <p>
-                Registration for that event just closed. Pick another upcoming
-                event below.
+                {JOIN_ERROR_MESSAGES[error] ??
+                  "Something went wrong while registering. Please try again."}
               </p>
             </div>
           ) : null}
@@ -160,7 +148,30 @@ export default async function JoinPage({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {openEvents.length === 0 ? (
+              {registered ? (
+                <div className="flex flex-col items-center gap-4 py-8 text-center">
+                  <span className="flex size-12 items-center justify-center rounded-full bg-primary/10">
+                    <CheckCircle2
+                      aria-hidden="true"
+                      className="size-7 text-primary"
+                    />
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    <p className="font-medium">Registration complete</p>
+                    <p className="text-sm text-muted-foreground">
+                      See you there — we&apos;ll email the details before the
+                      session. Spots are confirmed for your email address.
+                    </p>
+                  </div>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="tdc-mono mt-1 w-full cursor-target"
+                  >
+                    <a href="/join">Register for another event</a>
+                  </Button>
+                </div>
+              ) : openEvents.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   No events are open for registration right now. Check back
                   soon.
@@ -176,6 +187,7 @@ export default async function JoinPage({
                 <GuestRegistrationForm
                   events={eventOptions}
                   preselect={preselect}
+                  verifiedEmail={verifiedEmail}
                 />
               )}
             </CardContent>

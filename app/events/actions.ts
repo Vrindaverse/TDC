@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 import { requireProfile } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
-import { events, registrations, profiles } from "@/lib/db/schema";
+import { events, registrations } from "@/lib/db/schema";
 import { validateCsrfToken } from "@/lib/csrf";
 import { logger } from "@/lib/logger";
 

@@ -79,8 +79,17 @@ type College = {
 
 type Tab = "overview" | "events" | "team" | "settings";
 
+const PROFILE_ERROR_LABELS: Record<string, string> = {
+  csrf: "Your session expired. Refresh the page and try again.",
+  not_found: "That registration no longer exists.",
+  invalid_registration: "That registration isn't in your account.",
+  event_started: "That event has already started, so it can't be cancelled.",
+};
+
 export function ProfileClient({
   registered,
+  cancelled,
+  error,
   profile,
   avatarUrl,
   profileCompletion,
@@ -96,6 +105,8 @@ export function ProfileClient({
   upcomingEventList,
 }: {
   registered: string | undefined;
+  cancelled: string | undefined;
+  error: string | undefined;
   profile: Profile;
   avatarUrl: string | null;
   profileCompletion: number;
@@ -127,6 +138,32 @@ export function ProfileClient({
     <>
       {registered ? (
         <RegistrationSuccessDialog message="Welcome to your member portal! Track your events, manage your profile, and stay updated with the community." />
+      ) : null}
+
+      {cancelled ? (
+        <div
+          role="status"
+          className="mb-6 flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-foreground"
+        >
+          <Info
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 text-primary"
+          />
+          <p>Your registration was cancelled. The seat is free again.</p>
+        </div>
+      ) : null}
+
+      {error ? (
+        <div
+          role="alert"
+          className="mb-6 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"
+        >
+          <AlertCircle
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 text-destructive"
+          />
+          <p>{PROFILE_ERROR_LABELS[error] ?? "Something went wrong. Please try again."}</p>
+        </div>
       ) : null}
 
       <div className="mb-6 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">

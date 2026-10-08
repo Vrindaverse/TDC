@@ -123,6 +123,11 @@ export const registrations = pgTable(
       table.profileId,
       table.eventId
     ),
+    guestEventEmailUnique: uniqueIndex(
+      "registrations_guest_event_email_unique"
+    )
+      .on(table.eventId, sql`lower(${table.email})`)
+      .where(sql`${table.profileId} IS NULL`),
     eventIdIdx: index("registrations_event_id_idx").on(table.eventId),
     profileIdIdx: index("registrations_profile_id_idx").on(table.profileId),
   })

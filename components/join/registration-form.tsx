@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Loader2, Mail } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Loader2 } from "lucide-react";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { FormEvent, MouseEvent } from "react";
@@ -9,6 +9,7 @@ import {
   registerForEventAction,
   sendJoinCodeAction,
   verifyJoinCodeAction,
+  type RegisterFormState,
   type SendCodeFormState,
   type VerifyCodeFormState,
 } from "@/app/join/actions";
@@ -72,8 +73,9 @@ export function MemberRegistrationForm({
   name: string;
   email: string;
 }) {
+  const [state, formAction] = useActionState(registerForEventAction, null);
   return (
-    <form action={registerForEventAction} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
       <div>
         <Label htmlFor="semester" className={labelClassName}>
           Current semester
@@ -119,6 +121,11 @@ export function MemberRegistrationForm({
       </p>
 
       <PendingSubmitButton>register for this event</PendingSubmitButton>
+      {state?.error ? (
+        <p role="alert" className={fieldErrorClass}>
+          {state.error}
+        </p>
+      ) : null}
     </form>
   );
 }
@@ -126,9 +133,11 @@ export function MemberRegistrationForm({
 export function GuestRegistrationForm({
   events,
   preselect,
+  verifiedEmail,
 }: {
   events: EventOption[];
   preselect: string;
+  verifiedEmail?: string | null;
 }) {
   const [step, setStep] = useState<"details" | "verify">("details");
   const [sendState, sendFormAction, sendPending] = useActionState<
@@ -139,6 +148,10 @@ export function GuestRegistrationForm({
     VerifyCodeFormState,
     FormData
   >(verifyJoinCodeAction, null);
+  const [registerState, registerFormAction, registerPending] = useActionState<
+    RegisterFormState,
+    FormData
+  >(registerForEventAction, null);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -149,18 +162,39 @@ export function GuestRegistrationForm({
   const [otp, setOtp] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
   const [sendCount, setSendCount] = useState(0);
-  const [sendSeen, setSendSeen] = useState(false);
-
-  if (Boolean(sendState?.sent) && !sendSeen) {
-    setSendSeen(true);
-    setSendCount((value) => value + 1);
-    setStep("verify");
-  }
+  const [confirmedEmail, setConfirmedEmail] = useState<string | null>(null);
+  const [verifyLocked, setVerifyLocked] = useState(false);
 
   const { expired, label } = useOtpExpiry(sendCount);
   const codeSent = sendState?.sent;
-  const verified = verifyState?.verified;
-  const busy = sendPending || verifyPending;
+  const currentEmail = email.trim().toLowerCase();
+  const verified = confirmedEmail === currentEmail && !verifyLocked;
+  const busy = sendPending || verifyPending || registerPending;
+
+  const [prevSendState, setPrevSendState] = useState(sendState);
+  if (prevSendState !== sendState) {
+    setPrevSendState(sendState);
+    if (sendState?.sent) {
+      setSendCount((value) => value + 1);
+      setStep("verify");
+    }
+  }
+
+  const [prevVerifyState, setPrevVerifyState] = useState(verifyState);
+  if (prevVerifyState !== verifyState && verifyState?.verified) {
+    setPrevVerifyState(verifyState);
+    setConfirmedEmail(currentEmail);
+    setVerifyLocked(false);
+    setOtp("");
+  }
+
+  const [prevRegisterState, setPrevRegisterState] = useState(registerState);
+  if (prevRegisterState !== registerState) {
+    setPrevRegisterState(registerState);
+    if (registerState?.reason === "verify") {
+      setVerifyLocked(true);
+    }
+  }
 
   const handleDetailsNext = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -185,27 +219,33 @@ export function GuestRegistrationForm({
       return;
     }
     setClientError(null);
+    if (verifiedEmail && currentEmail === verifiedEmail) {
+      setConfirmedEmail(currentEmail);
+      setStep("verify");
+      return;
+    }
     const formData = new FormData();
     formData.set("name", name.trim());
-    formData.set("email", email.trim().toLowerCase());
+    formData.set("email", currentEmail);
     sendFormAction(formData);
   };
 
   const handleSendAgain = () => {
     if (!EMAIL_PATTERN.test(email)) return;
+    setClientError(null);
     const formData = new FormData();
     formData.set("name", name.trim());
-    formData.set("email", email.trim().toLowerCase());
+    formData.set("email", currentEmail);
     sendFormAction(formData);
   };
 
+  const handleBack = () => {
+    setStep("details");
+    setClientError(null);
+    setOtp("");
+  };
+
   const handleVerify = (event: MouseEvent<HTMLButtonElement>) => {
-    if (!EMAIL_PATTERN.test(email)) {
-      event.preventDefault();
-      setClientError("Enter a valid email address.");
-      setStep("details");
-      return;
-    }
     if (!OTP_PATTERN.test(otp)) {
       event.preventDefault();
       setClientError("Enter the 6-digit code");
@@ -371,9 +411,20 @@ export function GuestRegistrationForm({
       ) : (
         <div className="flex flex-col gap-5">
           <div className="rounded-xl border border-dashed bg-muted/20 p-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Step 2 — verify your email
-            </p>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Step 2 — verify your email
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+              >
+                <ArrowLeft aria-hidden="true" />
+                Back to details
+              </Button>
+            </div>
             <form action={verifyFormAction} noValidate className="flex flex-col gap-3">
               <input type="hidden" name="email" value={email} />
               {clientError && step === "verify" ? (
@@ -450,7 +501,7 @@ export function GuestRegistrationForm({
               )}
             </form>
           </div>
-          <form action={registerForEventAction} className="flex flex-col gap-5">
+          <form action={registerFormAction} className="flex flex-col gap-5">
             <input type="hidden" name="name" value={name} />
             <input type="hidden" name="email" value={email} />
             <input type="hidden" name="mobile" value={mobile} />
@@ -460,6 +511,11 @@ export function GuestRegistrationForm({
             <PendingSubmitButton disabled={!verified || busy}>
               register for this event
             </PendingSubmitButton>
+            {registerState?.error ? (
+              <p role="alert" className={fieldErrorClass}>
+                {registerState.error}
+              </p>
+            ) : null}
           </form>
         </div>
       )}

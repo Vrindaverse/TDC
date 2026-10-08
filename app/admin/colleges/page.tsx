@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Pencil,
+  Trash2,
   TriangleAlert,
 } from "lucide-react";
 import Link from "next/link";
@@ -122,6 +123,7 @@ export default async function AdminCollegesPage({
     in_use: "Members still use this college — deactivate it instead of deleting.",
     update: "We couldn't update that college. Please try again.",
     delete: "We couldn't delete that college. Please try again.",
+    csrf: "Your session expired. Refresh the page and try again.",
   };
 
   return (
@@ -210,6 +212,9 @@ export default async function AdminCollegesPage({
           ) : null}
           {error && errorMessages[error] ? (
             <Banner kind="error">{errorMessages[error]}</Banner>
+          ) : null}
+          {error && !errorMessages[error] ? (
+            <Banner kind="error">Something went wrong. Please try again.</Banner>
           ) : null}
 
           {rows.length === 0 ? (
@@ -300,6 +305,10 @@ export default async function AdminCollegesPage({
                               variant="ghost"
                               className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                               ariaLabel={`Delete ${college.name}`}
+                              icon={
+                                <Trash2 aria-hidden="true" className="size-4" />
+                              }
+                              iconOnly
                             />
                           ) : null}
                         </div>

@@ -1,13 +1,12 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
-import { and, eq } from "drizzle-orm";
-import { notFound, redirect } from "next/navigation";
+import { and, eq, isNull, or } from "drizzle-orm";
+import { redirect } from "next/navigation";
 
 import { friendlyAuthError } from "@/lib/auth/errors";
 import {
   clearJoinShadowCookie,
-  clearJoinVerifiedCookie,
   getJoinShadowEmail,
   getJoinVerifiedEmail,
   getProfile,
@@ -19,6 +18,7 @@ import { auth } from "@/lib/auth/server";
 import { db, sql } from "@/lib/db";
 import { events, registrations } from "@/lib/db/schema";
 import { findUserIdByEmail } from "@/lib/db/users";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   fieldErrorsFromZod,
   otpSchema,
@@ -38,6 +38,11 @@ export type VerifyCodeFormState = {
   verified?: boolean;
   error?: string;
   fieldErrors?: FieldErrors;
+} | null;
+
+export type RegisterFormState = {
+  error?: string;
+  reason?: "details" | "verify" | "semester" | "closed" | "duplicate";
 } | null;
 
 async function sendOtpToEmail(email: string, name: string) {
@@ -78,6 +83,13 @@ export async function sendJoinCodeAction(
   _prev: SendCodeFormState,
   formData: FormData
 ): Promise<SendCodeFormState> {
+  const rateLimit = await checkRateLimit("auth:join-send");
+  if (!rateLimit.success) {
+    return {
+      error: rateLimit.error ?? "Too many requests. Please try again later.",
+    };
+  }
+
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Enter a valid email address first." };
@@ -96,6 +108,15 @@ export async function verifyJoinCodeAction(
   _prev: VerifyCodeFormState,
   formData: FormData
 ): Promise<VerifyCodeFormState> {
+  const rateLimit = await checkRateLimit("auth:join-verify");
+  if (!rateLimit.success) {
+    return {
+      error:
+        rateLimit.error ??
+        "Too many verification attempts. Please try again later.",
+    };
+  }
+
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Enter a valid email address first." };
@@ -139,22 +160,42 @@ export async function verifyJoinCodeAction(
   }
 }
 
-export async function registerForEventAction(formData: FormData) {
+export async function registerForEventAction(
+  _prev: RegisterFormState,
+  formData: FormData
+): Promise<RegisterFormState> {
   const eventId = String(formData.get("eventId") ?? "").trim();
-  if (!eventId) redirect("/join");
+  if (!eventId) {
+    return { error: "Please choose an event from the list.", reason: "details" };
+  }
 
   const [event] = await db
     .select({
       id: events.id,
       registrationStatus: events.registrationStatus,
+      startsAt: events.startsAt,
     })
     .from(events)
     .where(eq(events.id, eventId))
     .limit(1);
 
-  if (!event) notFound();
+  if (!event) {
+    return {
+      error: "That event is no longer available. Pick another one below.",
+      reason: "closed",
+    };
+  }
   if (event.registrationStatus === "closed") {
-    redirect("/join?error=closed");
+    return {
+      error: "Registration for that event just closed. Pick another upcoming event.",
+      reason: "closed",
+    };
+  }
+  if (event.startsAt < new Date()) {
+    return {
+      error: "That event has already started. Pick an upcoming event below.",
+      reason: "closed",
+    };
   }
 
   const session = await getSession();
@@ -164,9 +205,11 @@ export async function registerForEventAction(formData: FormData) {
     const parsedSemester = joinSemesterSchema.safeParse(
       formData.get("semester")
     );
-    if (!parsedSemester.success) redirect("/join?error=semester");
+    if (!parsedSemester.success) {
+      return { error: "Please choose your current semester.", reason: "semester" };
+    }
 
-    await db
+    const inserted = await db
       .insert(registrations)
       .values({
         profileId: profile.id,
@@ -176,7 +219,8 @@ export async function registerForEventAction(formData: FormData) {
         enrollmentNumber: profile.enrollmentNumber,
       })
       .onConflictDoNothing();
-    redirect("/profile?registered=1");
+
+    redirect(inserted.rowCount === 0 ? "/profile" : "/profile?registered=1");
   }
 
   const parsed = joinSchema.safeParse({
@@ -186,36 +230,70 @@ export async function registerForEventAction(formData: FormData) {
     enrollmentNumber: formData.get("enrollmentNumber"),
     semester: formData.get("semester"),
   });
-  if (!parsed.success) redirect("/join?error=details");
+  if (!parsed.success) {
+    return {
+      error: "Please fill in your name, email, mobile and enrollment numbers to register.",
+      reason: "details",
+    };
+  }
 
   const input = parsed.data;
   const email = input.email.toLowerCase();
 
   const verifiedEmail = await getJoinVerifiedEmail();
   if (!verifiedEmail || verifiedEmail !== email) {
-    redirect("/join?error=verify");
+    return {
+      error: "Email verification expired. Request a new code and enter it below.",
+      reason: "verify",
+    };
   }
 
-  const [existing] = await db
+  const [duplicate] = await db
     .select({ id: registrations.id })
     .from(registrations)
     .where(
-      and(eq(registrations.eventId, event.id), eq(registrations.email, email))
+      and(
+        eq(registrations.eventId, event.id),
+        or(
+          eq(registrations.email, email),
+          and(
+            isNull(registrations.email),
+            or(
+              eq(registrations.mobile, input.mobile),
+              eq(registrations.enrollmentNumber, input.enrollmentNumber)
+            )
+          )
+        )
+      )
     )
     .limit(1);
 
-  if (!existing) {
-    await db.insert(registrations).values({
+  if (duplicate) {
+    return {
+      error: "You're already registered for this event. Pick another event below.",
+      reason: "duplicate",
+    };
+  }
+
+  const inserted = await db
+    .insert(registrations)
+    .values({
       eventId: event.id,
       name: input.name,
       email,
       mobile: input.mobile,
       enrollmentNumber: input.enrollmentNumber,
       semester: input.semester,
-    });
+    })
+    .onConflictDoNothing();
+
+  if (inserted.rowCount === 0) {
+    return {
+      error: "You're already registered for this event. Pick another event below.",
+      reason: "duplicate",
+    };
   }
 
-  await clearJoinVerifiedCookie();
   await clearJoinShadowCookie();
   redirect("/join?registered=1");
 }

@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 
 import { deleteEventAction } from "@/app/admin/events/actions";
+import { CsrfInput } from "@/components/csrf-input";
 import { Button } from "@/components/ui/button";
 
 export function DeleteEventButton({
@@ -25,6 +26,7 @@ export function DeleteEventButton({
         }
       }}
     >
+      <CsrfInput />
       <input type="hidden" name="id" value={id} />
       <Button
         type="submit"
