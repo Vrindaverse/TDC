@@ -6,6 +6,7 @@ import { ChevronDown, LayoutDashboard, LogOut, User } from "lucide-react";
 
 import { MobileStaggeredMenu } from "@/components/mobile-staggered-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TerminalNavLink } from "@/components/ui/terminal-nav-link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,17 +36,17 @@ function Logo({ className }: { className?: string }) {
     <Link
       href="/"
       className={cn(
-        "flex items-center gap-2.5 font-semibold tracking-tight text-foreground",
+        "tdc-mono flex items-center gap-2.5 text-base font-semibold tracking-tight text-foreground cursor-target",
         className
       )}
     >
       <span
         aria-hidden="true"
-        className="flex size-7 items-center justify-center rounded-[6px] bg-primary text-[0.7rem] font-bold tracking-tight text-primary-foreground"
+        className="flex size-7 items-center justify-center rounded-[4px] border border-border bg-background text-sm font-bold text-primary"
       >
-        TD
+        $
       </span>
-      <span className="text-base">{site.name}</span>
+      <span className="tdc-mono">{site.name}</span>
     </Link>
   );
 }
@@ -71,27 +72,14 @@ export function Navbar({
         <Logo />
 
         <nav aria-label="Main" className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => {
-            const active = isActive(pathname, link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative inline-flex items-center px-4 py-2 text-sm font-medium transition-all duration-200",
-                  active
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {link.label}
-                {active && (
-                  <span className="absolute inset-x-4 -bottom-1 h-0.5 bg-primary rounded-full" />
-                )}
-              </Link>
-            );
-          })}
+          {navLinks.map((link) => (
+            <TerminalNavLink
+              key={link.href}
+              href={link.href}
+              label={link.label}
+              active={isActive(pathname, link.href)}
+            />
+          ))}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -192,19 +180,25 @@ export function Navbar({
                 <Link
                   href="/login"
                   className={cn(
-                    "inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors",
+                    "tdc-mono group inline-flex h-8 items-center gap-1 rounded-[3px] px-3 text-xs font-medium uppercase tracking-widest transition-colors cursor-target",
                     isActive(pathname, "/login")
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Login
+                  <span
+                    aria-hidden="true"
+                    className="text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-70"
+                  >
+                    ❯
+                  </span>
+                  login
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                  className="tdc-mono inline-flex h-8 items-center rounded-[3px] bg-primary px-3 text-xs font-medium uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary/90 cursor-target"
                 >
-                  Register
+                  register
                 </Link>
               </>
             )}

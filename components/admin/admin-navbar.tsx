@@ -64,15 +64,15 @@ export function AdminNavbar({
           </button>
           <span
             aria-hidden="true"
-            className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-[0.7rem] font-bold tracking-tight text-primary-foreground shadow-sm"
+            className="flex size-8 items-center justify-center rounded-[4px] border border-border bg-background text-sm font-bold text-primary shadow-sm"
           >
-            TD
+            $
           </span>
           <div className="flex flex-col leading-tight">
-            <span className="text-base font-semibold tracking-tight">
+            <span className="tdc-mono text-base font-semibold tracking-tight">
               TDC Admin
             </span>
-            <span className="tdc-mono-label text-[10px]">console</span>
+            <span className="tdc-mono-label text-[10px]">~/admin</span>
           </div>
         </div>
 
@@ -81,10 +81,10 @@ export function AdminNavbar({
           <Link
             href={VISIT_SITE_HREF}
             target="_blank"
-            className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground sm:inline-flex"
+            className="tdc-mono hidden items-center gap-1.5 rounded-[3px] px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground sm:inline-flex cursor-target"
           >
             <ExternalLink aria-hidden="true" className="size-3.5" />
-            Visit site
+            visit site
           </Link>
 
           <DropdownMenu>

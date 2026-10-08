@@ -30,11 +30,16 @@
 
   /* Traffic-light dots drawn on terminal frames. */
   --tdc-dot: oklch(0.6 0 0);
+
+  /* Hero canvas inks. Hex only: the canvas 2D API cannot resolve `var()` or
+     oklch(), so these re-declare the theme foreground in hex. */
+  --tdc-hero-ink: #0a0a0a;
+  --tdc-hero-dot: #d4d4d4;
 }
 
 .dark {
-  /* Soft charcoal-slate dark theme: a whisper of cool blue, muted accent,
-     gentle contrast so it is calm rather than straining on the eyes. */
+  /* Soft charcoal-slate dark theme: a whisper of cool blue, gentle contrast,
+     and a soft (off-white) accent that cleanly inverts the black light theme. */
   --background: oklch(0.21 0.012 265);
   --foreground: oklch(0.91 0.008 260);
   --card: oklch(0.255 0.014 265);
@@ -42,8 +47,8 @@
   --popover: oklch(0.255 0.014 265);
   --popover-foreground: oklch(0.91 0.008 260);
 
-  --primary: oklch(0.72 0.06 280);
-  --primary-foreground: oklch(0.2 0.02 285);
+  --primary: oklch(0.94 0.005 265);
+  --primary-foreground: oklch(0.2 0.02 270);
 
   --secondary: oklch(0.29 0.015 265);
   --secondary-foreground: oklch(0.91 0.008 260);
@@ -55,9 +60,12 @@
   --destructive: oklch(0.7 0.11 25);
   --border: oklch(0.34 0.018 265);
   --input: oklch(0.37 0.02 265);
-  --ring: oklch(0.64 0.07 280);
+  --ring: oklch(0.92 0.008 265);
 
-  --tdc-dot: oklch(0.62 0.03 270);
+  --tdc-dot: oklch(0.6 0.02 265);
+
+  --tdc-hero-ink: #e8e8ee;
+  --tdc-hero-dot: #3b3b46;
 }
 
 @theme inline {
@@ -355,24 +363,49 @@
     .tdc-reveal {
       animation: tdc-reveal-in linear both;
       animation-timeline: view();
-      animation-range: entry 2% entry 55%;
+      animation-range: entry 4% entry 60%;
     }
 
     @keyframes tdc-reveal-in {
       from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(18px);
+        filter: blur(6px);
       }
       to {
         opacity: 1;
         transform: none;
+        filter: blur(0);
       }
     }
 
-    /* Left-to-right stagger inside each grid row. Higher specificity than
-       `.tdc-reveal` on its own, so the range override wins. */
-    .tdc-stagger > *:nth-child(even) {
-      animation-range: entry 8% entry 61%;
+    /* Grid children reveal in a left-to-right cascade: each item carries the
+       animation with a progressively later start, like a terminal printing
+       lines. Higher specificity than `.tdc-reveal` on its own, so the range
+       override wins when both classes land on the same element. */
+    .tdc-stagger > * {
+      animation: tdc-reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 4% entry 60%;
+    }
+
+    .tdc-stagger > *:nth-child(2) {
+      animation-range: entry 8% entry 64%;
+    }
+    .tdc-stagger > *:nth-child(3) {
+      animation-range: entry 12% entry 68%;
+    }
+    .tdc-stagger > *:nth-child(4) {
+      animation-range: entry 16% entry 72%;
+    }
+    .tdc-stagger > *:nth-child(5) {
+      animation-range: entry 20% entry 76%;
+    }
+    .tdc-stagger > *:nth-child(6) {
+      animation-range: entry 24% entry 80%;
+    }
+    .tdc-stagger > *:nth-child(n + 7) {
+      animation-range: entry 24% entry 80%;
     }
   }
 }

@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 
+import { useCssVarHex } from "@/components/use-css-var";
+
 import "./tech-text.css";
 
 const LABEL_FONT =
@@ -168,6 +170,13 @@ export function TechText({
   const settingsRef = useRef<TechTextSettings | null>(null);
   const wakeRef = useRef<() => void>(() => {});
 
+  /* Theme-aware ink: the canvas cannot parse `var()`/oklch(), so resolve the
+     foreground hex and re-render when the theme swaps. The given `color`/
+     `accentColor` props remain the pre-hydration fallback. */
+  const heroInk = useCssVarHex("--tdc-hero-ink");
+  const ink = heroInk ?? color;
+  const accent = heroInk ?? accentColor;
+
   useEffect(() => {
     settingsRef.current = {
       text,
@@ -175,8 +184,8 @@ export function TechText({
       fontWeight,
       fontSize,
       letterSpacing,
-      color,
-      accentColor,
+      color: ink,
+      accentColor: accent,
       reach,
       softness,
       dashLength,

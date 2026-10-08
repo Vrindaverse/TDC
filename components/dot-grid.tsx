@@ -5,6 +5,8 @@ import type { CSSProperties } from "react";
 import { gsap } from "gsap";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
 
+import { useCssVarHex } from "@/components/use-css-var";
+
 import "./dot-grid.css";
 
 gsap.registerPlugin(InertiaPlugin);
@@ -116,8 +118,8 @@ const throttle = <T extends unknown[]>(
 export default function DotGrid({
   dotSize = 4,
   gap = 25,
-  baseColor = "#d4d4d4",
-  activeColor = "#0a0a0a",
+  baseColor: baseColorProp = "#d4d4d4",
+  activeColor: activeColorProp = "#0a0a0a",
   proximity = 140,
   speedTrigger = 100,
   shockRadius = 220,
@@ -143,6 +145,14 @@ export default function DotGrid({
   });
   /** False while off-screen or in a hidden tab: skips the canvas work. */
   const activeRef = useRef(true);
+
+  /* Theme-aware inks: fall back to the given hex props until the CSS variable
+     has been resolved (the canvas cannot parse `var()`, and during SSR there is
+     no computed style to read). */
+  const heroInk = useCssVarHex("--tdc-hero-ink");
+  const heroDot = useCssVarHex("--tdc-hero-dot");
+  const baseColor = heroDot ?? baseColorProp;
+  const activeColor = heroInk ?? activeColorProp;
 
   const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
   const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);

@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
-import {
-  AppChrome,
-  AppFooter,
-  ChromeSkeleton,
-} from "@/components/app-shell";
+import { AppChrome, AppFooter, ChromeSkeleton } from "@/components/app-shell";
+import { ScrollProgress } from "@/components/scroll-progress";
 import { TargetCursor } from "@/components/target-cursor";
 import { ThemeProvider } from "@/components/theme-provider";
 import { site } from "@/lib/navigation";
@@ -58,6 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
+          <ScrollProgress />
           <Suspense fallback={<ChromeSkeleton />}>
             <AppChrome />
           </Suspense>

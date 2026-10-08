@@ -112,9 +112,10 @@ export function Hero() {
                   height utility would lose to it. */}
               <div className="-mx-4 sm:-mx-6">
                 <div className="h-[190px] w-full sm:h-[220px]">
-                  {/* `font-mono` on the container is picked up by the canvas via
-                      computed style, which gives the wordmark a terminal-block
-                      look. #0a0a0a is `--foreground`; canvas only parses hex. */}
+{/* `font-mono` on the container is picked up by the canvas via
+      computed style, which gives the wordmark a terminal-block
+      look. #0a0a0a is the pre-hydration fallback; TechText resolves
+      --tdc-hero-ink so the mark flips with the theme. */}
                   <TechText
                     text="TDC"
                     className="font-mono"
@@ -130,11 +131,23 @@ export function Hero() {
                 <Typewriter lines={TERMINAL_LINES} />
               </div>
 
-              <p className="tdc-mono mt-5 text-xs text-muted-foreground">
-                <span className="tdc-caret text-foreground">
-                  open to all technocrats
-                </span>
-              </p>
+              <div className="tdc-mono mt-5 flex items-center justify-between gap-3 border-t border-dashed pt-4 text-xs">
+                <p className="text-muted-foreground">
+                  <span aria-hidden="true" className="text-primary">
+                    $
+                  </span>{" "}
+                  <span className="tdc-caret text-foreground">
+                    open to all technocrats
+                  </span>
+                </p>
+                <p className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
+                  <span
+                    aria-hidden="true"
+                    className="size-1.5 rounded-full bg-primary"
+                  />
+                  ready
+                </p>
+              </div>
             </TerminalPanel>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { ChevronDown, LogOut, Menu, User, X } from "lucide-react";
 import { useState } from "react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TerminalNavLink } from "@/components/ui/terminal-nav-link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,45 +68,32 @@ export function MemberNavbar({
           </button>
           <Link
             href="/profile"
-            className="flex items-center gap-2.5 font-semibold tracking-tight text-foreground"
+            className="tdc-mono flex items-center gap-2.5 font-semibold tracking-tight text-foreground"
           >
             <span
               aria-hidden="true"
-              className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-[0.7rem] font-bold tracking-tight text-primary-foreground shadow-sm"
+              className="flex size-8 items-center justify-center rounded-[4px] border border-border bg-background text-sm font-bold text-primary shadow-sm"
             >
-              TD
+              $
             </span>
             <span className="flex flex-col leading-tight">
-              <span className="text-base">TDC Member</span>
+              <span className="tdc-mono text-base">TDC Member</span>
               <span className="tdc-mono-label text-[10px] text-muted-foreground">
-                portal
+                ~/member
               </span>
             </span>
           </Link>
         </div>
 
         <nav aria-label="Member" className="hidden items-center gap-1 md:flex">
-          {MEMBER_LINKS.map((link) => {
-            const active = isActive(pathname, link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative inline-flex items-center px-4 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {link.label}
-                {active && (
-                  <span className="absolute inset-x-4 -bottom-1 h-0.5 rounded-full bg-primary" />
-                )}
-              </Link>
-            );
-          })}
+          {MEMBER_LINKS.map((link) => (
+            <TerminalNavLink
+              key={link.href}
+              href={link.href}
+              label={link.label}
+              active={isActive(pathname, link.href)}
+            />
+          ))}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -183,12 +171,21 @@ export function MemberNavbar({
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "rounded-md px-3 py-2.5 text-sm font-medium",
+                  "tdc-mono flex items-center gap-2 rounded-[3px] px-3 py-2.5 text-xs font-medium uppercase tracking-widest",
                   isActive(pathname, link.href)
                     ? "bg-accent text-foreground"
                     : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
                 )}
               >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "text-primary",
+                    isActive(pathname, link.href) ? "opacity-100" : "opacity-0"
+                  )}
+                >
+                  ❯
+                </span>
                 {link.label}
               </Link>
             ))}

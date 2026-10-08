@@ -38,12 +38,12 @@ async function PublicAnnouncements() {
   if (items.length === 0) return null;
 
   return (
-    <section className="border-b bg-muted/10">
+    <section className="tdc-reveal border-b bg-muted/10">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-10 sm:px-6">
         <p className="tdc-mono text-xs uppercase tracking-wider text-muted-foreground">
           tdc / announcements
         </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="tdc-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <article
               key={item.id}
@@ -157,7 +157,7 @@ export default async function Home({
       </div>
 
       {/* Story */}
-      <Section>
+      <Section className="tdc-reveal">
         <TerminalPanel title="~/tdc — story" badge="readme" scanlines>
         <div className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-5">
@@ -190,7 +190,7 @@ export default async function Home({
       </Section>
 
       {/* Tracks */}
-      <section className="border-t">
+      <section className="tdc-reveal border-t">
         <Section>
           <TerminalPanel title="~/tdc/domains --list" badge="05 tracks" scanlines>
           <div className="flex items-end justify-between gap-4">
@@ -201,7 +201,7 @@ export default async function Home({
               {String(domains.length).padStart(2, "0")} tracks
             </span>
           </div>
-          <ol className="mt-8 divide-y border-y">
+          <ol className="tdc-stagger mt-8 divide-y border-y">
             {domains.map((domain, index) => {
               const Icon = domain.icon;
               return (
@@ -239,12 +239,12 @@ export default async function Home({
       </section>
 
       {/* How it works */}
-      <Section>
+      <Section className="tdc-reveal">
         <TerminalPanel title="~/tdc/how-it-works" badge="3 steps" scanlines>
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           How it works
         </h2>
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="tdc-stagger mt-8 grid gap-4 sm:grid-cols-3">
           {entrySteps.map((step, index) => (
             <div
               key={step.id}
@@ -273,7 +273,7 @@ export default async function Home({
       </Section>
 
       {/* Upcoming */}
-      <section className="border-t bg-muted/20">
+      <section className="tdc-reveal border-t bg-muted/20">
         <Section>
           <TerminalPanel title="~/tdc/events --upcoming" badge="live" scanlines>
           <div className="flex items-end justify-between gap-4">
@@ -288,7 +288,7 @@ export default async function Home({
               <ArrowUpRight aria-hidden="true" className="size-3.5" />
             </Link>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="tdc-stagger mt-8 grid gap-4 sm:grid-cols-3">
             {featuredEvents.length === 0 ? (
               <p className="text-sm text-muted-foreground sm:col-span-3">
                 Season details coming soon.
