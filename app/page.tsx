@@ -7,7 +7,7 @@ import { cacheLife } from "next/cache";
 
 import { BentoTile } from "@/components/bento-tile";
 import { Hero } from "@/components/hero";
-import { Marquee } from "@/components/marquee";
+import { DomainStream } from "@/components/domain-stream";
 import { Section } from "@/components/section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,9 +87,14 @@ export default async function Home({
 
       <Hero />
 
-      {/* Domain ticker */}
-      <div className="tdc-reveal border-b bg-muted/40 py-4">
-        <Marquee items={tickerItems} />
+      {/* Domain stream */}
+      <div className="tdc-reveal border-b bg-muted/40 py-6">
+        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
+          <p className="tdc-mono mb-2 text-xs uppercase tracking-wider text-muted-foreground">
+            $ tdc tracks --stream
+          </p>
+          <DomainStream items={tickerItems} />
+        </div>
       </div>
 
       {/* Bento grid */}

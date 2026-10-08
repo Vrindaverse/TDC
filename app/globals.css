@@ -152,6 +152,28 @@
   animation-play-state: paused;
 }
 
+@keyframes tdc-stream-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+.tdc-stream {
+  display: flex;
+  flex-direction: column;
+  max-height: 8.5rem;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+  animation: tdc-stream-scroll 18s linear infinite;
+}
+
+.tdc-stream:hover {
+  animation-play-state: paused;
+}
+
 @keyframes tdc-marquee-scroll {
   from {
     transform: translate3d(0, 0, 0);
@@ -245,6 +267,16 @@
 @media (prefers-reduced-motion: reduce) {
   .tdc-caret::after {
     animation: none;
+  }
+
+  .tdc-stream {
+    animation: none;
+    max-height: none;
+    mask-image: none;
+  }
+
+  .tdc-stream-track[aria-hidden="true"] {
+    display: none;
   }
 
   /* Fall back to a plain wrapping list instead of an unusable marquee. */
