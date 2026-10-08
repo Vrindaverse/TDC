@@ -35,7 +35,8 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <p className="mb-3 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+        <p className="tdc-mono mb-3 flex items-center gap-1.5 text-xs font-medium tracking-[0.16em] text-primary uppercase">
+          <span aria-hidden="true" className="opacity-80">❯</span>
           {eyebrow}
         </p>
       ) : null}

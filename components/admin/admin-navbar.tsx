@@ -23,13 +23,13 @@ export function AdminNavbar({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full px-4 pt-4 pb-2 sm:px-6">
       <AdminMobileSidebar
         open={mobileOpen}
         onOpenChange={setMobileOpen}
         unreadMessages={unreadMessages}
       />
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between rounded-[4px] border border-border/60 bg-card/80 px-4 shadow-lg shadow-black/5 backdrop-blur-md sm:px-5">
         <div className="flex items-center gap-2.5">
           <button
             type="button"

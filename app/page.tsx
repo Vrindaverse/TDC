@@ -340,41 +340,66 @@ export default async function Home({
       </section>
 
       {/* Inverted terminal call to action */}
-      <section className="tdc-reveal border-t bg-foreground text-background">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-          <p className="tdc-mono text-xs tracking-wide text-background/60 uppercase">
-            $ tdc join --apply
-          </p>
-          <h2 className="mt-5 max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-            Bring a laptop and an idea. We&apos;ll give you people to build
-            with.
-          </h2>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-background/70">
-            Problems worth solving, mentors on hand and enough support to finish
-            what you start. New to any of it? That is the point.
-          </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button
-              asChild
-              size="lg"
-              className="tdc-mono cursor-target border bg-background text-foreground shadow-none hover:bg-background/90"
-            >
-              <Link href="/join">join tdc</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="tdc-mono cursor-target border-background/40 bg-transparent text-background shadow-none hover:bg-background hover:text-foreground"
-            >
-              <Link href="/about">what we do</Link>
-            </Button>
-          </div>
-          <p className="tdc-mono mt-10 text-xs text-background/60">
-            <span className="tdc-caret text-background">
-              status: accepting new members
+      <section className="tdc-reveal px-4 sm:px-6">
+        <div className="tdc-scanlines mx-auto w-full max-w-6xl overflow-hidden rounded-[4px] border border-foreground bg-foreground text-background shadow-2xl">
+          <div
+            aria-hidden="true"
+            className="flex items-center gap-2 border-b border-background/20 px-4 py-2.5"
+          >
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-background/25" />
+              <span className="size-2.5 rounded-full bg-background/25" />
+              <span className="size-2.5 rounded-full bg-background/25" />
             </span>
-          </p>
+            <span className="tdc-mono-label ml-1.5 truncate !text-background/60">
+              ~/tdc/join
+            </span>
+            <span className="tdc-mono-label ml-auto hidden shrink-0 sm:inline !text-background/60">
+              recruiting
+            </span>
+          </div>
+
+          <div className="px-6 py-14 sm:px-12 sm:py-16">
+            <p className="tdc-mono text-xs tracking-wide text-background/60 uppercase">
+              $ tdc join --apply
+            </p>
+            <h2 className="mt-5 max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
+              Bring a laptop and an idea. We&apos;ll give you people to build
+              with.
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-background/70">
+              Problems worth solving, mentors on hand and enough support to
+              finish what you start. New to any of it? That is the point.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Button
+                asChild
+                size="lg"
+                className="tdc-mono cursor-target border bg-background text-foreground shadow-none hover:bg-background/90"
+              >
+                <Link href="/join">join tdc</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="tdc-mono cursor-target border-background/40 bg-transparent text-background shadow-none hover:bg-background hover:text-foreground"
+              >
+                <Link href="/about">what we do</Link>
+              </Button>
+            </div>
+            <p className="tdc-mono mt-10 text-xs text-background/60">
+              <span
+                aria-hidden="true"
+                className="text-background"
+              >
+                $ git log --oneline
+              </span>{" "}
+              <span className="tdc-caret text-background">
+                status: accepting new members
+              </span>
+            </p>
+          </div>
         </div>
       </section>
     </>

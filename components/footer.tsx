@@ -18,13 +18,13 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-muted/20">
-      <div
-        aria-hidden="true"
-        className="h-px bg-gradient-to-r from-transparent via-border to-transparent"
-      />
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="tdc-mono">
+    <footer className="mt-auto px-4 pb-6 sm:px-6">
+      <div className="mx-auto w-full max-w-7xl overflow-hidden rounded-[4px] border border-border/60 bg-muted/20 shadow-lg shadow-black/5 backdrop-blur-md">
+        <div
+          aria-hidden="true"
+          className="h-px bg-gradient-to-r from-transparent via-border to-transparent"
+        />
+        <div className="tdc-mono px-5 sm:px-8">
           {/* Faux terminal title bar */}
           <div
             aria-hidden="true"

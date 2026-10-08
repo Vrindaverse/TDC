@@ -14,14 +14,18 @@ export function StatCard({ stat }: StatCardProps) {
   const Icon = stat.icon;
 
   return (
-    <div className="rounded-lg border bg-card p-5">
-      <dt className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+    <div className="tdc-card-hover tdc-frame rounded-[4px] border bg-card p-5">
+      <dt className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
         <Icon className="size-4" aria-hidden="true" />
-        {stat.label}
+        <span className="tdc-mono uppercase tracking-widest">{stat.label}</span>
       </dt>
       <dd className="mt-3">
-        <span className="block text-3xl font-semibold tracking-tight text-card-foreground">
+        <span className="tdc-mono block text-3xl font-semibold tracking-tight text-card-foreground">
           {stat.value}
+          <span
+            aria-hidden="true"
+            className="ml-1 inline-block h-5 w-2 translate-y-0.5 bg-primary opacity-40"
+          />
         </span>
         <span className="mt-1.5 block text-sm leading-relaxed text-muted-foreground">
           {stat.description}
