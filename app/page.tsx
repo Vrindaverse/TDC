@@ -155,18 +155,18 @@ export default async function Home({
             className="tdc-reveal lg:col-span-4"
           >
             <h2 className="max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
-              A place where students actually build
+              Started by students, for students
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Technocrats Developer Community is a student-led group for people
-              who would rather write code than only read about it. We run
-              hands-on workshops, long build sessions and small teams that ship
-              projects together.
+              Technocrats Developer Community was founded by Annand Soni,
+              Ankit Kumar and Ankit Sharma — three friends who wanted juniors
+              to get real guidance from seniors, and a platform where
+              like-minded people could actually help each other grow.
             </p>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Membership is open to anyone at Technocrats who wants to learn
-              programming, development, AI/ML, cybersecurity or open source. No
-              prior experience is expected.
+              That legacy continues today: we prepare students for placements,
+              and teach DSA, Cybersecurity, App Dev, Web Dev and AI/ML —
+              through hands-on workshops, build sessions and mentorship.
             </p>
             <div className="mt-6">
               <Button asChild variant="outline" className="tdc-mono cursor-target">

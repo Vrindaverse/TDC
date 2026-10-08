@@ -44,7 +44,7 @@ export default function AboutPage() {
         <SectionHeading
           eyebrow="Community"
           title="Where we are today"
-          description="Placeholder figures for now — these update as the community grows."
+          description="The TDC at a glance."
           className="mb-10"
         />
         <StatList stats={communityStats} />
@@ -136,7 +136,7 @@ export default function AboutPage() {
         <SectionHeading
           eyebrow="Team"
           title="Who runs TDC"
-          description="Placeholder profiles for now — swap these for real core team members later."
+          description="The friends who started Technocrats Developer Community."
           className="mb-10"
         />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -125,32 +125,35 @@ export const domains: Domain[] = [
 
 export const communityStats: CommunityStat[] = [
   {
-    id: "members",
-    label: "Members",
-    value: "300+",
-    description: "Students actively learning and shipping together.",
+    id: "founders",
+    label: "Founded by",
+    value: "3 friends",
+    description:
+      "Annand Soni, Ankit Kumar and Ankit Sharma started TDC.",
     icon: Users,
   },
   {
-    id: "events",
-    label: "Events",
-    value: "20+",
-    description: "Workshops, talks and hackathons run so far.",
+    id: "domains",
+    label: "Tech tracks",
+    value: "08",
+    description: "From web and apps to AI, cloud and security.",
+    icon: Cpu,
+  },
+  {
+    id: "placements",
+    label: "Focus",
+    value: "Placements",
+    description:
+      "We prepare students with DSA, Cyber, Web Dev, App Dev and AI/ML.",
     icon: Trophy,
   },
   {
-    id: "projects",
-    label: "Projects",
-    value: "10+",
-    description: "Community-built tools, sites and experiments.",
+    id: "mentorship",
+    label: "Mentorship",
+    value: "Seniors ↔ Juniors",
+    description:
+      "Seniors guide juniors; like-minded people helping each other.",
     icon: Boxes,
-  },
-  {
-    id: "domains",
-    label: "Tech Domains",
-    value: "Multiple",
-    description: "From web and apps to AI, cloud and security.",
-    icon: Cpu,
   },
 ];
 
@@ -188,39 +191,21 @@ export const communityValues: CommunityValue[] = [
 export const team: TeamMember[] = [
   {
     id: "team-1",
-    name: "Aarav Sharma",
-    role: "Community Lead",
-    department: "Computer Science & Engineering",
+    name: "Annand Soni",
+    role: "Co-founder",
+    department: "Technocrats Institute of Technology",
   },
   {
     id: "team-2",
-    name: "Ishita Nair",
-    role: "Technical Lead",
-    department: "Information Technology",
+    name: "Ankit Kumar",
+    role: "Co-founder",
+    department: "Technocrats Institute of Technology",
   },
   {
     id: "team-3",
-    name: "Rohan Verma",
-    role: "Events Coordinator",
-    department: "Electronics & Communication",
-  },
-  {
-    id: "team-4",
-    name: "Nandini Rao",
-    role: "Design Lead",
-    department: "Computer Science & Engineering",
-  },
-  {
-    id: "team-5",
-    name: "Karan Mehta",
-    role: "Open Source Lead",
-    department: "Information Technology",
-  },
-  {
-    id: "team-6",
-    name: "Sana Iqbal",
-    role: "Outreach Lead",
-    department: "Computer Science & Engineering",
+    name: "Ankit Sharma",
+    role: "Co-founder",
+    department: "Technocrats Institute of Technology",
   },
 ];
 

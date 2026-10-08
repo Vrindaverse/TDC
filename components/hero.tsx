@@ -13,9 +13,9 @@ const TERMINAL_LINES = [
 ];
 
 const HERO_FACTS = [
-  { label: "members", value: "300+" },
+  { label: "founded by", value: "3 friends" },
   { label: "domains", value: "08" },
-  { label: "next", value: "17 Oct" },
+  { label: "join", value: "open" },
 ];
 
 /**
