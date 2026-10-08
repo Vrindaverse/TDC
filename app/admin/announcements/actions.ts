@@ -45,9 +45,14 @@ async function createAnnouncementActionInternal(
   const parsed = announcementSchema.safeParse({
     title: formData.get("title"),
     body: formData.get("body"),
+    audience: formData.get("audience") ?? "all",
+    teamId: formData.get("teamId") ?? "",
   });
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsFromZod(parsed.error) };
+  }
+  if (parsed.data.audience === "team" && !parsed.data.teamId) {
+    return { fieldErrors: { teamId: "Select a team." } };
   }
 
   let announcementId: string;
@@ -57,6 +62,8 @@ async function createAnnouncementActionInternal(
       .values({
         title: parsed.data.title,
         body: parsed.data.body,
+        audience: parsed.data.audience,
+        teamId: parsed.data.audience === "team" ? parsed.data.teamId || null : null,
         createdBy: profile.id,
       })
       .returning({ id: announcements.id });
@@ -102,9 +109,14 @@ async function updateAnnouncementActionInternal(
   const parsed = announcementSchema.safeParse({
     title: formData.get("title"),
     body: formData.get("body"),
+    audience: formData.get("audience") ?? "all",
+    teamId: formData.get("teamId") ?? "",
   });
   if (!parsed.success) {
     return { fieldErrors: fieldErrorsFromZod(parsed.error) };
+  }
+  if (parsed.data.audience === "team" && !parsed.data.teamId) {
+    return { fieldErrors: { teamId: "Select a team." } };
   }
 
   try {
@@ -122,6 +134,8 @@ async function updateAnnouncementActionInternal(
       .set({
         title: parsed.data.title,
         body: parsed.data.body,
+        audience: parsed.data.audience,
+        teamId: parsed.data.audience === "team" ? parsed.data.teamId || null : null,
       })
       .where(eq(announcements.id, id))
       .returning({ id: announcements.id });

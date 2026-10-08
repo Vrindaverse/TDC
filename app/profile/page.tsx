@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { eq, and, lt, desc } from "drizzle-orm";
+import { eq, and, lt, desc, or, inArray } from "drizzle-orm";
 import { ProfileClient } from "@/components/profile/profile-client";
 import {
   PendingApprovalScreen,
@@ -117,7 +117,18 @@ export default async function ProfilePage({
       db
         .select()
         .from(announcements)
-        .where(eq(announcements.isActive, true))
+        .where(
+          and(
+            eq(announcements.isActive, true),
+            or(
+              inArray(announcements.audience, ["all", "members"]),
+              and(
+                eq(announcements.audience, "team"),
+                profile.teamId ? eq(announcements.teamId, profile.teamId) : eq(announcements.id, profile.id)
+              )
+            )
+          )
+        )
         .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
         .limit(5),
 

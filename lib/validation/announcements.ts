@@ -11,6 +11,9 @@ export const announcementSchema = z.object({
     .trim()
     .min(10, "Add a bit more detail")
     .max(5000, "Announcement is too long"),
+  audience: z.enum(["all", "members", "visitors", "team"]),
+  teamId: z.string().uuid("Select a team").optional().or(z.literal("")),
 });
 
 export type AnnouncementInput = z.input<typeof announcementSchema>;
+export const announcementAudiences = ["all", "members", "visitors", "team"] as const;

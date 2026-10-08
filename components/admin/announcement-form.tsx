@@ -18,9 +18,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { announcementSchema } from "@/lib/validation/announcements";
 import { fieldErrorsFromZod, type FieldErrors } from "@/lib/validation/auth";
 
-type Values = { title: string; body: string };
+type Values = { title: string; body: string; audience: string; teamId: string };
 
-const FIELDS: (keyof Values)[] = ["title", "body"];
+const FIELDS: (keyof Values)[] = ["title", "body", "audience", "teamId"];
+
+const AUDIENCE_OPTIONS = [
+  { value: "all", label: "Everyone (members + visitors)" },
+  { value: "members", label: "All approved members" },
+  { value: "team", label: "A specific team" },
+  { value: "visitors", label: "Visitors (public site)" },
+];
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
@@ -33,8 +40,16 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 
 export function AnnouncementForm({
   announcement,
+  teams = [],
 }: {
-  announcement?: { id: string; title: string; body: string };
+  announcement?: {
+    id: string;
+    title: string;
+    body: string;
+    audience: string;
+    teamId: string | null;
+  };
+  teams?: { id: string; name: string }[];
 } = {}) {
   const action = announcement ? updateAnnouncementAction : createAnnouncementAction;
   const [state, formAction, pending] = useActionState<
@@ -44,6 +59,8 @@ export function AnnouncementForm({
   const [values, setValues] = useState<Values>({
     title: announcement?.title ?? "",
     body: announcement?.body ?? "",
+    audience: announcement?.audience ?? "all",
+    teamId: announcement?.teamId ?? "",
   });
   const [clientErrors, setClientErrors] = useState<FieldErrors>({});
   const [edited, setEdited] = useState<Record<string, boolean>>({});
@@ -76,7 +93,10 @@ export function AnnouncementForm({
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    const parsed = announcementSchema.safeParse(values);
+    const parsed = announcementSchema.safeParse({
+      ...values,
+      teamId: values.audience === "team" ? values.teamId : "",
+    });
     if (!parsed.success) {
       event.preventDefault();
       const nextErrors = fieldErrorsFromZod(parsed.error);
@@ -140,6 +160,50 @@ export function AnnouncementForm({
           }
         />
         <FieldError id="announcement-body-error" message={displayErrors.body} />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="announcement-audience">Audience</Label>
+          <select
+            id="announcement-audience"
+            name="audience"
+            value={values.audience}
+            disabled={pending}
+            onChange={(event) => update("audience", event.target.value)}
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            {AUDIENCE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <FieldError id="announcement-audience-error" message={displayErrors.audience} />
+        </div>
+        {values.audience === "team" ? (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="announcement-team">Team</Label>
+            <select
+              id="announcement-team"
+              name="teamId"
+              value={values.teamId}
+              disabled={pending}
+              onChange={(event) => update("teamId", event.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Select a team</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+            <FieldError id="announcement-team-error" message={displayErrors.teamId} />
+          </div>
+        ) : (
+          <input type="hidden" name="teamId" value="" />
+        )}
       </div>
 
       <div className="flex gap-3">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { asc, gt } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, or } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { cacheLife } from "next/cache";
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProfile, getSession } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
-import { events } from "@/lib/db/schema";
+import { announcements, events } from "@/lib/db/schema";
 import { dbEventToItem } from "@/lib/events";
 import { communityStats, domains } from "@/lib/site-data";
 
@@ -31,6 +31,56 @@ async function getFeaturedEvents() {
     .limit(3);
 
   return rows.map(dbEventToItem);
+}
+
+async function PublicAnnouncements() {
+  const items = await getPublicAnnouncements();
+  if (items.length === 0) return null;
+
+  return (
+    <section className="border-b bg-muted/10">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-10 sm:px-6">
+        <p className="tdc-mono text-xs uppercase tracking-wider text-muted-foreground">
+          tdc / announcements
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => (
+            <article
+              key={item.id}
+              className="rounded-xl border bg-card/60 p-4 text-sm shadow-sm"
+            >
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <h3 className="font-semibold tracking-tight">{item.title}</h3>
+                {item.pinned ? (
+                  <Badge variant="secondary">Pinned</Badge>
+                ) : null}
+              </div>
+              <p className="line-clamp-4 whitespace-pre-wrap text-muted-foreground">
+                {item.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+async function getPublicAnnouncements() {
+  "use cache";
+  cacheLife("minutes");
+
+  return db
+    .select()
+    .from(announcements)
+    .where(
+      and(
+        eq(announcements.isActive, true),
+        inArray(announcements.audience, ["all", "visitors"])
+      )
+    )
+    .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
+    .limit(3);
 }
 
 async function AdminGate({
@@ -86,6 +136,10 @@ export default async function Home({
 
 
       <Hero />
+
+      <Suspense>
+        <PublicAnnouncements />
+      </Suspense>
 
       {/* Domain stream */}
       <div className="tdc-reveal border-b bg-muted/40 py-6">

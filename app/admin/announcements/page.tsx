@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/db";
-import { announcements } from "@/lib/db/schema";
+import { announcements, teams } from "@/lib/db/schema";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en-IN", {
@@ -65,6 +65,11 @@ export default async function AdminAnnouncementsPage({
     .from(announcements)
     .orderBy(desc(announcements.pinned), desc(announcements.createdAt))
     .limit(100);
+
+  const teamRows = await db
+    .select({ id: teams.id, name: teams.name })
+    .from(teams)
+    .orderBy(teams.name);
 
   const editing =
     edit && /^[0-9a-f-]{36}$/i.test(edit)
@@ -110,9 +115,16 @@ export default async function AdminAnnouncementsPage({
         </CardHeader>
         <CardContent className="p-4">
           <AnnouncementForm
+            teams={teamRows}
             announcement={
               editing
-                ? { id: editing.id, title: editing.title, body: editing.body }
+                ? {
+                    id: editing.id,
+                    title: editing.title,
+                    body: editing.body,
+                    audience: editing.audience,
+                    teamId: editing.teamId,
+                  }
                 : undefined
             }
           />

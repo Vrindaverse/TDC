@@ -188,6 +188,10 @@ export const announcements = pgTable(
     }),
     pinned: boolean("pinned").notNull().default(false),
     isActive: boolean("is_active").notNull().default(true),
+    audience: text("audience").notNull().default("all"),
+    teamId: uuid("team_id").references(() => teams.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -198,6 +202,11 @@ export const announcements = pgTable(
   },
   (table) => ({
     activeIdx: index("announcements_active_idx").on(table.isActive),
+    audienceIdx: index("announcements_audience_idx").on(table.audience),
+    audienceCheck: check(
+      "announcements_audience_check",
+      sql`${table.audience} in ('all', 'members', 'visitors', 'team')`
+    ),
   })
 );
 
