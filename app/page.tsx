@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { cacheLife } from "next/cache";
 
-import { BentoTile } from "@/components/bento-tile";
 import { Hero } from "@/components/hero";
 import { DomainMarquee } from "@/components/domain-marquee";
 import { Section } from "@/components/section";
@@ -146,151 +145,99 @@ export default async function Home({
         <DomainMarquee items={tickerItems} />
       </div>
 
-      {/* Bento grid */}
+      {/* Story */}
       <Section>
-        <div className="tdc-stagger grid gap-4 lg:grid-cols-6">
-          <BentoTile
-            label="~/tdc/about"
-            hint="readme"
-            className="tdc-reveal lg:col-span-4"
-          >
-            <h2 className="max-w-xl text-2xl font-semibold tracking-tight text-balance sm:text-3xl">
+        <div className="grid gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <p className="tdc-mono-label">tdc / story</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
               Started by students, for students
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+          </div>
+          <div className="space-y-4 text-base leading-relaxed text-muted-foreground lg:col-span-7">
+            <p>
               Technocrats Developer Community was founded by Annand Soni,
               Ankit Kumar and Ankit Sharma — three friends who wanted juniors
               to get real guidance from seniors, and a platform where
-              like-minded people could actually help each other grow.
+              like-minded people could help each other grow.
             </p>
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            <p>
               That legacy continues today: we prepare students for placements,
-              and teach DSA, Cybersecurity, App Dev, Web Dev and AI/ML —
-              through hands-on workshops, build sessions and mentorship.
+              and teach DSA, Cybersecurity, App Dev, Web Dev and AI/ML through
+              hands-on workshops and mentorship.
             </p>
-            <div className="mt-6">
-              <Button asChild variant="outline" className="tdc-mono cursor-target">
-                <Link href="/about">
-                  read more
-                  <ArrowUpRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </div>
-          </BentoTile>
-
-          <BentoTile
-            label="~/tdc/schedule"
-            hint="next"
-            interactive
-            className="tdc-reveal lg:col-span-2"
-          >
-            <ul className="flex flex-1 flex-col">
-              {featuredEvents.length === 0 ? (
-                <li className="py-3">
-                  <p className="tdc-mono text-[11px] text-muted-foreground">
-                    next
-                  </p>
-                  <p className="mt-1 text-sm font-semibold">
-                    Season details coming soon
-                  </p>
-                </li>
-              ) : null}
-              {featuredEvents.map((event, index) => (
-                <li
-                  key={event.id}
-                  className={
-                    index === 0
-                      ? "border-b border-dashed pb-3"
-                      : "border-b border-dashed py-3 last:border-b-0 last:pb-0"
-                  }
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="tdc-mono text-[11px] text-muted-foreground">
-                        {event.date}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-balance">
-                        {event.title}
-                      </p>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="tdc-mono rounded-none text-[10px] tracking-wide uppercase"
-                    >
-                      {event.registrationStatus}
-                    </Badge>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <Button
-              asChild
-              size="sm"
-              variant="ghost"
-              className="tdc-mono mt-5 w-full justify-start cursor-target"
-            >
-              <Link href="/events">
-                all events
+            <Button asChild variant="outline" className="tdc-mono cursor-target">
+              <Link href="/about">
+                read our story
                 <ArrowUpRight aria-hidden="true" />
               </Link>
             </Button>
-          </BentoTile>
+          </div>
+        </div>
+      </Section>
 
-          <BentoTile
-            label="~/tdc/domains"
-            hint={`${domains.length} tracks`}
-            className="tdc-reveal lg:col-span-4"
-          >
-            <ul className="grid gap-x-6 sm:grid-cols-2">
-              {domains.map((domain) => {
-                const Icon = domain.icon;
-                return (
-                  <li key={domain.slug}>
-                    <Link
-                      href="/about"
-                      className="group flex cursor-target items-center gap-3 border-b border-dashed py-2.5 transition-colors last:border-b-0 hover:text-foreground"
-                    >
-                      <Icon
-                        className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
-                        aria-hidden="true"
-                      />
-                      <span className="tdc-underline text-sm font-medium">{domain.title}</span>
-                      <ArrowUpRight
-                        className="ml-auto size-3.5 shrink-0 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
-                        aria-hidden="true"
-                      />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </BentoTile>
+      {/* Tracks */}
+      <section className="border-t">
+        <Section>
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Tracks we teach
+            </h2>
+            <span className="tdc-mono text-xs text-muted-foreground">
+              {String(domains.length).padStart(2, "0")} tracks
+            </span>
+          </div>
+          <ol className="mt-8 divide-y border-y">
+            {domains.map((domain, index) => {
+              const Icon = domain.icon;
+              return (
+                <li key={domain.slug}>
+                  <Link
+                    href="/about"
+                    className="group flex items-center gap-5 py-4 transition-colors hover:bg-muted/40 sm:gap-8"
+                  >
+                    <span className="tdc-mono w-8 shrink-0 text-xs text-muted-foreground">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <Icon
+                      aria-hidden="true"
+                      className="size-5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base font-semibold tracking-tight sm:text-lg">
+                        {domain.title}
+                      </h3>
+                      <p className="truncate text-sm text-muted-foreground">
+                        {domain.description}
+                      </p>
+                    </div>
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-muted-foreground opacity-0 transition-all group-hover:opacity-100"
+                    />
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        </Section>
+      </section>
 
-          <BentoTile
-            label="~/tdc/stats"
-            hint="live"
-            className="tdc-reveal lg:col-span-2"
-          >
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-6">
-              {communityStats.map((stat) => (
-                <div key={stat.id}>
-                  <dt className="tdc-mono-label">{stat.label}</dt>
-                  <dd className="mt-1.5 text-3xl font-semibold tracking-tight">
-                    {stat.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </BentoTile>
-
+      {/* How it works */}
+      <Section>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          How it works
+        </h2>
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {entrySteps.map((step, index) => (
-            <BentoTile
+            <div
               key={step.id}
-              label={`0${index + 1}`}
-              interactive
-              className="tdc-reveal lg:col-span-2"
+              className="rounded-xl border bg-card/50 p-5 shadow-sm"
             >
-              <h3 className="text-lg font-semibold tracking-tight">
+              <p className="tdc-mono text-3xl font-bold text-primary">
+                0{index + 1}
+              </p>
+              <h3 className="mt-3 text-lg font-semibold tracking-tight">
                 {step.title}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -303,10 +250,67 @@ export default async function Home({
                 <span aria-hidden="true">$</span>
                 {step.command}
               </Link>
-            </BentoTile>
+            </div>
           ))}
         </div>
       </Section>
+
+      {/* Upcoming */}
+      <section className="border-t bg-muted/20">
+        <Section>
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Upcoming
+            </h2>
+            <Link
+              href="/events"
+              className="tdc-mono tdc-underline inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              all events
+              <ArrowUpRight aria-hidden="true" className="size-3.5" />
+            </Link>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {featuredEvents.length === 0 ? (
+              <p className="text-sm text-muted-foreground sm:col-span-3">
+                Season details coming soon.
+              </p>
+            ) : (
+              featuredEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="flex flex-col gap-3 rounded-xl border bg-card/50 p-5 shadow-sm"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="tdc-mono text-xs text-muted-foreground">
+                      {event.date}
+                    </p>
+                    <Badge
+                      variant="outline"
+                      className="tdc-mono rounded-none text-[10px] uppercase tracking-wide"
+                    >
+                      {event.registrationStatus}
+                    </Badge>
+                  </div>
+                  <h3 className="text-base font-semibold tracking-tight">
+                    {event.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {event.location || "TDC Campus"} · {event.time}
+                  </p>
+                  <Link
+                    href={`/join?event=${event.id}`}
+                    className="tdc-mono tdc-underline mt-auto inline-flex items-center gap-1.5 text-xs text-foreground"
+                  >
+                    register
+                    <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        </Section>
+      </section>
 
       {/* Inverted terminal call to action */}
       <section className="tdc-reveal border-t bg-foreground text-background">
