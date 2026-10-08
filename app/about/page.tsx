@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Eye, Target } from "lucide-react";
 
+import ThreeDImagePageflip from "@/components/lightswind/3d-image-pageflip";
+import type { PageFlipLeaf } from "@/components/lightswind/3d-image-pageflip";
 import { DomainCard } from "@/components/domain-card";
 import { SectionHeading } from "@/components/section-heading";
 import { MutedBand, Section } from "@/components/section";
@@ -13,6 +15,61 @@ export const metadata: Metadata = {
   description:
     "Purpose, mission, vision, domains and core team of the Technocrats Developer Community.",
 };
+
+const storyLeaves: PageFlipLeaf[] = [
+  {
+    id: 1,
+    frontImage:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+    backImage:
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+    frontTitle: "Technocrats Developer Community",
+    frontSubtitle: "our story, told in leaves",
+    frontBadge: "cover",
+    backTitle: "Chapter 01 · the beginning",
+    backSubtitle: "Annand Soni, Ankit Kumar & Ankit Sharma",
+    backBadge: "cp.01",
+  },
+  {
+    id: 2,
+    frontImage:
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80",
+    backImage:
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+    frontTitle: "Chapter 02 · the why",
+    frontSubtitle: "juniors deserve real guidance from seniors",
+    frontBadge: "cp.02",
+    backTitle: "Chapter 03 · what we teach",
+    backSubtitle: "web · apps · ai/ml · security · dsa",
+    backBadge: "cp.03",
+  },
+  {
+    id: 3,
+    frontImage:
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    backImage:
+      "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=800&q=80",
+    frontTitle: "Chapter 04 · how we work",
+    frontSubtitle: "workshops, sprints and honest code review",
+    frontBadge: "cp.04",
+    backTitle: "Chapter 05 · placement prep",
+    backSubtitle: "dsa, mock interviews and practice rounds",
+    backBadge: "cp.05",
+  },
+  {
+    id: 4,
+    frontImage:
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80",
+    backImage:
+      "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=800&q=80",
+    frontTitle: "Chapter 06 · the community",
+    frontSubtitle: "open study groups and demo nights",
+    frontBadge: "cp.06",
+    backTitle: "Endplate · your turn",
+    backSubtitle: "bring a laptop and an idea — join us",
+    backBadge: "endplate",
+  },
+];
 
 export default function AboutPage() {
   return (
@@ -60,6 +117,30 @@ export default function AboutPage() {
             </div>
           </TerminalPanel>
         </div>
+      </Section>
+
+      {/* Story notebook */}
+      <Section id="story" className="tdc-reveal">
+        <SectionHeading
+          eyebrow="Notebook"
+          title="Our story, page by page"
+          description="Flip through how TDC came to be, what we teach and where it is headed."
+          className="mb-10"
+        />
+        <TerminalPanel title="~/tdc/story --open" badge="[ 4 leaves ]" scanlines>
+          <div className="overflow-x-auto">
+            <ThreeDImagePageflip
+              pages={storyLeaves}
+              pageWidth={250}
+              pageHeight={350}
+              perspective={1400}
+              duration={0.7}
+              peekAngle={14}
+              autoplay
+              autoplayInterval={5000}
+            />
+          </div>
+        </TerminalPanel>
       </Section>
 
       {/* Community */}
