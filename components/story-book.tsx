@@ -254,7 +254,7 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [peekingIndex, setPeekingIndex] = useState<number | null>(null);
     const rootRef = useRef<HTMLDivElement>(null);
-    const [scale, setScale] = useState<number>(1);
+    const [effPageWidth, setEffPageWidth] = useState<number>(pageWidth);
 
     const totalLeaves = pages.length;
     const currentTurned =
@@ -262,15 +262,17 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
     const isOpen = currentTurned > 0 && currentTurned < totalLeaves;
 
     const roundedRadius = typeof radius === "number" ? `${radius}px` : radius;
-    const stageWidth = pageWidth * 2 + 40;
-    const stageHeight = pageHeight + 40;
+    const effPageHeight = effPageWidth * (pageHeight / pageWidth);
+    const effStageWidth = effPageWidth * 2 + 40;
+    const effStageHeight = effPageHeight + 40;
 
     useEffect(() => {
       const el = rootRef.current;
       if (!el) return;
       const update = () => {
         const avail = el.clientWidth;
-        setScale(avail > 0 ? Math.min(1, avail / stageWidth) : 1);
+        const target = avail > 40 ? Math.min(pageWidth, (avail - 40) / 2) : pageWidth;
+        setEffPageWidth((prev) => (target > 40 && Math.abs(target - prev) > 1 ? target : prev));
       };
       update();
       const ro = new ResizeObserver(update);
@@ -280,7 +282,7 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
         ro.disconnect();
         window.removeEventListener("resize", update);
       };
-    }, [stageWidth]);
+    }, [pageWidth]);
 
     const setTurned = useCallback(
       (newCount: number) => {
@@ -364,28 +366,22 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
       >
         {/* 3D book viewport stage */}
         <div
-          className="relative mx-auto"
-          style={{ width: stageWidth * scale, height: stageHeight * scale }}
+          className="relative flex items-center justify-center transition-all duration-500"
+          style={{
+            perspective: `${perspective}px`,
+            width: `${effStageWidth}px`,
+            height: `${effStageHeight}px`,
+          }}
         >
-          <div
-            className="absolute left-0 top-0 z-0 flex items-center justify-center transition-transform duration-500"
-            style={{
-              perspective: `${perspective}px`,
-              width: `${stageWidth}px`,
-              height: `${stageHeight}px`,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-            }}
-          >
           {/* 3D book container */}
           <div
             className="relative transition-transform"
             style={{
-              width: `${pageWidth}px`,
-              height: `${pageHeight}px`,
+              width: `${effPageWidth}px`,
+              height: `${effPageHeight}px`,
               transformStyle: "preserve-3d",
               transition: `transform ${duration}s ${easing}`,
-              transform: spineShift && isOpen ? `translateX(${pageWidth / 2}px)` : "translateX(0)",
+              transform: spineShift && isOpen ? `translateX(${effPageWidth / 2}px)` : "translateX(0)",
             }}
           >
             {/* Spine shadow & binding crease */}
@@ -481,7 +477,6 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
                 </div>
               );
             })}
-          </div>
           </div>
         </div>
 
