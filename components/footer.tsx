@@ -84,18 +84,18 @@ export function Footer() {
                 <li>
                   <a
                     href={`mailto:${contactDetails.email}`}
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground cursor-target"
+                    className="inline-flex min-w-0 items-center gap-2 break-all text-sm text-muted-foreground transition-colors hover:text-foreground cursor-target"
                   >
-                    <Mail aria-hidden="true" className="size-3.5" />
+                    <Mail aria-hidden="true" className="size-3.5 shrink-0" />
                     {contactDetails.email}
                   </a>
                 </li>
                 <li>
                   <a
                     href={`tel:${contactDetails.phone.replace(/[^+\d]/g, "")}`}
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground cursor-target"
+                    className="inline-flex min-w-0 items-center gap-2 break-all text-sm text-muted-foreground transition-colors hover:text-foreground cursor-target"
                   >
-                    <Phone aria-hidden="true" className="size-3.5" />
+                    <Phone aria-hidden="true" className="size-3.5 shrink-0" />
                     {contactDetails.phone}
                   </a>
                 </li>

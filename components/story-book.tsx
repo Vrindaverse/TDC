@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
@@ -253,6 +253,8 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
     const [internalTurned, setInternalTurned] = useState<number>(defaultTurnedIndex);
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [peekingIndex, setPeekingIndex] = useState<number | null>(null);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState<number>(1);
 
     const totalLeaves = pages.length;
     const currentTurned =
@@ -260,6 +262,25 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
     const isOpen = currentTurned > 0 && currentTurned < totalLeaves;
 
     const roundedRadius = typeof radius === "number" ? `${radius}px` : radius;
+    const stageWidth = pageWidth * 2 + 40;
+    const stageHeight = pageHeight + 40;
+
+    useEffect(() => {
+      const el = rootRef.current;
+      if (!el) return;
+      const update = () => {
+        const avail = el.clientWidth;
+        setScale(avail > 0 ? Math.min(1, avail / stageWidth) : 1);
+      };
+      update();
+      const ro = new ResizeObserver(update);
+      ro.observe(el);
+      window.addEventListener("resize", update);
+      return () => {
+        ro.disconnect();
+        window.removeEventListener("resize", update);
+      };
+    }, [stageWidth]);
 
     const setTurned = useCallback(
       (newCount: number) => {
@@ -329,8 +350,9 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
 
     return (
       <div
+        ref={rootRef}
         className={cn(
-          "flex w-full flex-col items-center justify-center select-none py-6",
+          "flex w-full flex-col items-center select-none py-6",
           className
         )}
         style={style}
@@ -342,13 +364,19 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
       >
         {/* 3D book viewport stage */}
         <div
-          className="relative flex items-center justify-center transition-all duration-500"
-          style={{
-            perspective: `${perspective}px`,
-            width: `${pageWidth * 2 + 40}px`,
-            height: `${pageHeight + 40}px`,
-          }}
+          className="relative mx-auto"
+          style={{ width: stageWidth * scale, height: stageHeight * scale }}
         >
+          <div
+            className="absolute left-0 top-0 z-0 flex items-center justify-center transition-transform duration-500"
+            style={{
+              perspective: `${perspective}px`,
+              width: `${stageWidth}px`,
+              height: `${stageHeight}px`,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+            }}
+          >
           {/* 3D book container */}
           <div
             className="relative transition-transform"
@@ -454,11 +482,12 @@ export const StoryBook = forwardRef<StoryBookHandle, StoryBookProps>(
               );
             })}
           </div>
+          </div>
         </div>
 
         {/* Controls */}
         {showControls ? (
-          <div className="mt-4 flex select-none items-center justify-center gap-2">
+          <div className="mt-4 flex flex-wrap select-none items-center justify-center gap-2">
             <button
               onClick={flipPrev}
               disabled={currentTurned === 0}

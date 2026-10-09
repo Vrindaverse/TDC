@@ -380,32 +380,38 @@ export default async function Home({
       {/* Glimpse of TDC — moments from the community */}
       <section className="tdc-reveal border-t bg-muted/10">
         <Section>
-          <TerminalPanel title="~/tdc/glimpse --moments" badge="rotate" scanlines>
-            <div className="flex flex-col items-center gap-8">
-              <div className="w-full max-w-xl text-center">
-                <p className="tdc-mono-label">tdc / glimpse</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-                  Glimpse of TDC
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Late builds, quiet workshops, whiteboard debates and demo-day
-                  nerves — the whole community, spinning by.
-                </p>
-              </div>
-              <ImageSlider3D
-                duration={36}
-                cardWidth="11.5em"
-                cardAspectRatio="3/4"
-                rotationDirection="left"
-                images={glimpseMoments}
-                imageClassName="rounded-[0.9em] border border-border/60 bg-muted shadow-[0_0.4em_2.5em_rgba(0,0,0,0.28)]"
-              />
-              <p className="tdc-mono-label flex items-center gap-2 text-xs">
-                <span className="text-emerald-500">$</span> moments --next
-                <span className="tdc-caret" aria-hidden />
-              </p>
-            </div>
-          </TerminalPanel>
+          <div className="flex flex-col items-center gap-5 text-center">
+            <p className="tdc-mono-label">tdc / glimpse</p>
+            <h2 className="max-w-xl text-2xl font-semibold tracking-tight sm:text-3xl">
+              Glimpse of TDC
+            </h2>
+            <p className="max-w-xl text-sm text-muted-foreground">
+              Late builds, quiet workshops, whiteboard debates and demo-day
+              nerves — the whole community, spinning by.
+            </p>
+          </div>
+
+          <div className="relative mt-10 overflow-hidden rounded-[4px] border border-border/60 bg-card/50 px-4 py-8 sm:px-8 sm:py-12">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[100px]"
+            />
+            <ImageSlider3D
+              duration={36}
+              cardWidth="clamp(9.5em, 30vw, 13em)"
+              cardAspectRatio="3/4"
+              rotationDirection="left"
+              images={glimpseMoments}
+              imageClassName="rounded-[0.9em] border border-border/60 bg-muted shadow-[0_0.6em_3em_rgba(0,0,0,0.4)]"
+              containerClassName="min-h-[20rem] sm:min-h-[28rem]"
+            />
+          </div>
+
+          <p className="tdc-mono mt-6 flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="h-px w-10 bg-border" aria-hidden />
+            {glimpseMoments.length} moments, still turning
+            <span className="h-px w-10 bg-border" aria-hidden />
+          </p>
         </Section>
       </section>
     </>

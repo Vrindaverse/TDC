@@ -136,7 +136,7 @@ export default async function AdminRegistrationsPage({
               name="q"
               defaultValue={query}
               placeholder="Search name, email, enrollment, event"
-              className="w-64"
+              className="w-full sm:w-64"
               aria-label="Search registrations"
             />
             <select

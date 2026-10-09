@@ -193,7 +193,7 @@ export default async function AdminEventsPage({
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-1 rounded-lg border border-border/60 p-1">
+                      <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border/60 p-1">
                         {STATUS_ORDER.map((candidate) => (
                           <form
                             key={candidate}

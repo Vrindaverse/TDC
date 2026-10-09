@@ -185,7 +185,7 @@ export default async function AdminMessagesPage({
               name="q"
               defaultValue={query}
               placeholder="Search subject, body, sender"
-              className="w-64"
+              className="w-full sm:w-64"
               aria-label="Search messages"
             />
             <select

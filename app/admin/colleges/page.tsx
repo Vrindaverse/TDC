@@ -174,7 +174,7 @@ export default async function AdminCollegesPage({
               name="q"
               defaultValue={query}
               placeholder="Search name or code"
-              className="w-56"
+              className="w-full sm:w-56"
               aria-label="Search colleges"
             />
             <select

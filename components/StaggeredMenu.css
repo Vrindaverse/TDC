@@ -350,6 +350,11 @@
     right: 0;
   }
 
+  .sm-panel-item {
+    font-size: 2.6rem;
+    padding-right: 1em;
+  }
+
   .staggered-menu-wrapper[data-open] .sm-logo-img {
     filter: invert(100%);
   }

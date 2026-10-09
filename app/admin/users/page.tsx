@@ -65,7 +65,7 @@ function FilterForm({
         name="q"
         defaultValue={q}
         placeholder="Search name, email, mobile, enrollment"
-        className="w-64"
+        className="w-full sm:w-64"
         aria-label="Search members"
       />
       <select
