@@ -32,7 +32,3 @@ export function validateEnv(): void {
     }
   }
 }
-
-export function getEnv() {
-  return env;
-}

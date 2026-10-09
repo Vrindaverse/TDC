@@ -51,24 +51,6 @@ export async function getUserEmail(id: string): Promise<string | null> {
   return rows[0]?.email ?? null;
 }
 
-export async function getUserEmails(userIds: string[]): Promise<Map<string, string>> {
-  if (userIds.length === 0) return new Map();
-  const placeholders = userIds.map((_, i) => `$${i + 1}`).join(", ");
-  const query = `select id, email from neon_auth."user" where id in (${placeholders})`;
-  const rows = await sql.query(query, userIds);
-  const map = new Map<string, string>();
-  for (const row of rows) {
-    map.set(row.id, row.email);
-  }
-  return map;
-}
-
 export async function deleteUser(id: string): Promise<void> {
   await sql`delete from neon_auth."user" where id = ${id}`;
-}
-
-export async function getAdminCount(): Promise<number> {
-  // This requires joining with profiles table which is in public schema
-  // The admin role is stored in profiles, not in neon_auth
-  return 0;
 }

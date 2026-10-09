@@ -138,11 +138,6 @@ export async function getJoinVerifiedEmail(): Promise<string | null> {
   return store.get(JOIN_VERIFIED_COOKIE)?.value ?? null;
 }
 
-export async function clearJoinVerifiedCookie() {
-  const store = await cookies();
-  store.delete(JOIN_VERIFIED_COOKIE);
-}
-
 export async function setResetEmailCookie(email: string) {
   const store = await cookies();
   store.set(RESET_EMAIL_COOKIE, email.toLowerCase(), {

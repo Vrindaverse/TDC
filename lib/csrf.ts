@@ -44,16 +44,3 @@ export async function validateCsrfToken(clientToken: string): Promise<boolean> {
     return false;
   }
 }
-
-export async function rotateCsrfToken(): Promise<string> {
-  const store = await cookies();
-  const token = generateToken();
-  store.set(CSRF_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: CSRF_COOKIE_MAX_AGE,
-    path: "/",
-  });
-  return token;
-}

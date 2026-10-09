@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 
@@ -116,13 +117,15 @@ function BookFace({
           boxShadow: `0 12px 28px rgba(0, 0, 0, ${shadowIntensity})`,
         }}
       >
-        <img
-          src={content.image}
-          alt={content.title}
-          className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover"
-          loading="lazy"
-          decoding="async"
-        />
+        {content.image ? (
+          <Image
+            src={content.image}
+            alt={content.title}
+            fill
+            sizes="(max-width: 768px) 90vw, 33vw"
+            className="pointer-events-none select-none object-cover"
+          />
+        ) : null}
         <span
           aria-hidden="true"
           className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10"
@@ -191,13 +194,16 @@ function BookFace({
 
         {content.image ? (
           <figure className="relative mt-auto overflow-hidden rounded-[3px] border border-border/60">
-            <img
-              src={content.image}
-              alt={content.title}
-              className="h-28 w-full select-none object-cover"
-              loading="lazy"
-              decoding="async"
-            />
+            {content.image ? (
+              <Image
+                src={content.image}
+                alt={content.title}
+                width={400}
+                height={112}
+                sizes="(max-width: 768px) 90vw, 33vw"
+                className="h-28 w-full select-none object-cover"
+              />
+            ) : null}
             {content.caption ? (
               <figcaption className="tdc-mono w-full truncate bg-black/60 px-2 py-1 text-[9px] text-white/90">
                 {content.caption}

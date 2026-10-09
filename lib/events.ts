@@ -27,7 +27,6 @@ export function dbEventToItem(event: EventRecord): EventItem {
     id: event.id,
     title: event.title,
     poster: resolvePosterUrl(event.poster),
-    posterHeight: 828,
     date: formatDate(event.startsAt),
     time: formatTime(event.startsAt),
     location: event.location ?? "Technocrats Campus",

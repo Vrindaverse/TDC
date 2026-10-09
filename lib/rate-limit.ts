@@ -85,12 +85,3 @@ export async function checkRateLimit(
     };
   }
 }
-
-export function getRateLimitHeaders(action: keyof typeof RATE_LIMITS, result: RateLimitResult): Record<string, string> {
-  const config = RATE_LIMITS[action];
-  return {
-    "X-RateLimit-Limit": String(config.maxRequests),
-    "X-RateLimit-Remaining": String(result.remaining),
-    "X-RateLimit-Reset": String(Math.ceil(result.resetTime / 1000)),
-  };
-}

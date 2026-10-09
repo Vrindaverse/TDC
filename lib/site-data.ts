@@ -2,14 +2,9 @@ import type { LucideIcon } from "lucide-react";
 import {
   AppWindow,
   Bot,
-  Boxes,
-  Braces,
-  Cpu,
   Globe,
   Shield,
   Swords,
-  Trophy,
-  Users,
 } from "lucide-react";
 
 export type RegistrationStatus = "open" | "closing" | "closed";
@@ -21,21 +16,11 @@ export interface Domain {
   icon: LucideIcon;
 }
 
-export interface CommunityStat {
-  id: string;
-  label: string;
-  value: string;
-  description: string;
-  icon: LucideIcon;
-}
-
 export interface EventItem {
   id: string;
   title: string;
-  /** Grayscale poster art used by the events masonry. */
+  /** Poster art used by the event cards. */
   poster: string;
-  /** Poster height in px as the masonry consumes it (it renders at half). */
-  posterHeight: number;
   date: string;
   time: string;
   location: string;
@@ -50,13 +35,6 @@ export interface TeamMember {
   name: string;
   role: string;
   department: string;
-}
-
-export interface CommunityValue {
-  id: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
 }
 
 /**
@@ -99,71 +77,6 @@ export const domains: Domain[] = [
     description:
       "Crack coding interviews with guided DSA practice and placement preparation.",
     icon: Swords,
-  },
-];
-
-export const communityStats: CommunityStat[] = [
-  {
-    id: "founders",
-    label: "Founded by",
-    value: "3 friends",
-    description:
-      "Annand Soni, Ankit Kumar and Ankit Sharma started TDC.",
-    icon: Users,
-  },
-  {
-    id: "domains",
-    label: "Tech tracks",
-    value: "05",
-    description: "Web, apps, AI/ML, cybersecurity and DSA.",
-    icon: Cpu,
-  },
-  {
-    id: "placements",
-    label: "Focus",
-    value: "Placements",
-    description:
-      "We prepare students with DSA, Cyber, Web Dev, App Dev and AI/ML.",
-    icon: Trophy,
-  },
-  {
-    id: "mentorship",
-    label: "Mentorship",
-    value: "Seniors ↔ Juniors",
-    description:
-      "Seniors guide juniors; like-minded people helping each other.",
-    icon: Boxes,
-  },
-];
-
-export const communityValues: CommunityValue[] = [
-  {
-    id: "learn",
-    title: "Learn",
-    description:
-      "Concepts get reinforced by building, not by memorising. Every session ends with working code.",
-    icon: Cpu,
-  },
-  {
-    id: "build",
-    title: "Build",
-    description:
-      "Side projects, lab contributions and internal tools count. Shipping small beats planning large.",
-    icon: Boxes,
-  },
-  {
-    id: "collaborate",
-    title: "Collaborate",
-    description:
-      "Teams form naturally around interests, and code review is the default way we learn from each other.",
-    icon: Users,
-  },
-  {
-    id: "share",
-    title: "Share",
-    description:
-      "Write it up, teach it back, publish the resource. What one member learns, the whole community keeps.",
-    icon: Braces,
   },
 ];
 

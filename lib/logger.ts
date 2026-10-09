@@ -48,12 +48,3 @@ export const logger = {
     this.info(`[API] ${route}`, context);
   },
 };
-
-export function createChildLogger(prefix: string) {
-  return {
-    debug: (message: string, context?: LogContext) => logger.debug(`[${prefix}] ${message}`, context),
-    info: (message: string, context?: LogContext) => logger.info(`[${prefix}] ${message}`, context),
-    warn: (message: string, context?: LogContext) => logger.warn(`[${prefix}] ${message}`, context),
-    error: (message: string, context?: LogContext) => logger.error(`[${prefix}] ${message}`, context),
-  };
-}

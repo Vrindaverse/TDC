@@ -16,4 +16,3 @@ export const announcementSchema = z.object({
 });
 
 export type AnnouncementInput = z.input<typeof announcementSchema>;
-export const announcementAudiences = ["all", "members", "visitors", "team"] as const;

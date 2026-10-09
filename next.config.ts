@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     localPatterns: [{ pathname: "**", search: "" }],
     remotePatterns: [
       { protocol: "https", hostname: "**", pathname: "/avatars/**" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 };

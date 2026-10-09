@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
+import Image from "next/image";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 
 const DEFAULT_DATA = [
@@ -110,12 +111,12 @@ export default function ImageSlider3D({
                 transform: `rotateY(calc(${i} * (1turn / ${n}))) translateZ(calc(-1 * (0.5 * ${cardWidth} + 0.5em) / tan(0.5 * (1turn / ${n}))))`,
               }}
             >
-              <img
+              <Image
                 src={src}
                 alt={alt}
-                loading="lazy"
-                decoding="async"
-                className={`h-full w-full object-cover rounded-[1.5em] ${imageClassName}`}
+                fill
+                sizes="(max-width: 640px) 40vw, 20vw"
+                className={`object-cover rounded-[1.5em] ${imageClassName}`}
               />
               {label ? (
                 <span className="tdc-mono pointer-events-none absolute left-2 top-2 z-10 rounded-[3px] border border-white/25 bg-black/60 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
