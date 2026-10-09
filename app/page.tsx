@@ -8,6 +8,7 @@ import { cacheLife } from "next/cache";
 import { Hero } from "@/components/hero";
 import { DomainMarquee } from "@/components/domain-marquee";
 import ImageSlider3D from "@/components/lightswind/3d-image-slider";
+import type { SliderImage } from "@/components/lightswind/3d-image-slider";
 import { Section } from "@/components/section";
 import { TerminalPanel } from "@/components/terminal-panel";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,17 @@ import { dbEventToItem } from "@/lib/events";
 import { domains } from "@/lib/site-data";
 
 const tickerItems = domains.map((domain) => domain.title.toUpperCase());
+
+const glimpseMoments: SliderImage[] = [
+  { src: "/glimpse/setup-night.jpg", label: "setup night" },
+  { src: "/glimpse/workshop.jpg", label: "workshop" },
+  { src: "/glimpse/whiteboard.jpg", label: "whiteboard session" },
+  { src: "/glimpse/guest-talk.jpg", label: "guest talk" },
+  { src: "/glimpse/hack-night.jpg", label: "hack night" },
+  { src: "/glimpse/team-table.jpg", label: "team table" },
+  { src: "/glimpse/demo-day.jpg", label: "demo day" },
+  { src: "/glimpse/study-group.jpg", label: "study group" },
+];
 
 async function getFeaturedEvents() {
   "use cache";
@@ -365,19 +377,19 @@ export default async function Home({
         </Section>
       </section>
 
-      {/* 3D image slider */}
+      {/* Glimpse of TDC — moments from the community */}
       <section className="tdc-reveal border-t bg-muted/10">
         <Section>
-          <TerminalPanel title="~/tdc/view --gallery" badge="rotate" scanlines>
+          <TerminalPanel title="~/tdc/glimpse --moments" badge="rotate" scanlines>
             <div className="flex flex-col items-center gap-8">
               <div className="w-full max-w-xl text-center">
-                <p className="tdc-mono-label">tdc / gallery</p>
+                <p className="tdc-mono-label">tdc / glimpse</p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-                  One community, five tracks
+                  Glimpse of TDC
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Spin the gallery — web, apps, AI/ML, security and DSA. Pick
-                  one, then show up and build.
+                  Late builds, quiet workshops, whiteboard debates and demo-day
+                  nerves — the whole community, spinning by.
                 </p>
               </div>
               <ImageSlider3D
@@ -385,8 +397,13 @@ export default async function Home({
                 cardWidth="11.5em"
                 cardAspectRatio="3/4"
                 rotationDirection="left"
+                images={glimpseMoments}
                 imageClassName="rounded-[0.9em] border border-border/60 bg-muted shadow-[0_0.4em_2.5em_rgba(0,0,0,0.28)]"
               />
+              <p className="tdc-mono-label flex items-center gap-2 text-xs">
+                <span className="text-emerald-500">$</span> moments --next
+                <span className="tdc-caret" aria-hidden />
+              </p>
             </div>
           </TerminalPanel>
         </Section>

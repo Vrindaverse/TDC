@@ -18,9 +18,11 @@ const DEFAULT_DATA = [
   "https://images.unsplash.com/photo-1633936929709-59991b5fdd72?w=800&auto=format&fit=crop&q=60",
 ];
 
+export type SliderImage = string | { src: string; alt?: string; label?: string };
+
 interface Slider3DProps {
-  /** Array of image URLs to display */
-  images?: string[];
+  /** Array of images — plain URLs or objects with src/alt/label. */
+  images?: SliderImage[];
   /** Duration of one full 360-degree rotation (in seconds) */
   duration?: number;
   /** Width of each card. Can be px, rem, em, etc. */
@@ -88,23 +90,41 @@ export default function ImageSlider3D({
           repeat: Infinity,
         }}
       >
-        {images.map((src, i) => (
-          <img
-            key={i}
-            src={src}
-            alt={`Slide ${i}`}
-            loading="lazy"
-            decoding="async"
-            className={`col-start-1 row-start-1 object-cover rounded-[1.5em] ${imageClassName}`}
-            style={{
-              width: cardWidth,
-              aspectRatio: cardAspectRatio,
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              transform: `rotateY(calc(${i} * (1turn / ${n}))) translateZ(calc(-1 * (0.5 * ${cardWidth} + 0.5em) / tan(0.5 * (1turn / ${n}))))`,
-            }}
-          />
-        ))}
+        {images.map((item, i) => {
+          const src = typeof item === "string" ? item : item.src;
+          const alt =
+            typeof item === "string"
+              ? `Slide ${i}`
+              : (item.alt ?? `TDC moment ${i + 1}`);
+          const label = typeof item === "string" ? null : item.label;
+
+          return (
+            <div
+              key={i}
+              className="relative col-start-1 row-start-1"
+              style={{
+                width: cardWidth,
+                aspectRatio: cardAspectRatio,
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: `rotateY(calc(${i} * (1turn / ${n}))) translateZ(calc(-1 * (0.5 * ${cardWidth} + 0.5em) / tan(0.5 * (1turn / ${n}))))`,
+              }}
+            >
+              <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                className={`h-full w-full object-cover rounded-[1.5em] ${imageClassName}`}
+              />
+              {label ? (
+                <span className="tdc-mono pointer-events-none absolute left-2 top-2 z-10 rounded-[3px] border border-white/25 bg-black/60 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
+                  {label}
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
       </motion.div>
     </div>
   );
