@@ -112,7 +112,7 @@ export const contactDetails = {
 };
 
 export const socialLinks = [
-  { label: "GitHub", href: "#" },
-  { label: "LinkedIn", href: "#" },
+  { label: "GitHub", href: "https://github.com/technocrats-developer-community" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/technocrats-developer-community/" },
   { label: "Discord", href: "#" },
 ];

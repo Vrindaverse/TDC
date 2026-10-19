@@ -61,6 +61,9 @@ export default function ForumPage() {
             <span className="tdc-caret text-foreground">
               threads &amp; replies are being set up
             </span>
+            <span className="ml-auto rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] uppercase tracking-widest text-primary">
+              coming soon
+            </span>
           </p>
         </TerminalPanel>
       </div>
