@@ -131,27 +131,41 @@ export default async function EventsPage() {
 
             {upcomingEvents.length > 0 ? (
               <div className="tdc-stagger grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {upcomingEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    showTime
-                    showRegistration
-                    formAction={
-                      canRegister &&
-                      (event.registrationStatus === "open" ||
-                        event.registrationStatus === "closing") &&
-                      new Date(event.startsAt) > new Date()
-                        ? registerForEventAction
-                        : undefined
-                    }
-                    action={
-                      !canRegister
-                        ? { label: "Register your details", href: "/join" }
-                        : null
-                    }
-                  />
-                ))}
+                {upcomingEvents.map((event) => {
+                  const isOpen =
+                    event.registrationStatus === "open" ||
+                    event.registrationStatus === "closing";
+                  const upcoming = new Date(event.startsAt) > new Date();
+                  const paid = (event.fee ?? 0) > 0;
+                  return (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      showTime
+                      showRegistration
+                      formAction={
+                        canRegister && isOpen && upcoming && !paid
+                          ? registerForEventAction
+                          : undefined
+                      }
+                      action={
+                        !canRegister
+                          ? {
+                              label: isOpen && upcoming
+                                ? "Register your details"
+                                : "View event",
+                              href: `/join?event=${event.id}`,
+                            }
+                          : isOpen && upcoming && paid
+                            ? {
+                                label: `Pay ₹${event.fee} & register`,
+                                href: `/join?event=${event.id}`,
+                              }
+                            : null
+                      }
+                    />
+                  );
+                })}
               </div>
             ) : (
               <EmptyState

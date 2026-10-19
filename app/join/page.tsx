@@ -23,6 +23,7 @@ import {
   getProfile,
   getSession,
 } from "@/lib/auth/guards";
+import { resolvePosterUrl } from "@/lib/avatar";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 
@@ -57,6 +58,8 @@ const JOIN_ERROR_MESSAGES: Record<string, string> = {
   semester: "Please choose your current semester.",
   closed:
     "Registration for that event just closed. Pick another upcoming event below.",
+  payment:
+    "That event has a registration fee — scan the QR and upload your payment screenshot to complete registration.",
 };
 
 export default async function JoinPage({
@@ -80,6 +83,8 @@ export default async function JoinPage({
       location: events.location,
       startsAt: events.startsAt,
       registrationStatus: events.registrationStatus,
+      fee: events.fee,
+      paymentQrKey: events.paymentQrKey,
     })
     .from(events)
     .where(
@@ -102,7 +107,9 @@ export default async function JoinPage({
     } · ${
       REGISTRATION_STATUS_LABELS[event.registrationStatus] ??
       event.registrationStatus
-    }`,
+    }${(event.fee ?? 0) > 0 ? ` · ₹${event.fee} fee` : " · Free"}`,
+    fee: event.fee ?? 0,
+    paymentQrUrl: event.paymentQrKey ? resolvePosterUrl(event.paymentQrKey) : null,
   }));
 
   return (

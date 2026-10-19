@@ -78,6 +78,8 @@ export const events = pgTable(
     poster: text("poster"),
     domain: text("domain").notNull().default("Multi-domain"),
     registrationStatus: text("registration_status").notNull().default("open"),
+    fee: integer("fee"),
+    paymentQrKey: text("payment_qr_key"),
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -95,6 +97,10 @@ export const events = pgTable(
     statusCheck: check(
       "events_registration_status_check",
       sql`${table.registrationStatus} in ('open', 'closing', 'closed')`
+    ),
+    feeCheck: check(
+      "events_fee_check",
+      sql`${table.fee} is null or ${table.fee} >= 0`
     ),
   })
 );
@@ -114,11 +120,21 @@ export const registrations = pgTable(
     mobile: text("mobile"),
     enrollmentNumber: text("enrollment_number"),
     semester: integer("semester"),
+    /**
+     * 'none' = free event, 'paid' = payment screenshot uploaded (confirmed).
+     * Set at insert time — paid events only insert once the screenshot lands.
+     */
+    paymentStatus: text("payment_status").notNull().default("none"),
+    paymentScreenshotKey: text("payment_screenshot_key"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (table) => ({
+    paymentStatusCheck: check(
+      "registrations_payment_status_check",
+      sql`${table.paymentStatus} in ('none', 'paid')`
+    ),
     profileEventUnique: uniqueIndex("registrations_profile_event_unique").on(
       table.profileId,
       table.eventId

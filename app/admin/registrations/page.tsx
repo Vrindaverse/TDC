@@ -21,6 +21,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { adminRegistrationsRows } from "@/lib/admin/list-queries";
+import type { AdminRegistrationRow } from "@/lib/admin/list-queries";
+import { resolvePosterUrl } from "@/lib/avatar";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
 
@@ -53,6 +55,38 @@ function buildHref(
 const bannerClass = "flex items-start gap-3 rounded-lg border p-4 text-sm";
 const successBanner = `${bannerClass} border-primary/30 bg-primary/5 text-foreground`;
 const errorBanner = `${bannerClass} border-destructive/30 bg-destructive/5`;
+
+function PaymentCell({ row }: { row: AdminRegistrationRow }) {
+  const paid = (row.fee ?? 0) > 0;
+  if (!paid) {
+    return (
+      <span className="text-xs text-muted-foreground">Free</span>
+    );
+  }
+  if (row.paymentStatus !== "paid" || !row.paymentScreenshotKey) {
+    return (
+      <Badge variant="outline" className="text-[10px] text-destructive border-destructive/40">
+        Awaiting payment
+      </Badge>
+    );
+  }
+  const screenshotUrl = resolvePosterUrl(row.paymentScreenshotKey);
+  return (
+    <span className="inline-flex items-center gap-2">
+      <Badge variant="outline" className="border-primary/40 bg-primary/10 text-[10px]">
+        Paid ₹{row.fee}
+      </Badge>
+      <a
+        href={screenshotUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="text-xs underline text-muted-foreground hover:text-foreground"
+      >
+        screenshot
+      </a>
+    </span>
+  );
+}
 
 export const instant = false;
 
@@ -230,6 +264,7 @@ export default async function AdminRegistrationsPage({
                       <th className="px-4 py-3 font-medium">Enrollment</th>
                       <th className="px-4 py-3 font-medium">Sem</th>
                       <th className="px-4 py-3 font-medium">Event</th>
+                      <th className="px-4 py-3 font-medium">Payment</th>
                       <th className="px-4 py-3 font-medium">Event date</th>
                       <th className="px-4 py-3 font-medium">Registered</th>
                       <th className="px-4 py-3 text-right font-medium">Actions</th>
@@ -266,6 +301,9 @@ export default async function AdminRegistrationsPage({
                           {row.semester ? `Sem ${row.semester}` : "—"}
                         </td>
                         <td className="px-4 py-3">{row.title}</td>
+                        <td className="px-4 py-3">
+                          <PaymentCell row={row} />
+                        </td>
                         <td className="px-4 py-3 text-muted-foreground">
                           {formatDate(row.startsAt)}
                         </td>

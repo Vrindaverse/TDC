@@ -34,5 +34,6 @@ export function dbEventToItem(event: EventRecord): EventItem {
     domain: event.domain,
     registrationStatus: normalizedStatus(event.registrationStatus),
     startsAt: event.startsAt.toISOString(),
+    fee: event.fee ?? null,
   };
 }

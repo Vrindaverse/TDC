@@ -5,6 +5,7 @@ export type RegistrationStatusValue = (typeof registrationStatuses)[number];
 
 const BUNDLED_POSTER_PATTERN = /^\/images\/events\/[a-z0-9._-]+$/i;
 const UPLOADED_POSTER_PATTERN = /^events\/[0-9a-f-]+\.[a-z0-9]+$/i;
+const UPLOADED_PAYMENT_QR_PATTERN = /^events\/qr-[0-9a-f-]+\.[a-z0-9]+$/i;
 
 export const eventSchema = z
   .object({
@@ -26,6 +27,22 @@ export const eventSchema = z
           UPLOADED_POSTER_PATTERN.test(value),
         "Pick a preset poster or upload an image"
       ),
+    fee: z
+      .string()
+      .trim()
+      .max(10, "Fee is too long")
+      .refine(
+        (value) => value === "" || /^\d{1,6}$/.test(value),
+        "Enter the fee as a whole number in rupees, or leave it empty for a free event"
+      ),
+    paymentQr: z
+      .string()
+      .trim()
+      .max(300, "Payment QR path is too long")
+      .refine(
+        (value) => value === "" || UPLOADED_PAYMENT_QR_PATTERN.test(value),
+        "Upload a payment QR image"
+      ),
     domain: z
       .string()
       .trim()
@@ -43,6 +60,14 @@ export const eventSchema = z
     endsAt: z.string().trim(),
   })
   .superRefine((values, ctx) => {
+    const fee = values.fee ? Number(values.fee) : 0;
+    if (fee > 0 && !values.paymentQr) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["paymentQr"],
+        message: "Upload the payment QR code for this fee",
+      });
+    }
     if (!values.endsAt) return;
     if (Number.isNaN(Date.parse(values.endsAt))) {
       ctx.addIssue({
@@ -65,6 +90,8 @@ export const eventSchema = z
     description: values.description || null,
     location: values.location || null,
     poster: values.poster || null,
+    fee: values.fee ? Number(values.fee) : null,
+    paymentQrKey: values.paymentQr || null,
     domain: values.domain,
     registrationStatus: values.registrationStatus,
     startsAt: new Date(values.startsAt),

@@ -27,6 +27,8 @@ type Values = {
   description: string;
   location: string;
   poster: string;
+  fee: string;
+  paymentQr: string;
   domain: string;
   registrationStatus: RegistrationStatusValue;
   startsAt: string;
@@ -38,6 +40,8 @@ const FIELDS: (keyof Values)[] = [
   "description",
   "location",
   "poster",
+  "fee",
+  "paymentQr",
   "domain",
   "registrationStatus",
   "startsAt",
@@ -83,6 +87,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 export function EventForm({
   event,
   posterPreviewUrl,
+  paymentQrPreviewUrl,
 }: {
   event?: {
     id: string;
@@ -90,6 +95,8 @@ export function EventForm({
     description: string | null;
     location: string | null;
     poster: string | null;
+    fee: number | null;
+    paymentQrKey: string | null;
     domain: string;
     registrationStatus: RegistrationStatusValue;
     startsAt: Date;
@@ -97,6 +104,8 @@ export function EventForm({
   };
   /** Resolved URL for an already-uploaded poster (storage keys don't resolve client-side). */
   posterPreviewUrl?: string;
+  /** Resolved URL for an already-uploaded payment QR. */
+  paymentQrPreviewUrl?: string;
 }) {
   const action = event ? updateEventAction : createEventAction;
   const [state, formAction, pending] = useActionState<
@@ -108,6 +117,8 @@ export function EventForm({
     description: event?.description ?? "",
     location: event?.location ?? "",
     poster: event?.poster ?? "/images/events/hackathon-2026-01.svg",
+    fee: event?.fee ? String(event.fee) : "",
+    paymentQr: event?.paymentQrKey ?? "",
     domain: event?.domain ?? "Web Development",
     registrationStatus: event?.registrationStatus ?? "open",
     startsAt: toDateTimeLocal(event?.startsAt),
@@ -120,6 +131,11 @@ export function EventForm({
   );
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedQrUrl, setUploadedQrUrl] = useState<string | null>(
+    event?.paymentQrKey ? (paymentQrPreviewUrl ?? null) : null
+  );
+  const [uploadingQr, setUploadingQr] = useState(false);
+  const [qrUploadError, setQrUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     const first = FIELDS.find((field) => state?.fieldErrors?.[field]);
@@ -213,6 +229,39 @@ export function EventForm({
       setUploadError("The upload failed. Please try again.");
     } finally {
       setUploading(false);
+      changeEvent.target.value = "";
+    }
+  };
+
+  const handlePaymentQrFile = async (
+    changeEvent: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = changeEvent.target.files?.[0];
+    if (!file) return;
+    setQrUploadError(null);
+    setUploadingQr(true);
+    try {
+      const body = new FormData();
+      body.append("paymentQr", file);
+      const response = await fetch("/api/admin/events/payment-qr", {
+        method: "POST",
+        body,
+      });
+      const data = (await response.json()) as {
+        paymentQr?: string;
+        paymentQrUrl?: string;
+        error?: string;
+      };
+      if (!response.ok || !data.paymentQr) {
+        setQrUploadError(data.error ?? "The upload failed. Please try again.");
+        return;
+      }
+      setUploadedQrUrl(data.paymentQrUrl ?? null);
+      update("paymentQr", data.paymentQr);
+    } catch {
+      setQrUploadError("The upload failed. Please try again.");
+    } finally {
+      setUploadingQr(false);
       changeEvent.target.value = "";
     }
   };
@@ -371,6 +420,75 @@ export function EventForm({
             {uploadError}
           </p>
         ) : null}
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="event-fee">Registration fee (₹, optional)</Label>
+          <Input
+            {...fieldProps("fee")}
+            type="text"
+            inputMode="numeric"
+            placeholder="Leave empty for a free event"
+            disabled={pending}
+          />
+          <p className="text-xs text-muted-foreground">
+            Events with a fee ask registrants to pay via your QR and upload a
+            screenshot before their spot is confirmed.
+          </p>
+          <FieldError id="event-fee-error" message={displayErrors.fee} />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="event-paymentQr-file">Payment QR code</Label>
+          <Input
+            id="event-paymentQr-file"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+            onChange={handlePaymentQrFile}
+            disabled={pending || uploadingQr}
+            className="max-w-xs"
+          />
+          {values.paymentQr ? (
+            <input type="hidden" name="paymentQr" value={values.paymentQr} />
+          ) : (
+            <input type="hidden" name="paymentQr" value="" />
+          )}
+          {uploadedQrUrl || values.paymentQr ? (
+            <div className="flex items-center gap-3">
+              {uploadedQrUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- preview accepts any uploaded URL, including cross-origin S3
+                <img
+                  src={uploadedQrUrl ?? undefined}
+                  alt="Payment QR preview"
+                  className="h-24 w-24 rounded-md border bg-white object-contain p-1"
+                />
+              ) : null}
+              <p className="text-xs text-muted-foreground">
+                QR uploaded. Registrants scan this to pay the fee.
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Required when a fee is set. Upload your UPI/payment QR image.
+            </p>
+          )}
+          {uploadingQr ? (
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 aria-hidden="true" className="size-3 animate-spin" />
+              Uploading QR…
+            </p>
+          ) : null}
+          {qrUploadError ? (
+            <p role="alert" className="text-sm text-destructive">
+              {qrUploadError}
+            </p>
+          ) : null}
+          <FieldError
+            id="event-paymentQr-error"
+            message={displayErrors.paymentQr}
+          />
+        </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">

@@ -162,6 +162,68 @@ export async function deletePosterObject(key: string) {
   await deleteAvatarObject(key);
 }
 
+/** Storage key for an uploaded event payment QR: `events/qr-<uuid>.<ext>`. */
+export function paymentQrKey(ext: AvatarExtension) {
+  return `events/qr-${randomUUID()}.${ext}`;
+}
+
+export async function putPaymentQrObject(
+  ext: AvatarExtension,
+  body: Uint8Array,
+  contentType: string
+): Promise<string> {
+  if (!validateMagicBytes(body, ext)) {
+    throw new Error("Invalid file content: magic bytes do not match declared type");
+  }
+  const key = paymentQrKey(ext);
+  await getS3Client().send(
+    new PutObjectCommand({
+      Bucket: AVATAR_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: AVATAR_CACHE_CONTROL,
+    })
+  );
+  return key;
+}
+
+export async function deletePaymentQrObject(key: string) {
+  await deleteAvatarObject(key);
+}
+
+export const MAX_PAYMENT_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+
+/** Storage key for an uploaded payment screenshot: `payments/<uuid>.<ext>`. */
+export function paymentScreenshotKey(ext: AvatarExtension) {
+  return `payments/${randomUUID()}.${ext}`;
+}
+
+export async function putPaymentScreenshotObject(
+  ext: AvatarExtension,
+  body: Uint8Array,
+  contentType: string
+): Promise<string> {
+  if (!validateMagicBytes(body, ext)) {
+    throw new Error("Invalid file content: magic bytes do not match declared type");
+  }
+  const key = paymentScreenshotKey(ext);
+  await getS3Client().send(
+    new PutObjectCommand({
+      Bucket: AVATAR_BUCKET,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: "private, max-age=0, no-store",
+    })
+  );
+  return key;
+}
+
+export async function deletePaymentScreenshotObject(key: string) {
+  await deleteAvatarObject(key);
+}
+
 /**
  * Turns whatever is stored in `events.poster` into a URL the browser can
  * load: bundled `/images/…` paths and full URLs pass through, storage keys

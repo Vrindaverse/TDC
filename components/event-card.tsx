@@ -121,9 +121,16 @@ export function EventCard({
       </div>
 
       <div className="relative flex flex-1 flex-col p-5">
-        <span className="tdc-mono w-fit rounded-sm border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] tracking-widest text-muted-foreground uppercase">
-          {event.domain}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="tdc-mono w-fit rounded-sm border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] tracking-widest text-muted-foreground uppercase">
+            {event.domain}
+          </span>
+          {(event.fee ?? 0) > 0 ? (
+            <span className="tdc-mono w-fit rounded-sm border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-[10px] tracking-widest text-foreground uppercase">
+              ₹{event.fee} fee
+            </span>
+          ) : null}
+        </div>
 
         <p className="tdc-mono mt-4 truncate text-[11px] text-muted-foreground">
           <span aria-hidden="true" className="text-primary">

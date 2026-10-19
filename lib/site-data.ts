@@ -28,6 +28,8 @@ export interface EventItem {
   domain: string;
   registrationStatus: RegistrationStatus;
   startsAt: string;
+  /** Registration fee in rupees; null/0 = free event. */
+  fee: number | null;
 }
 
 export interface TeamMember {

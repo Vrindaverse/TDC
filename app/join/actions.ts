@@ -1,7 +1,7 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
-import { and, eq, isNull, or } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 import { friendlyAuthError } from "@/lib/auth/errors";
@@ -15,7 +15,7 @@ import {
   setJoinVerifiedCookie,
 } from "@/lib/auth/guards";
 import { auth } from "@/lib/auth/server";
-import { db, sql } from "@/lib/db";
+import { db, sql as neonSql } from "@/lib/db";
 import { events, registrations } from "@/lib/db/schema";
 import { findUserIdByEmail } from "@/lib/db/users";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -42,7 +42,7 @@ export type VerifyCodeFormState = {
 
 export type RegisterFormState = {
   error?: string;
-  reason?: "details" | "verify" | "semester" | "closed" | "duplicate";
+  reason?: "details" | "verify" | "semester" | "closed" | "duplicate" | "payment";
 } | null;
 
 async function sendOtpToEmail(email: string, name: string) {
@@ -145,7 +145,7 @@ export async function verifyJoinCodeAction(
       try {
         // The temp account only existed to deliver the OTP. With the email
         // now verified, remove it so event registrants never become users.
-        await sql`delete from neon_auth."user" where lower(email) = ${email}`;
+        await neonSql`delete from neon_auth."user" where lower(email) = ${email}`;
         await clearJoinShadowCookie();
       } catch (err) {
         console.error("[join] shadow user cleanup failed:", err);
@@ -172,6 +172,7 @@ export async function registerForEventAction(
   const [event] = await db
     .select({
       id: events.id,
+      fee: events.fee,
       registrationStatus: events.registrationStatus,
       startsAt: events.startsAt,
     })
@@ -197,6 +198,13 @@ export async function registerForEventAction(
       reason: "closed",
     };
   }
+  if ((event.fee ?? 0) > 0) {
+    return {
+      error:
+        "This event has a registration fee. Complete the payment step on this page — scan the QR and upload your screenshot — to finish registering.",
+      reason: "payment",
+    };
+  }
 
   const session = await getSession();
   const profile = session?.user ? await getProfile(session.user.id) : null;
@@ -214,13 +222,25 @@ export async function registerForEventAction(
       .values({
         profileId: profile.id,
         eventId: event.id,
+        name: profile.name,
+        email: session.user.email?.toLowerCase() ?? null,
         semester: parsedSemester.data,
         mobile: profile.mobile,
         enrollmentNumber: profile.enrollmentNumber,
+        paymentStatus: "none",
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing({
+        target: [registrations.profileId, registrations.eventId],
+      });
 
-    redirect(inserted.rowCount === 0 ? "/profile" : "/profile?registered=1");
+    if (inserted.rowCount === 0) {
+      return {
+        error: "You're already registered for this event. Pick another event below.",
+        reason: "duplicate",
+      };
+    }
+
+    redirect("/profile?registered=1");
   }
 
   const parsed = joinSchema.safeParse({
@@ -255,7 +275,7 @@ export async function registerForEventAction(
       and(
         eq(registrations.eventId, event.id),
         or(
-          eq(registrations.email, email),
+          sql`lower(${registrations.email}) = ${email}`,
           and(
             isNull(registrations.email),
             or(
@@ -284,7 +304,10 @@ export async function registerForEventAction(
       mobile: input.mobile,
       enrollmentNumber: input.enrollmentNumber,
       semester: input.semester,
+      paymentStatus: "none",
     })
+    // No target: for a profileId-less row the only unique constraint that can
+    // fire is the partial guest (event_id, lower(email)) index.
     .onConflictDoNothing();
 
   if (inserted.rowCount === 0) {

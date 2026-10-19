@@ -60,6 +60,7 @@ export default async function AdminEventEditPage({
         <CardContent>
           <EventForm
             posterPreviewUrl={resolvePosterUrl(event.poster)}
+            paymentQrPreviewUrl={event.paymentQrKey ? resolvePosterUrl(event.paymentQrKey) : undefined}
             event={{
               ...event,
               registrationStatus: event.registrationStatus as

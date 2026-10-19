@@ -28,13 +28,14 @@ async function registerForEventActionInternal(
     return { error: "Invalid request. Please refresh and try again." };
   }
 
-  const { profile } = await requireProfile();
+  const { session, profile } = await requireProfile();
 
   const eventId = String(formData.get("eventId") ?? "").trim();
   if (!UUID_PATTERN.test(eventId)) {
     return { error: "Invalid event." };
   }
 
+  let requiresPayment = false;
   try {
     const [event] = await db
       .select()
@@ -55,34 +56,48 @@ async function registerForEventActionInternal(
       return { error: "This event has already started." };
     }
 
-    const [existing] = await db
-      .select()
-      .from(registrations)
-      .where(and(eq(registrations.profileId, profile.id), eq(registrations.eventId, eventId)))
-      .limit(1);
+    if ((event.fee ?? 0) > 0) {
+      requiresPayment = true;
+    } else {
+      const [existing] = await db
+        .select()
+        .from(registrations)
+        .where(and(eq(registrations.profileId, profile.id), eq(registrations.eventId, eventId)))
+        .limit(1);
 
-    if (existing) {
-      return { error: "You're already registered for this event." };
+      if (existing) {
+        return { error: "You're already registered for this event." };
+      }
+
+      const inserted = await db
+        .insert(registrations)
+        .values({
+          profileId: profile.id,
+          eventId,
+          name: profile.name,
+          email: session.user.email?.toLowerCase() ?? null,
+          mobile: profile.mobile,
+          enrollmentNumber: profile.enrollmentNumber,
+          semester: null,
+          paymentStatus: "none",
+        })
+        .onConflictDoNothing({
+          target: [registrations.profileId, registrations.eventId],
+        });
+
+      if (inserted.rowCount === 0) {
+        return { error: "You're already registered for this event." };
+      }
+
+      logger.info("Event registration", { 
+        action: "register", 
+        eventId, 
+        profileId: profile.id 
+      });
+
+      revalidatePath("/events");
+      revalidatePath("/profile");
     }
-
-    await db.insert(registrations).values({
-      profileId: profile.id,
-      eventId,
-      name: profile.name,
-      email: null,
-      mobile: profile.mobile,
-      enrollmentNumber: profile.enrollmentNumber,
-      semester: null,
-    });
-
-    logger.info("Event registration", { 
-      action: "register", 
-      eventId, 
-      profileId: profile.id 
-    });
-
-    revalidatePath("/events");
-    revalidatePath("/profile");
   } catch (err) {
     logger.error("Event registration failed", { 
       action: "register", 
@@ -91,6 +106,10 @@ async function registerForEventActionInternal(
       error: String(err) 
     });
     return { error: "Something went wrong. Please try again." };
+  }
+
+  if (requiresPayment) {
+    redirect(`/join?event=${eventId}`);
   }
 
   redirect("/profile?registered=1");

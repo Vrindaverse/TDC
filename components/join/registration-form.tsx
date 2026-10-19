@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, BadgeCheck, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import type { FormEvent, MouseEvent } from "react";
@@ -22,7 +23,12 @@ import {
 } from "@/components/auth/otp-expiry";
 import { semesterOptions } from "@/lib/validation/join";
 
-export type EventOption = { id: string; label: string };
+export type EventOption = {
+  id: string;
+  label: string;
+  fee: number;
+  paymentQrUrl: string | null;
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_PATTERN = /^\d{6}$/;
@@ -62,6 +68,133 @@ const labelClassName =
 
 const fieldErrorClass = "mt-1 text-sm text-destructive";
 
+function PaymentStep({
+  eventId,
+  fee,
+  paymentQrUrl,
+  semester,
+  extraFields,
+  successHref,
+  disabled,
+}: {
+  eventId: string;
+  fee: number;
+  paymentQrUrl: string | null;
+  semester: string;
+  extraFields?: Record<string, string>;
+  successHref: string;
+  disabled?: boolean;
+}) {
+  const router = useRouter();
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!file) {
+      setError("Attach a screenshot of your payment to continue.");
+      return;
+    }
+    setError(null);
+    setPending(true);
+    try {
+      const body = new FormData();
+      body.set("eventId", eventId);
+      body.set("semester", semester);
+      body.set("screenshot", file);
+      if (extraFields) {
+        for (const [key, value] of Object.entries(extraFields)) {
+          body.set(key, value);
+        }
+      }
+      const response = await fetch("/api/registrations/payment", {
+        method: "POST",
+        body,
+      });
+      const data = (await response.json()) as { ok?: boolean; error?: string };
+      if (!response.ok || !data.ok) {
+        setError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+      router.push(successHref);
+      router.refresh();
+    } catch {
+      setError("The upload failed. Please try again.");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Payment required — ₹{fee}
+      </p>
+
+      <div className="rounded-xl border border-dashed bg-muted/20 p-5 text-center">
+        <p className="text-sm font-medium">
+          Scan the QR code and pay ₹{fee}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Pay with any UPI app, then upload the payment screenshot below to
+          confirm your spot.
+        </p>
+        {paymentQrUrl ? (
+          <div className="mt-4 flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element -- admin-uploaded QR from cross-origin S3 */}
+            <img
+              src={paymentQrUrl}
+              alt={`Payment QR code for ₹${fee}`}
+              className="h-48 w-48 rounded-lg border bg-white object-contain p-2"
+            />
+          </div>
+        ) : (
+          <p role="alert" className="mt-3 text-sm text-destructive">
+            The payment QR for this event is missing. Contact an admin to
+            register.
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="payment-screenshot" className={labelClassName}>
+          Payment screenshot
+        </Label>
+        <Input
+          id="payment-screenshot"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+          className="mt-2"
+          disabled={pending || disabled}
+          onChange={(changeEvent) => {
+            setFile(changeEvent.target.files?.[0] ?? null);
+            setError(null);
+          }}
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          A screenshot of the success screen or transaction confirmation (max
+          5 MB).
+        </p>
+      </div>
+
+      {error ? (
+        <p role="alert" className={fieldErrorClass}>
+          {error}
+        </p>
+      ) : null}
+
+      <PendingSubmitButton disabled={pending || disabled || !paymentQrUrl}>
+        pay ₹{fee} &amp; register
+      </PendingSubmitButton>
+      <p className="text-xs text-muted-foreground">
+        Your spot is confirmed as soon as the screenshot is uploaded — no
+        waiting for manual approval.
+      </p>
+    </form>
+  );
+}
+
 export function MemberRegistrationForm({
   events,
   preselect,
@@ -74,52 +207,85 @@ export function MemberRegistrationForm({
   email: string;
 }) {
   const [state, formAction] = useActionState(registerForEventAction, null);
+  const [semester, setSemester] = useState("1");
+  const [eventId, setEventId] = useState(preselect);
+  const selectedEvent = events.find((event) => event.id === eventId);
+  const requiresPayment = (selectedEvent?.fee ?? 0) > 0;
+
+  const semesterField = (
+    <div>
+      <Label htmlFor="semester" className={labelClassName}>
+        Current semester
+      </Label>
+      <select
+        id="semester"
+        name="semester"
+        required
+        value={semester}
+        onChange={(e) => setSemester(e.target.value)}
+        className={selectClassName}
+      >
+        {semesterOptions.map((semesterOption) => (
+          <option key={semesterOption} value={semesterOption}>
+            Semester {semesterOption}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const eventField = (
+    <div>
+      <Label htmlFor="event" className={labelClassName}>
+        Event
+      </Label>
+      <select
+        id="event"
+        name="eventId"
+        required
+        value={eventId}
+        onChange={(e) => setEventId(e.target.value)}
+        className={selectClassName}
+      >
+        {events.map((event) => (
+          <option key={event.id} value={event.id}>
+            {event.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const intro = (
+    <p className="text-xs text-muted-foreground">
+      Registering as {name}
+      {email ? ` (${email})` : ""}. Your saved mobile and enrollment numbers
+      will be attached to this sign-up.
+    </p>
+  );
+
+  if (requiresPayment) {
+    return (
+      <div className="flex flex-col gap-5">
+        {semesterField}
+        {eventField}
+        {intro}
+        <PaymentStep
+          eventId={eventId}
+          fee={selectedEvent?.fee ?? 0}
+          paymentQrUrl={selectedEvent?.paymentQrUrl ?? null}
+          semester={semester}
+          successHref="/profile?registered=1"
+        />
+      </div>
+    );
+  }
+
   return (
     <form action={formAction} className="flex flex-col gap-5">
-      <div>
-        <Label htmlFor="semester" className={labelClassName}>
-          Current semester
-        </Label>
-        <select
-          id="semester"
-          name="semester"
-          required
-          defaultValue="1"
-          className={selectClassName}
-        >
-          {semesterOptions.map((semester) => (
-            <option key={semester} value={semester}>
-              Semester {semester}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <Label htmlFor="event" className={labelClassName}>
-          Event
-        </Label>
-        <select
-          id="event"
-          name="eventId"
-          required
-          defaultValue={preselect}
-          className={selectClassName}
-        >
-          {events.map((event) => (
-            <option key={event.id} value={event.id}>
-              {event.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        Registering as {name}
-        {email ? ` (${email})` : ""}. Your saved mobile and enrollment numbers
-        will be attached to this sign-up.
-      </p>
-
+      {semesterField}
+      {eventField}
+      {intro}
       <PendingSubmitButton>register for this event</PendingSubmitButton>
       {state?.error ? (
         <p role="alert" className={fieldErrorClass}>
@@ -195,6 +361,9 @@ export function GuestRegistrationForm({
       setVerifyLocked(true);
     }
   }
+
+  const selectedEvent = events.find((event) => event.id === eventId);
+  const requiresPayment = (selectedEvent?.fee ?? 0) > 0;
 
   const handleDetailsNext = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -501,22 +670,43 @@ export function GuestRegistrationForm({
               )}
             </form>
           </div>
-          <form action={registerFormAction} className="flex flex-col gap-5">
-            <input type="hidden" name="name" value={name} />
-            <input type="hidden" name="email" value={email} />
-            <input type="hidden" name="mobile" value={mobile} />
-            <input type="hidden" name="enrollmentNumber" value={enrollmentNumber} />
-            <input type="hidden" name="semester" value={semester} />
-            <input type="hidden" name="eventId" value={eventId} />
-            <PendingSubmitButton disabled={!verified || busy}>
-              register for this event
-            </PendingSubmitButton>
-            {registerState?.error ? (
-              <p role="alert" className={fieldErrorClass}>
-                {registerState.error}
-              </p>
-            ) : null}
-          </form>
+          {requiresPayment ? (
+            <PaymentStep
+              eventId={eventId}
+              fee={selectedEvent?.fee ?? 0}
+              paymentQrUrl={selectedEvent?.paymentQrUrl ?? null}
+              semester={semester}
+              extraFields={{
+                name: name.trim(),
+                email: currentEmail,
+                mobile: mobile.trim(),
+                enrollmentNumber: enrollmentNumber.trim(),
+              }}
+              successHref="/join?registered=1"
+              disabled={!verified || busy}
+            />
+          ) : (
+            <form action={registerFormAction} className="flex flex-col gap-5">
+              <input type="hidden" name="name" value={name} />
+              <input type="hidden" name="email" value={email} />
+              <input type="hidden" name="mobile" value={mobile} />
+              <input
+                type="hidden"
+                name="enrollmentNumber"
+                value={enrollmentNumber}
+              />
+              <input type="hidden" name="semester" value={semester} />
+              <input type="hidden" name="eventId" value={eventId} />
+              <PendingSubmitButton disabled={!verified || busy}>
+                register for this event
+              </PendingSubmitButton>
+              {registerState?.error ? (
+                <p role="alert" className={fieldErrorClass}>
+                  {registerState.error}
+                </p>
+              ) : null}
+            </form>
+          )}
         </div>
       )}
     </div>

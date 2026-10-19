@@ -5,7 +5,11 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { recordAudit } from "@/lib/admin/audit";
-import { deletePosterObject, isUploadedPoster } from "@/lib/avatar";
+import {
+  deletePaymentQrObject,
+  deletePosterObject,
+  isUploadedPoster,
+} from "@/lib/avatar";
 import { requireAdmin } from "@/lib/auth/guards";
 import { db } from "@/lib/db";
 import { events } from "@/lib/db/schema";
@@ -24,6 +28,8 @@ function parseForm(formData: FormData) {
     description: formData.get("description") ?? "",
     location: formData.get("location") ?? "",
     poster: formData.get("poster") ?? "",
+    fee: formData.get("fee") ?? "",
+    paymentQr: formData.get("paymentQr") ?? "",
     domain: formData.get("domain"),
     registrationStatus: formData.get("registrationStatus"),
     startsAt: formData.get("startsAt"),
@@ -95,9 +101,15 @@ async function updateEventActionInternal(
   }
 
   let replacedPoster: string | null = null;
+  let replacedPaymentQr: string | null = null;
   try {
     const existing = await db
-      .select({ id: events.id, title: events.title, poster: events.poster })
+      .select({
+        id: events.id,
+        title: events.title,
+        poster: events.poster,
+        paymentQrKey: events.paymentQrKey,
+      })
       .from(events)
       .where(eq(events.id, id))
       .limit(1);
@@ -122,6 +134,15 @@ async function updateEventActionInternal(
       isUploadedPoster(previousPoster)
     ) {
       replacedPoster = previousPoster;
+    }
+
+    const previousPaymentQr = existing[0].paymentQrKey;
+    if (
+      previousPaymentQr &&
+      previousPaymentQr !== parsed.data.paymentQrKey &&
+      isUploadedPoster(previousPaymentQr)
+    ) {
+      replacedPaymentQr = previousPaymentQr;
     }
 
     await recordAudit({
@@ -149,6 +170,14 @@ async function updateEventActionInternal(
     }
   }
 
+  if (replacedPaymentQr) {
+    try {
+      await deletePaymentQrObject(replacedPaymentQr);
+    } catch (err) {
+      console.error("[admin/events] old payment QR cleanup failed:", err);
+    }
+  }
+
   revalidatePath("/");
   revalidatePath("/events");
   redirect("/admin/events");
@@ -170,9 +199,15 @@ async function deleteEventActionInternal(formData: FormData) {
   let outcome: "ok" | "failed" = "ok";
   let detail: string | null = null;
   let uploadedPoster: string | null = null;
+  let uploadedPaymentQr: string | null = null;
   try {
     const [existing] = await db
-      .select({ id: events.id, title: events.title, poster: events.poster })
+      .select({
+        id: events.id,
+        title: events.title,
+        poster: events.poster,
+        paymentQrKey: events.paymentQrKey,
+      })
       .from(events)
       .where(eq(events.id, id))
       .limit(1);
@@ -180,6 +215,9 @@ async function deleteEventActionInternal(formData: FormData) {
       detail = existing.title;
       if (isUploadedPoster(existing.poster)) {
         uploadedPoster = existing.poster;
+      }
+      if (existing.paymentQrKey) {
+        uploadedPaymentQr = existing.paymentQrKey;
       }
       await db.delete(events).where(eq(events.id, id));
     }
@@ -195,6 +233,14 @@ async function deleteEventActionInternal(formData: FormData) {
       await deletePosterObject(uploadedPoster);
     } catch (err) {
       console.error("[admin/events] poster cleanup failed:", err);
+    }
+  }
+
+  if (uploadedPaymentQr) {
+    try {
+      await deletePaymentQrObject(uploadedPaymentQr);
+    } catch (err) {
+      console.error("[admin/events] payment QR cleanup failed:", err);
     }
   }
 

@@ -14,6 +14,9 @@ export type AdminRegistrationRow = {
   semester: number | null;
   college: string | null;
   isMember: boolean;
+  paymentStatus: string;
+  paymentScreenshotKey: string | null;
+  fee: number | null;
 };
 
 export type AdminUserRow = {
@@ -168,9 +171,12 @@ export async function adminRegistrationsRows(
            coalesce(r.email, u.email) as email,
            coalesce(r.mobile, p.mobile) as mobile,
            coalesce(r.enrollment_number, p.enrollment_number) as "enrollmentNumber",
-           r.semester as semester,
-           c.name as college,
-           (r.profile_id is not null) as "isMember"
+            r.semester as semester,
+            c.name as college,
+            (r.profile_id is not null) as "isMember",
+            r.payment_status as "paymentStatus",
+            r.payment_screenshot_key as "paymentScreenshotKey",
+            e.fee as fee
     ${from}
     ${where}
      order by r.created_at desc
