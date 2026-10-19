@@ -79,18 +79,18 @@ export default function ImageSlider3D({
         ...maskStyles,
       }}
     >
-      <motion.div
-        className="grid place-self-center pointer-events-auto will-change-transform"
-        style={{
-          transformStyle: "preserve-3d",
-        }}
-        animate={isInView ? { rotateY: rotationValues } : false}
-        transition={{
-          duration: animationDuration,
-          ease: "linear",
-          repeat: Infinity,
-        }}
-      >
+        <motion.div
+          className="grid place-self-center pointer-events-auto will-change-transform"
+          style={{
+            transformStyle: "preserve-3d",
+          }}
+          animate={isInView && !prefersReducedMotion ? { rotateY: rotationValues } : false}
+          transition={{
+            duration: animationDuration,
+            ease: "linear",
+            repeat: Infinity,
+          }}
+        >
         {images.map((item, i) => {
           const src = typeof item === "string" ? item : item.src;
           const alt =

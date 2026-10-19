@@ -7,7 +7,8 @@ import {
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
-import { gsap } from "gsap";
+
+import { getGsap } from "@/lib/gsap";
 
 import "./target-cursor.css";
 
@@ -121,8 +122,9 @@ export function TargetCursor({
     getServerSnapshot
   );
 
-  const moveCursor = useCallback((x: number, y: number) => {
+  const moveCursor = useCallback(async (x: number, y: number) => {
     if (!cursorRef.current) return;
+    const gsap = await getGsap();
     const { x: offsetX, y: offsetY } = getContainingBlockOffset(
       containingBlockRef.current
     );
@@ -234,7 +236,9 @@ export function TargetCursor({
       tickerAttached = false;
     };
 
-    const moveHandler = (e: MouseEvent) => moveCursor(e.clientX, e.clientY);
+  const moveHandler = (e: MouseEvent) => {
+      void moveCursor(e.clientX, e.clientY);
+    };
     window.addEventListener("mousemove", moveHandler);
 
     const scrollHandler = () => {
