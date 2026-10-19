@@ -39,6 +39,43 @@ export const metadata: Metadata = {
     "AI/ML",
     "Cybersecurity",
   ],
+  metadataBase: new URL(process.env.SITE_URL ?? "https://tdc-six.vercel.app"),
+  openGraph: {
+    title: site.fullName,
+    description: site.tagline,
+    url: process.env.SITE_URL ?? "https://tdc-six.vercel.app",
+    siteName: site.name,
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/images/tdc-hero.svg",
+        width: 1200,
+        height: 630,
+        alt: site.fullName,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.fullName,
+    description: site.tagline,
+    images: ["/images/tdc-hero.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

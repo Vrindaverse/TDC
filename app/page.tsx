@@ -22,14 +22,38 @@ import { domains } from "@/lib/site-data";
 const tickerItems = domains.map((domain) => domain.title.toUpperCase());
 
 const glimpseMoments: SliderImage[] = [
-  { src: "/glimpse/setup-night.jpg", label: "setup night" },
-  { src: "/glimpse/workshop.jpg", label: "workshop" },
-  { src: "/glimpse/whiteboard.jpg", label: "whiteboard session" },
-  { src: "/glimpse/guest-talk.jpg", label: "guest talk" },
-  { src: "/glimpse/hack-night.jpg", label: "hack night" },
-  { src: "/glimpse/team-table.jpg", label: "team table" },
-  { src: "/glimpse/demo-day.jpg", label: "demo day" },
-  { src: "/glimpse/study-group.jpg", label: "study group" },
+  {
+    src: "https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=800&auto=format&fit=crop&q=60",
+    label: "setup night",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=800&auto=format&fit=crop&q=60",
+    label: "workshop",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1628944682084-831f35256163?w=800&auto=format&fit=crop&q=60",
+    label: "whiteboard session",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1590013330451-3946e83e0392?w=800&auto=format&fit=crop&q=60",
+    label: "guest talk",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1590421959604-741d0eec0a2e?w=800&auto=format&fit=crop&q=60",
+    label: "hack night",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1572613000712-eadc57acbecd?w=800&auto=format&fit=crop&q=60",
+    label: "team table",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1570097192570-4b49a6736f9f?w=800&auto=format&fit=crop&q=60",
+    label: "demo day",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1620789550663-2b10e0080354?w=800&auto=format&fit=crop&q=60",
+    label: "study group",
+  },
 ];
 
 async function getFeaturedEvents() {
