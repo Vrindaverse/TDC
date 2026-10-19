@@ -57,7 +57,7 @@ export default function ImageSlider3D({
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { margin: "200px" });
   const prefersReducedMotion = useReducedMotion();
-  const animationDuration = prefersReducedMotion ? duration * 4 : duration;
+  const animationDuration = prefersReducedMotion ? duration * 8 : duration;
 
   // rotation angles based on direction
   const rotationValues = rotationDirection === "left" ? [0, 360] : [360, 0];
