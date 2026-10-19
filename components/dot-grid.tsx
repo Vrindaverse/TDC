@@ -2,23 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { CSSProperties } from "react";
-import { gsap } from "gsap";
-import { InertiaPlugin } from "gsap/InertiaPlugin";
 
+import { getGsap } from "@/lib/gsap";
 import { useCssVarHex } from "@/components/use-css-var";
 
 import "./dot-grid.css";
-
-gsap.registerPlugin(InertiaPlugin);
-
-/**
- * Feature test the plugin's own shape rather than GSAP's plugin registry: the
- * registry is only populated once GSAP has booted, so reading it at module scope
- * can report false during SSR even when the plugin is perfectly usable.
- */
-const inertiaAvailable =
-  typeof (InertiaPlugin as unknown as { init?: unknown } | undefined)?.init ===
-  "function";
 
 interface Dot {
   cx: number;
@@ -61,9 +49,21 @@ function hexToRgb(hex: string) {
  * `InertiaPlugin` is a GSAP add-on. If it is ever missing the grid still needs
  * to respond to the pointer, so pushes fall back to a plain tween rather than
  * silently doing nothing (and without GSAP's "missing plugin" console noise).
+ *
+ * gsap is loaded lazily through `getGsap` (see `lib/gsap.ts`), so this function
+ * is async. The pointer/click handlers that call it are fire-and-forget: a
+ * missed push while the module is still loading is invisible to the user.
  */
-function pushDot(dot: Dot, x: number, y: number, resistance: number, returnDuration: number) {
+async function pushDot(
+  dot: Dot,
+  x: number,
+  y: number,
+  resistance: number,
+  returnDuration: number
+) {
   dot.applied = true;
+  const gsap = await getGsap();
+
   const settle = () => {
     gsap.to(dot, {
       xOffset: 0,
@@ -76,15 +76,10 @@ function pushDot(dot: Dot, x: number, y: number, resistance: number, returnDurat
     });
   };
 
-  if (inertiaAvailable) {
-    gsap.to(dot, {
-      inertia: { xOffset: x, yOffset: y, resistance },
-      onComplete: settle,
-    });
-    return;
-  }
-
-  gsap.to(dot, { xOffset: x, yOffset: y, duration: 0.6, ease: "power3.out", onComplete: settle });
+  gsap.to(dot, {
+    inertia: { xOffset: x, yOffset: y, resistance },
+    onComplete: settle,
+  });
 }
 
 const throttle = <T extends unknown[]>(
@@ -327,7 +322,7 @@ export default function DotGrid({
         if (dot.applied) continue;
         if (speed <= speedTrigger) continue;
         if (Math.hypot(dot.cx - pointer.x, dot.cy - pointer.y) >= proximity) continue;
-        pushDot(
+        void pushDot(
           dot,
           dot.cx - pointer.x + vx * 0.005,
           dot.cy - pointer.y + vy * 0.005,
@@ -348,7 +343,7 @@ export default function DotGrid({
         const dist = Math.hypot(dot.cx - cx, dot.cy - cy);
         if (dist >= shockRadius) continue;
         const falloff = 1 - dist / shockRadius;
-        pushDot(
+        void pushDot(
           dot,
           (dot.cx - cx) * shockStrength * falloff,
           (dot.cy - cy) * shockStrength * falloff,
