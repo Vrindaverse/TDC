@@ -484,16 +484,24 @@ export function TargetCursor({
 
   useEffect(() => {
     if (isMobile || !cursorRef.current || !spinTl.current) return;
-    if (spinTl.current.isActive()) {
-      spinTl.current.kill();
-      spinTl.current = gsap
-        .timeline({ repeat: -1 })
-        .to(cursorRef.current, {
-          rotation: "+=360",
-          duration: spinDuration,
-          ease: "none",
-        });
-    }
+    let cancelled = false;
+    void (async () => {
+      const gsap = await getGsap();
+      if (cancelled) return;
+      if (spinTl.current?.isActive()) {
+        spinTl.current.kill();
+        spinTl.current = gsap
+          .timeline({ repeat: -1 })
+          .to(cursorRef.current, {
+            rotation: "+=360",
+            duration: spinDuration,
+            ease: "none",
+          });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [spinDuration, isMobile]);
 
   if (isMobile || typeof document === "undefined") {
