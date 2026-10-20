@@ -2,6 +2,7 @@
 
 import React, { useCallback, useLayoutEffect, useRef, useState, CSSProperties } from 'react';
 import { gsap } from 'gsap';
+import Link from 'next/link';
 import './StaggeredMenu.css';
 
 export interface StaggeredMenuItem {
@@ -399,6 +400,17 @@ gsap.set(numberEls, { '--sm-num-opacity': 0 } as gsap.TweenVars);
     };
   }, [closeOnClickAway, open, closeMenu]);
 
+  React.useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeMenu();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, closeMenu]);
+
   const styleVars: CSSProperties = accentColor
     ? ({ '--sm-accent': accentColor } as CSSProperties)
     : {};
@@ -448,17 +460,37 @@ gsap.set(numberEls, { '--sm-num-opacity': 0 } as gsap.TweenVars);
         </button>
       </header>
 
-      <aside id="staggered-menu-panel" ref={panelRef} className="staggered-menu-panel" aria-hidden={!open}>
+      <aside
+        id="staggered-menu-panel"
+        ref={panelRef}
+        className="staggered-menu-panel"
+        aria-hidden={!open}
+        inert={!open}
+      >
         <div className="sm-panel-inner">
           <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
             {items && items.length ? (
-              items.map((it, idx) => (
-                <li className="sm-panel-itemWrap" key={it.label + idx}>
-                  <a className="sm-panel-item" href={it.link} aria-label={it.ariaLabel} data-index={idx + 1}>
-                    <span className="sm-panel-itemLabel">{it.label}</span>
-                  </a>
-                </li>
-              ))
+              items.map((it, idx) => {
+                const sharedProps = {
+                  className: 'sm-panel-item',
+                  'aria-label': it.ariaLabel,
+                  'data-index': idx + 1,
+                  onClick: closeMenu
+                };
+                return (
+                  <li className="sm-panel-itemWrap" key={it.label + idx}>
+                    {it.link.startsWith('/') ? (
+                      <Link href={it.link} {...sharedProps}>
+                        <span className="sm-panel-itemLabel">{it.label}</span>
+                      </Link>
+                    ) : (
+                      <a href={it.link} {...sharedProps}>
+                        <span className="sm-panel-itemLabel">{it.label}</span>
+                      </a>
+                    )}
+                  </li>
+                );
+              })
             ) : (
               <li className="sm-panel-itemWrap" aria-hidden="true">
                 <span className="sm-panel-item">

@@ -67,6 +67,13 @@ export function Navbar({
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* The staggered menu's toggle is position:fixed (StaggeredMenu.css
+              aligns it with this row, left of the theme toggle), so keep it
+              first in the DOM to match visual left-to-right order. */}
+          <MobileStaggeredMenu
+            isAuthenticated={isAuthenticated}
+            isAdmin={isAdmin}
+          />
           <ThemeToggle />
           <div className="hidden items-center gap-2 md:flex">
             {isAuthenticated ? (
@@ -105,11 +112,6 @@ export function Navbar({
               </>
             )}
           </div>
-
-          <MobileStaggeredMenu
-            isAuthenticated={isAuthenticated}
-            isAdmin={isAdmin}
-          />
         </div>
       </div>
     </header>

@@ -59,7 +59,7 @@ export function Hero() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="tdc-mono cursor-target">
-                <Link href="https://forms.gle/nkSmmE9EU31os5UU8">
+                <Link href="/join">
                   register now
                   <ArrowRight aria-hidden="true" />
                 </Link>

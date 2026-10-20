@@ -30,8 +30,33 @@
   z-index: 20;
 }
 
+/*
+ * Fixed usage inside the site navbar (mobile-staggered-menu): sit the toggle
+ * on the navbar's center line instead of 2em from the top, and pull it back
+ * past the ThemeToggle so the two never overlap. Numbers mirror the navbar:
+ * h-16 (4rem row), px-4 (1rem edge) + ThemeToggle size-9 (2.25rem) + gap-2
+ * (0.5rem) = 3.75rem right inset.
+ */
+.staggered-menu-wrapper.fixed-wrapper .staggered-menu-header {
+  height: 4rem;
+  padding: 0 3.75rem 0 1rem;
+  align-items: center;
+}
+
+/* Navbar switches to px-6 at sm, so widen the inset to keep the same gap. */
+@media (min-width: 640px) {
+  .staggered-menu-wrapper.fixed-wrapper .staggered-menu-header {
+    padding-right: 4.25rem;
+  }
+}
+
 .staggered-menu-header > * {
   pointer-events: auto;
+}
+
+/* The flex-1 spacer must not swallow taps meant for the navbar under it. */
+.staggered-menu-header > .flex-1 {
+  pointer-events: none;
 }
 
 .sm-logo {

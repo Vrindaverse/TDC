@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, Lock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Lock, Mail, MapPin, Phone, User } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -19,16 +19,16 @@ export const metadata: Metadata = {
 
 const contactItems = [
   {
-    icon: Mail,
-    label: "General enquiries",
-    value: contactDetails.email,
+    icon: User,
+    label: "Contact person",
+    value: contactDetails.name,
     href: `mailto:${contactDetails.email}`,
   },
   {
     icon: Mail,
-    label: "Support",
-    value: contactDetails.supportEmail,
-    href: `mailto:${contactDetails.supportEmail}`,
+    label: "General enquiries",
+    value: contactDetails.email,
+    href: `mailto:${contactDetails.email}`,
   },
   {
     icon: Phone,

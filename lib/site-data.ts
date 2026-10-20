@@ -104,10 +104,11 @@ export const team: TeamMember[] = [
 ];
 
 export const contactDetails = {
-  email: "tdc@technocrats.edu",
-  supportEmail: "tdc.support@technocrats.edu",
-  phone: "+91 90000 00000",
-  address: "Technocrats Institute of Technology, Tech Campus Road, Hyderabad 500081",
+  name: "Nikhil Mahalik",
+  email: "nikhilmahalik78@gmail.com",
+  phone: "+91 9149411249",
+  address:
+    "Technocrats Institute of Technology (Excellence), Bhopal",
   hours: "Monday to Saturday, 10:00 AM – 6:00 PM",
 };
 
