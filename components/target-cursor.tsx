@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
@@ -107,6 +108,12 @@ export function TargetCursor({
   const dotRef = useRef<HTMLDivElement | null>(null);
   const containingBlockRef = useRef<HTMLElement | null>(null);
 
+  // The main effect below calls gsap.set/timeline/ticker synchronously. gsap is
+  // lazy-loaded (lib/gsap.ts), so the effect must not run until the module has
+  // resolved — otherwise it throws ReferenceError: gsap is not defined.
+  const gsapRef = useRef<Awaited<ReturnType<typeof getGsap>> | null>(null);
+  const [gsapReady, setGsapReady] = useState(false);
+
   const isActiveRef = useRef(false);
   const targetCornerPositionsRef = useRef<{ x: number; y: number }[] | null>(
     null
@@ -137,7 +144,22 @@ export function TargetCursor({
   }, []);
 
   useEffect(() => {
-    if (isMobile || !cursorRef.current) return;
+    if (isMobile) return;
+    let cancelled = false;
+    void getGsap().then((instance) => {
+      if (cancelled) return;
+      gsapRef.current = instance;
+      setGsapReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!gsapReady || isMobile || !cursorRef.current) return;
+    const gsap = gsapRef.current;
+    if (!gsap) return;
 
     const originalCursor = document.body.style.cursor;
     if (hideDefaultCursor) {
@@ -471,6 +493,7 @@ export function TargetCursor({
       cornersRef.current = null;
     };
   }, [
+    gsapReady,
     targetSelector,
     spinDuration,
     moveCursor,
